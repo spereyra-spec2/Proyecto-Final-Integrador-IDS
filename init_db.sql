@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
 	fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
 	contrasena_hash VARCHAR(255),
 	cursando_actualmente BOOLEAN,
-	main VARCHAR(255) UNIQUE,
+	mail VARCHAR(255) UNIQUE,
 	grupo_ID INT,
 	FOREIGN KEY (grupo_ID) REFERENCES grupos(grupo_ID)
 );
@@ -35,5 +35,7 @@ CREATE TABLE IF NOT EXISTS notas (
 	nota DECIMAL(5,2),
 	FOREIGN KEY (alumno_padron) REFERENCES usuarios(padron),
 	FOREIGN KEY (grupo_ID) REFERENCES grupos(grupo_ID),
-	FOREIGN KEY (evaluacion_ID) REFERENCES evaluaciones(evaluacion_ID),
+	FOREIGN KEY (evaluacion_ID) REFERENCES evaluaciones(evaluacion_ID)
 );
+
+
