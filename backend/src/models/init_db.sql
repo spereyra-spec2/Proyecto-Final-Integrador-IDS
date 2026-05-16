@@ -2,16 +2,29 @@ CREATE DATABASE IF NOT EXISTS ids_db;
 USE ids_db;
 
 CREATE TABLE IF NOT EXISTS usuarios (
-	padron INT NOT NULL PRIMARY KEY,
-	rango INT NOT NULL,
+	id_usuario INT NOT NULL PRIMARY KEY,
+	rol ENUM('Alumno', 'Docente'),
 	nombres VARCHAR(255),
 	fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
 	contrasena_hash VARCHAR(255),
-	cursando_actualmente BOOLEAN,
 	mail VARCHAR(255) UNIQUE,
-	grupo_ID INT,
-	FOREIGN KEY (grupo_ID) REFERENCES grupos(grupo_ID)
 );
+
+CREATE TABLE IF NOT EXISTS alumno (
+	id_alumno INT NOT NULL,
+	padron INT NOT NULL UNIQUE PRIMARY KEY,
+	cursando BOOLEAN DEFAULT TRUE,
+	grupo_ID INT,
+	FOREIGN KEY (id_alumno) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
+	FOREIGN KEY (grupo_ID) REFERENCES grupos(grupo_ID) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS docente (
+	id_docente INT NOT NULL,
+	padron INT NOT NULL UNIQUE PRIMARY KEY,
+	FOREIGN KEY (id_docente) REFERENCES usuarios(id_usuario) ON DELETE CASCADE
+);
+
 
 CREATE TABLE IF NOT EXISTS grupos (
 	nombre VARCHAR(255),
