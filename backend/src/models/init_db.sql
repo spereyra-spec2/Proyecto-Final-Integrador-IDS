@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
 	cursando_actualmente BOOLEAN,
 	mail VARCHAR(255) UNIQUE,
 	grupo_ID INT,
-	FOREIGN KEY (grupo_ID) REFERENCES grupos(grupo_ID)
+	FOREIGN KEY (grupo_ID) REFERENCES grupos(grupo_ID) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS grupos (
@@ -35,4 +35,12 @@ CREATE TABLE IF NOT EXISTS notas (
 	FOREIGN KEY (alumno_padron) REFERENCES usuarios(padron),
 	FOREIGN KEY (grupo_ID) REFERENCES grupos(grupo_ID),
 	FOREIGN KEY (evaluacion_ID) REFERENCES evaluaciones(evaluacion_ID),
+);
+
+CREATE TABLE IF NOT EXISTS asistencias (
+	asistio BOOLEAN,
+	fecha DATE,
+	padron INT,
+	justificado BOOLEAN,
+	FOREIGN KEY (padron) REFERENCES usuarios(padron)
 );
