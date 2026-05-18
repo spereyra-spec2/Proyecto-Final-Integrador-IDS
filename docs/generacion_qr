@@ -1,0 +1,22 @@
+este documento explica como funciona la generacion de qr, como se envian por mail y como se valida las respuestas, para mas detalle vayan a la documentacion de cada cosa, o mandenme mensaje
+
+para generar el codigo QR y enviarlo a los emails de cada alumno,
+
+en config.py se tiene que llenar las variables vacias:
+	SECRET_KEY es una clave secreta a traves de la cual se van a generar y validar los tokens, no compartir con nadie
+	QR_EXPIRATION_SECONDS es autoexplanatorio
+	MAIL_SERVER el servidor SMTP que va a enviar los mails
+	MAIL_PORT es el puerto en el cual se van a recibir las respuestas de los alumnos
+	MAIL_USE_TLS es el protocolo que se va a usar
+	MAIL_USERNAME el correo de mail desde el cual se van a enviar los mensajes
+	MAIL_PASSWORD la contraseña de este correo, si tenes 2fa activado tenes que generar una application password desde tu cuenta de google
+
+en db.py, con MetaData de sqlalchemy describimos la tabla que vamos a utilizar para construir nuestro mensaje.
+
+en mail.py se crea una instancia de flask_mail
+
+tasks.py genera el qr y lo envia por mail, con threading para que no se bloquee el servidor mientras se envian.
+	la funcion enviar_qr_async recibe los datos e inicia el thread. _enviar corre dentro del hilo, esta envia los mails. es necesario llamar app_context ya que el hilo no corre en el contexto de applicacion de flask por defecto
+
+
+SMTP(Simple Mail Transfer Protocol) es el protocolo de transeferencia utilizado para el intercambio de mensajes de correo electronico.
