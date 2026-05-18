@@ -1,10 +1,10 @@
 host: str = "localhost"
 user: str = "root"
-password: str = 
+password: str = ""
 database: str = "ids_db"
 
 # generacion de QR
-SECRET_KEY = "Lb58CRNaxKG7B0ZvUZLJ"
+SECRET_KEY = ""
 QR_EXPIRATION_SECONDS = 900 # 15 min
 
 # mail

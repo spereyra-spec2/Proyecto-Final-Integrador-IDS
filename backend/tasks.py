@@ -2,13 +2,12 @@ import threading
 import qrcode
 import io
 from flask_mail import Message
-from mail import mail
 
-def enviar_qr(app, email_destino, token, alumno_nombre, alumno_padron):
+def enviar_qr_async(app, mail, email_destino, token, alumno_nombre, alumno_padron):
     def _enviar():
         with app.app_context():
 
-            # generar qr a partir del token
+            # generar qr a partir del token, guardado en memoria
             img = qrcode.make(token)
             buffer = io.BytesIO()
             img.save(buffer, format="PNG")
@@ -28,6 +27,6 @@ def enviar_qr(app, email_destino, token, alumno_nombre, alumno_padron):
             mail.send(msg)
 
     # enviar al hilo, y matar el hilo si se corta el server
-    hilo = threading.Thread(target=_enviar())
+    hilo = threading.Thread(target=_enviar)
     hilo.daemon = True
     hilo.start()

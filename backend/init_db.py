@@ -1,13 +1,16 @@
+import os
 from config import user, password, host
 import mysql.connector
 
 def init_db():
-    with open("init_db.sql") as f:
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    sql_path = os.path.join(base_dir, "src", "models", "init_db.sql")
+    
+    with open(sql_path) as f:
         sql = f.read()
 
     conn = mysql.connector.connect(
         host=host,
-        port=3306,
         user=user,
         password=password,
     )
@@ -22,3 +25,6 @@ def init_db():
 
     cursor.close()
     conn.close()
+
+if __name__ == "__main__":
+    init_db()
