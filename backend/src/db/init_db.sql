@@ -83,9 +83,9 @@ CREATE TABLE IF NOT EXISTS Notas (
     Evaluaciones_idEvaluacion INT NOT NULL,
     Equipos_idEquipos INT,
     Usuarios_padron INT,   
-    CONSTRAINT fk_Usuarios_padron FOREIGN KEY (Usuarios_padron) REFERENCES Usuarios(padron),
-    CONSTRAINT fk_Equipos_idEquipos FOREIGN KEY (Equipos_idEquipos) REFERENCES Equipos(idEquipos),
-    CONSTRAINT fk_Evaluaciones_idEvaluacion FOREIGN KEY (Evaluaciones_idEvaluacion) REFERENCES Evaluaciones(idEvaluacion)
+    FOREIGN KEY (Usuarios_padron) REFERENCES Usuarios(padron),
+    FOREIGN KEY (Equipos_idEquipos) REFERENCES Equipos(idEquipos),
+    FOREIGN KEY (Evaluaciones_idEvaluacion) REFERENCES Evaluaciones(idEvaluacion)
 );
 
 CREATE TABLE IF NOT EXISTS Logs (
@@ -93,5 +93,6 @@ CREATE TABLE IF NOT EXISTS Logs (
     fecha DATETIME,
     accion VARCHAR(255),
     Usuarios_padron INT NOT NULL,
-    FOREIGN KEY (Usuarios_padron) REFERENCES Usuarios(padron) ON DELETE CASCADE
+    FOREIGN KEY (Usuarios_padron) REFERENCES Usuarios(padron)
 );
+
