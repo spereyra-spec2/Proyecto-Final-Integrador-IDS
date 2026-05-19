@@ -9,7 +9,7 @@ from datetime import date
 asistencia_qr_bp = Blueprint("asistencia_qr", __name__)
 serializer = URLSafeTimedSerializer(config.SECRET_KEY)
 
-@asistencia_qr_bp.route("/generar-qr/<int:padron>", methods=["POST"])
+@asistencia_qr_bp.route("/api/asistencia/generar-qr/<int:padron>", methods=["POST"])
 def generar_qr(padron):
     try:
         alumno = obtener_alumno_por_padron(padron)
@@ -64,7 +64,7 @@ def validar_logica_token(token):
             "fecha": fecha_hoy
     }, 200
 
-@asistencia_qr_bp.route("/validar-qr", methods=["GET"])
+@asistencia_qr_bp.route("/api/asistencia/registrar", methods=["GET"])
 def validar_qr():
     token = request.args.get("token")
     resultado, status_code = validar_logica_token(token)
@@ -72,7 +72,7 @@ def validar_qr():
     if status_code == 200:
         return f"""
         <html>
-            <body style="font-family: Arial; text-align: center; margin-top: 50px;">
+            <body>
                 <h1>Asistencia registrada</h1>
                 <p><strong>Alumno:</strong> {resultado['alumno']}</p>
                 <p><strong>Padrón:</strong> {resultado['padron']}</p>

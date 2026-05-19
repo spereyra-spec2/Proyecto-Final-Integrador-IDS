@@ -2,14 +2,45 @@ este documento explica como funciona la generacion de qr, como se envian por mai
 
 para generar el codigo QR y enviarlo a los emails de cada alumno,
 
-en config.py se tiene que llenar las variables vacias:
-	SECRET_KEY es una clave secreta a traves de la cual se van a generar y validar los tokens, no compartir con nadie
-	QR_EXPIRATION_SECONDS es autoexplanatorio
-	MAIL_SERVER el servidor SMTP que va a enviar los mails
-	MAIL_PORT es el puerto en el cual se van a recibir las respuestas de los alumnos
-	MAIL_USE_TLS es el protocolo que se va a usar
-	MAIL_USERNAME el correo de mail desde el cual se van a enviar los mensajes
-	MAIL_PASSWORD la contraseña de este correo, si tenes 2fa activado tenes que generar una application password desde tu cuenta de google
+¿como usar?
+
+variables a llenar:
+tenes que llenar los siguientes datos en config.py:
+SECRET_KEY es una llave super secreta que se va a utilizar para generar los tokens, no compartir con nadie
+QR_EXPIRATION_SECONDS es la cantidad de segundos en los que va a expirar el codigo QR
+MAIL_SERVER el servidor SMTP que va a enviar los mails
+MAIL_PORT el puerto usado para recibir las respuestas de los alumnos, por defecto es el 587 ya que usamos TLS
+MAIL_USE_TLS esto viene true ya que lo mas comun es usar TLS como protocolo pero podes usar el que te guste
+MAIL_USERNAME este es tu direccion de email "pedritoarcoiris@qsy.com
+MAIL_PASSWORD la contraseña de tu mail, probablemente no te deje con tu contraseña normal, en ese caso tenes que activar 2fa en tu cuenta de google y poner una "app password" aca
+
+
+endpoints:
+suponiendo que se inicio la aplicacion y tenemos la base de datos inicializada y el servidor corriendo
+POST /api/asistencia/generar-qr/<int:padron>
+genera un nuevo QR unico y lo envia al mail del usuario cuyo padron sea el del URL.
+202 - aceptado
+404 - alumno no encontrado: no se encontro ningun alumno con ese padron
+400 - alumno sin email: el alumno esta registrado pero no tiene mail asosciado
+500 - error interno: error del servidor
+
+GET /api/asistencia/registrar
+el url seria http://{ip_servidor}:5000/validar-qr?token={token}
+esto se ejecuta automaticamente cuando el alumno escanea el QR y abre el link en el navegador.
+le muestra un mensaje al alumno diciendo que fue la asistencia fue registrada, o el error que hubo, y se añade un nuevo registro a la tabla de asistencias.
+200 - exito
+400 - no se envio el token
+401 - QR expirado
+403 - QR invalido
+o cualquier error del server
+
+
+
+¿como funciona?
+
+archivos:
+
+en config.py se tiene que llenar las variables vacias
 
 en db.py, con MetaData de sqlalchemy describimos la tabla que vamos a utilizar para construir nuestro mensaje.
 
@@ -18,5 +49,29 @@ en mail.py se crea una instancia de flask_mail
 tasks.py genera el qr y lo envia por mail, con threading para que no se bloquee el servidor mientras se envian.
 	la funcion enviar_qr_async recibe los datos e inicia el thread. _enviar corre dentro del hilo, esta envia los mails. es necesario llamar app_context ya que el hilo no corre en el contexto de applicacion de flask por defecto
 
+en /src/routes/asistencia_por_qr.py se encuentran los endpoints principales que se utilizan.
+el URLSafeTimedSerializer firma y verifica los tokens con la secret key en config.py y le pone el timestamp para despues verificar si ya expiraron los tokens
 
-SMTP(Simple Mail Transfer Protocol) es el protocolo de transeferencia utilizado para el intercambio de mensajes de correo electronico.
+
+endpoints:
+
+POST /api/asistencia/generar-qr/<int:padron>
+primero se busca el alumno en la base de datos y se traen sus datos, manejando los errores.
+en el payload se ponen los datos que se incluiran dentro del token firmado.
+se genera el codigo con el serializer, utilizando el payload y salt evita conflictos entre distintos usos del serializer.
+real_app = current_app._get_current_object recibe el objeto real de la aplicacion, necesario para iniciar en el hilo.
+luego se crea el qr y se envia el email sin bloquear la repuesta, y se devuelve un mensaje si todo salio bien, y otro si salio mal
+
+GET /api/asistencia/registrar
+se extrae el token del query param y se llama a la funcion que valida la logica del token.
+si todo salio bien, se muestra un mensaje con los datos del usuario
+si no, se devuelve el error y el codigo del error
+
+hay un endpoint que esta comentado, este funciona se quiere verificar con un post, y el token en el body
+
+
+funciones auxiliares:
+
+validar_logica_token(token)
+contiene toda la logica para validar el token
+
