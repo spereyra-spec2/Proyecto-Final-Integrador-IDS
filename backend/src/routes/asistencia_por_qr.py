@@ -1,5 +1,5 @@
 from flask import Blueprint, request, current_app
-from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature, serializer
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 from db import obtener_alumno_por_padron, ya_usado_token, registrar_asistencia
 from tasks import enviar_qr_async
 from src.utils.errors import error_response, bad_request, not_found, server_error, conflict
@@ -35,40 +35,62 @@ def generar_qr(padron):
     except Exception as e:
         return server_error(str(e))
 
-@asistencia_qr_bp.route("/validar_qr", methods=["POST"])
-def validar_qr():
+def validar_logica_token(token):
+    if not token:
+        return bad_request("no se envio ningun token")
     try:
-        data = request.get_json(silent=True)
-        if not data or "token" not in data:
-            return bad_request("el cuerpo debe incluir el campo 'token'")
+        payload = serializer.loads(token, salt="asistencia-qr", max_age=config.QR_EXPIRATION_SECONDS)
+    except SignatureExpired:
+        return error_response(401, "QR expirado", "error", "el codigo ha vencido")
+    except BadSignature:
+        return error_response(403, "QR invalido", "error", "la firma es incorrecta")
 
-        token = data["token"]
+    padron = payload.get("padron")
+    alumno = obtener_alumno_por_padron(padron)
+    if not alumno:
+        return not_found(f"alumno con padron {padron}")
 
-        try:
-            payload = serializer.loads(token, salt="asistencia-qr", max_age=config.QR_EXPIRATION_SECONDS)
-        except SignatureExpired:
-            return error_response(401, "QR expirado", "warning", "el codigo ha vencido")
-        except BadSignature:
-            return error_response(403, "QR invalido", "error", "la firma criptografica es incorrecta")
+    if ya_usado_token(token):
+        return conflict("este codigo QR ya fue utilizado")
 
-        padron = payload.get("padron")
-        alumno = obtener_alumno_por_padron(padron)
-        if not alumno:
-            return not_found(f"alumno con padron {padron}")
+    if not registrar_asistencia(alumno["padron"], token):
+        return server_error("no se pudo registrar la asistencia")
 
-        if ya_usado_token(token):
-            return conflict("este codigo QR ya fue utilizado")
-
-        if not registrar_asistencia(alumno["padron"], token):
-            return server_error("no se pudo registrar la asistencia en la base de datos")
-
-        fecha_hoy = date.today().isoformat()
-        return {
+    fecha_hoy = date.today().isoformat()
+    return {
             "mensaje": "presente registrado correctamente",
             "alumno": alumno["nombres"],
             "padron": alumno["padron"],
             "fecha": fecha_hoy
-        }, 200
+    }, 200
 
-    except Exception as e:
-        return server_error(str(e))
+@asistencia_qr_bp.route("/validar-qr", methods=["GET"])
+def validar_qr():
+    token = request.args.get("token")
+    resultado, status_code = validar_logica_token(token)
+
+    if status_code == 200:
+        return f"""
+        <html>
+            <body style="font-family: Arial; text-align: center; margin-top: 50px;">
+                <h1>Asistencia registrada</h1>
+                <p><strong>Alumno:</strong> {resultado['alumno']}</p>
+                <p><strong>Padrón:</strong> {resultado['padron']}</p>
+                <p><strong>Fecha:</strong> {resultado['fecha']}</p>
+                <p>Gracias por confirmar tu presencia.</p>
+            </body>
+        </html>
+        """, 200
+
+    return resultado, status_code
+
+"""
+@asistencia_qr_bp.route("/validar-qr", methods=["POST"])
+def validar_qr_post():
+    data = request.get_json(silent=True)
+    if not data:
+        return bad_request("El cuerpo debe ser JSON")
+    
+    token = data.get("token")
+    return validar_logica_token(token)
+"""

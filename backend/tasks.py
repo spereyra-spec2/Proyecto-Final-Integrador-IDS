@@ -8,7 +8,9 @@ def enviar_qr_async(app, mail, email_destino, token, alumno_nombre, alumno_padro
         with app.app_context():
 
             # generar qr a partir del token, guardado en memoria
-            img = qrcode.make(token)
+            base_url = "http://localhost:5000"
+            full_url = f"{base_url}/validar-qr?token={token}"
+            img = qrcode.make(full_url)
             buffer = io.BytesIO()
             img.save(buffer, format="PNG")
             buffer.seek(0)
