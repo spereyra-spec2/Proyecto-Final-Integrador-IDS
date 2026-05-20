@@ -3,7 +3,7 @@ import csv
 from db import get_connection
 from flask import request, jsonify, Blueprint
 from mysql.connector import IntegrityError
-from scr.utils.funciones import (
+from src.utils.funciones import (
     not_found, validar_email_fiuba, conflict, server_error, bad_request
 )
 
