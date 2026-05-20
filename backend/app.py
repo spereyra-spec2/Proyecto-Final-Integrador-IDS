@@ -1,10 +1,12 @@
 from flask import Flask
 from flask_cors import CORS
 from init_db import init_db
+from src.routes.auth.auth import auth_bp
 
 app = Flask(__name__)
 CORS(app)
 
+app.register_blueprint(auth_bp, url_prefix="/api/auth")
 
 try:
     init_db()
