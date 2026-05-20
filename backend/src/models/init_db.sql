@@ -21,10 +21,11 @@ CREATE TABLE IF NOT EXISTS grupos (
 
 CREATE TABLE IF NOT EXISTS evaluaciones (
 	evaluacion_ID INT AUTO_INCREMENT PRIMARY KEY,
-	tipo ENUM('parcial', 'parcialito', 'TP', 'final'),
-	instancia INT,
-	tema INT,
+	tipo VARCHAR(255),
+	descripcion VARCHAR(255),
 	fecha DATETIME
+	curso_id INT,
+	FOREIGN KEY (curso_id) REFERENCES cursos(curso_id)
 );
 
 CREATE TABLE IF NOT EXISTS notas (
