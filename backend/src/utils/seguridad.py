@@ -12,7 +12,7 @@ def generar_token(usuario):
     }
     return jwt.encode(payload, SECRET_KEY, algorithm="HS256")
 
-def verify_token(headers):
+def verificar_token(headers):
     if "Authorization" in headers.keys():
         authorization=headers["Authorization"]
         print(authorization)
