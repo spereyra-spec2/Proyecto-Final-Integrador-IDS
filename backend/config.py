@@ -1,4 +1,4 @@
 host: str = "localhost"
 user: str = "root"
-password: str = 
+password: str = ""
 database: str = "ids_db"
