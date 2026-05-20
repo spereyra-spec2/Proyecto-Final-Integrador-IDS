@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS Asistencias (
     asistio TINYINT,
     fecha DATETIME,
     justificado TINYINT,
-	hash_qr VARCHAR(512)
+	hash_qr VARCHAR(512),
     Usuarios_padron INT NOT NULL,
     FOREIGN KEY (Usuarios_padron) REFERENCES Usuarios(padron) ON DELETE CASCADE
 );
