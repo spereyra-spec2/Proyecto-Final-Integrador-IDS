@@ -14,13 +14,13 @@ CREATE TABLE IF NOT EXISTS Usuarios (
     nombres VARCHAR(255),
     mail VARCHAR(255),
     contrasena_hash VARCHAR(255),
-    cursando_actualmente TINYINT,
     created_at DATETIME
 );
 
 CREATE TABLE IF NOT EXISTS Curso_has_Usuarios (
     Curso_idCurso INT NOT NULL,
     Usuarios_padron INT NOT NULL,
+    cursando_actualmente TINYINT,
     FOREIGN KEY (Curso_idCurso) REFERENCES Curso(idCurso) ON DELETE CASCADE,
     FOREIGN KEY (Usuarios_padron) REFERENCES Usuarios(padron) ON DELETE CASCADE
 );
