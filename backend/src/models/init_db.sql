@@ -26,6 +26,8 @@ CREATE TABLE IF NOT EXISTS evaluaciones (
 	fecha DATETIME
 	curso_id INT,
 	FOREIGN KEY (curso_id) REFERENCES cursos(curso_id)
+	notas_id INT,
+	FOREIGN KEY (notas_id) REFERENCES notas(nota_id)
 );
 
 CREATE TABLE IF NOT EXISTS notas (
