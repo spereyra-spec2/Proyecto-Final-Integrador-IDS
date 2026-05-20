@@ -1,16 +1,10 @@
 host: str = "localhost"
 user: str = "root"
-password: str = ""
+password: str = "P!assW0rd33"
 database: str = "ids_db"
 
 # generacion de QR
-SECRET_KEY = ""
-QR_EXPIRATION_SECONDS = 900 # 15 min
-
-# mail
-MAIL_SERVER = "smtp.gmail.com"
-MAIL_PORT = 587
-MAIL_USE_TLS = True
-MAIL_USERNAME = ""
-MAIL_PASSWORD = ""
+SECRET_KEY = "penis"
+QR_EXPIRATION_SECONDS = 60 # 15 min
+BASE_URL = "http://localhost:5000"
 
