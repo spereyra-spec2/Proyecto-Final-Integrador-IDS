@@ -7,7 +7,7 @@ from scr.utils.funciones import (
     not_found, validar_email_fiuba, conflict, server_error, bad_request
 )
 
-alumnos_bp = Blueprint('/alumnos', __name__)
+alumnos_bp = Blueprint('alumnos', __name__)
 
 #-------------------------
 
