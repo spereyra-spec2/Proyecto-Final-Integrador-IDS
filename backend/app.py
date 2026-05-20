@@ -10,7 +10,7 @@ def create_app():
     app.config["SECRET_KEY"] = config.SECRET_KEY
 
     CORS(app)
-    app.register_blueprint(asistencia_qr_bp, url_prefix="/api")
+    app.register_blueprint(asistencia_qr_bp, url_prefix="/api/asistencia-qr")
 
     return app
 

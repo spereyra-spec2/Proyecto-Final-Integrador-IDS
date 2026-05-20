@@ -1,7 +1,7 @@
 from flask import Blueprint, request
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
-from db import obtener_alumno_por_padron, registrar_asistencia, ip_registrado, alumno_asistio
-from tasks import hacer_y_guardar_qr
+from db import obtener_alumno_por_padron
+from src.utils.asistencia_utils import alumno_asistio, ip_registrado, registrar_asistencia, hacer_y_guardar_qr
 from src.utils.errors import error_response, bad_request, not_found, server_error, conflict
 import config
 from datetime import date
