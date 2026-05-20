@@ -56,7 +56,7 @@ def crear_equipo(curso_id: int, nombre_equipo: str, padrones: list) -> str:
         conn.close()
 
 
-def get_equipo(curso_id: int) -> list:
+def get_equipos(curso_id: int) -> list:
     conn = _get_connection()
     cursor = conn.cursor(dictionary=True)
     query = """
