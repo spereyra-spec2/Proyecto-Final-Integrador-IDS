@@ -12,12 +12,14 @@ alumnos_bp = Blueprint('alumnos', __name__)
 #-------------------------
 
 @alumnos_bp.route('', methods=['POST']) 
-def add_alumno(curso_id):
+def add_alumno(idCurso):
     conn = None
     cursor = None
     
     try:
         data = request.get_json(silent=True)
+        if not data:
+            return bad_request("No se recibió un cuerpo JSON válido en la solicitud.")
 
         # Validación de campos obligatorios 
         campos_requeridos = ["padron", "nombres", "mail"]
@@ -32,7 +34,7 @@ def add_alumno(curso_id):
         nombres = str(data["nombres"]).strip()
         mail = str(data["mail"]).strip()
         padron = int(data["padron"])
-        rol = "estudiantes" 
+        rol = "Alumno" 
 
         # Validación mail fiuba
         if not validar_email_fiuba(mail):
@@ -41,15 +43,21 @@ def add_alumno(curso_id):
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
         
-        query = """
-            INSERT INTO usuarios (padron, nombres, mail, rol) 
-            VALUES (%s, %s, %s, %s)
+        query_usuario = """
+            INSERT INTO Usuarios (padron, rol, nombres, mail, cursando_actualmente, created_at) 
+            VALUES (%s, %s, %s, %s, 1, NOW())
         """
         
-        cursor.execute(query, (padron, nombres, mail, rol))
-        
+        cursor.execute(query_usuario, (padron, rol, nombres, mail))
+
+        query_relacion = """
+            INSERT IGNORE INTO Curso_has_Usuarios (Curso_idCurso, Usuarios_padron)
+            VALUES (%s, %s)
+        """
+        cursor.execute(query_relacion, (idCurso, padron))
+
         conn.commit()
-        return jsonify({"mensage": "Alumno registrado correctamente"}), 201
+        return jsonify({"mensage": "Alumno registrado correctamente en el curso"}), 201
 
     except IntegrityError:
         if conn:
@@ -70,7 +78,7 @@ def add_alumno(curso_id):
 # -------------------------
 
 @alumnos_bp.route('/importar', methods=['POST'])
-def importar_alumnos(curso_id):
+def importar_alumnos(idCurso):
     conn = None
     cursor = None   
     try:
@@ -97,18 +105,17 @@ def importar_alumnos(curso_id):
 
         # Validar consistencia de datos fila por fila
         for row in csv_input:
-           
             row = {k.strip(): v.strip() for k, v in row.items()}
             
             if not all(campo in row for campo in campos_esperados):
                 return bad_request("El archivo CSV debe contener las columnas: padron, nombres, mail")
             
             alumnos_a_insertar.append((
-                row["padron"], 
+                int(row["padron"]), 
+                "Alumno",
                 row["nombres"], 
-                row["mail"], 
-                "estudiantes" 
-            ))
+                row["mail"]
+                ))
 
         if not alumnos_a_insertar:
             return bad_request("El archivo CSV está vacío o no contiene registros válidos.")
@@ -116,12 +123,23 @@ def importar_alumnos(curso_id):
         conn = get_connection()
         cursor = conn.cursor()
         
-        query = """
-            INSERT INTO usuarios (padron, nombres, mail, rol) 
-            VALUES (%s, %s, %s, %s)
+        query_usuario = """
+            INSERT INTO Usuarios (padron, rol, nombres, mail, cursando_actualmente, created_at) 
+            VALUES (%s, %s, %s, %s, 1, NOW())
+            ON DUPLICATE KEY UPDATE cursando_actualmente = 1
         """
         
-        cursor.executemany(query, alumnos_a_insertar)
+        cursor.executemany(query_usuario, alumnos_a_insertar)
+
+        relaciones = [(idCurso, alumno[0]) for alumno in alumnos_a_insertar]    
+
+        query_relacion = """
+            INSERT IGNORE INTO Curso_has_Usuarios (Curso_idCurso, Usuarios_padron)
+            VALUES (%s, %s)
+        """
+        
+        cursor.executemany(query_relacion, alumnos_a_insertar)
+
         conn.commit()
         registros_insertados = cursor.rowcount
 
@@ -143,7 +161,7 @@ def importar_alumnos(curso_id):
 #-------------------------
 
 @alumnos_bp.route('/<int:padron>', methods=['DELETE'])
-def delete_alumno(curso_id, padron):
+def delete_alumno(idCurso, padron):
     conn = None
     cursor = None
     
@@ -154,7 +172,7 @@ def delete_alumno(curso_id, padron):
         # Verificar si el alumno existe 
         query_verificar = """
             SELECT cursando_actualmente 
-            FROM usuarios 
+            FROM Usuarios 
             WHERE padron = %s 
         """
         cursor.execute(query_verificar, (padron,))
@@ -169,8 +187,8 @@ def delete_alumno(curso_id, padron):
 
         
         query_baja = """
-            UPDATE usuarios 
-            SET cursando_actualmente = FALSE
+            UPDATE Usuarios 
+            SET cursando_actualmente = 0
             WHERE padron = %s
         """
     
