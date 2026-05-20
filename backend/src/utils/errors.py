@@ -46,3 +46,28 @@ def datos_incompletos():
             }
         ]
     }), 400
+
+def datos_incorrectos(dato):
+    return jsonify({
+        "errors": [
+            {
+                    "code": "400",
+                    "message": "BAD REQUEST",
+                    "level": "error",
+                    "description": f"Se han introducido datos incorrectos: {dato} "
+            }
+        ]
+    }), 400
+
+
+def ya_existe_alumno():
+    return jsonify({
+        'errors': [
+            {
+                "code":"409",
+                "message":"CONFLICT",
+                "level":"error",
+                "description":f"Ya existe un usuario con ese padrón"
+                }
+            ]
+        }), 409
