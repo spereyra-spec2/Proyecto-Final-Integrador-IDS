@@ -12,7 +12,7 @@ except Exception as e:
     print(f"error al inicializar la base de datos: {e}")
     exit(1)
 
-app.register_blueprint(equipos_bp, url_prefix="/api/equipos")
+app.register_blueprint(equipos_bp, url_prefix="/api/cursos")
 
 if __name__ == "__main__":
     app.run(port=5001, debug=True)
