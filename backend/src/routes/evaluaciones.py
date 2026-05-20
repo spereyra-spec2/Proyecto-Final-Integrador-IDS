@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from mysql.connector import IntegrityError
 from datetime import datetime
+from db import get_connection
 
 evaluaciones_bp = Blueprint('evaluaciones', __name__)
 
