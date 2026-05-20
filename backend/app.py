@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_cors import CORS
 from init_db import init_db
-from scr.routes.alumnos import alumnos_bp
+from src.routes.alumnos import alumnos_bp
 
 app = Flask(__name__)
 CORS(app)
