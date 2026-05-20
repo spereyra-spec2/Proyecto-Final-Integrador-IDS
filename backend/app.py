@@ -6,7 +6,7 @@ from src.routes.alumnos import alumnos_bp
 app = Flask(__name__)
 CORS(app)
 
-app.register_blueprint(alumnos_bp, url_prefix='/api/cursos/<curso_id>/alumnos')
+app.register_blueprint(alumnos_bp, url_prefix='/api/cursos/<int:idCurso>/alumnos')
 
 try:
     init_db()
