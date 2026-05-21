@@ -1,8 +1,8 @@
-from config import user, password, host
+from config import user, password, host, MODEL_PATH
 import mysql.connector
 
 def init_db():
-    with open("init_db.sql") as f:
+    with open(MODEL_PATH) as f:
         sql = f.read()
 
     conn = mysql.connector.connect(
