@@ -46,3 +46,15 @@ def datos_incompletos():
             }
         ]
     }), 400
+
+def acceso_denegado():
+    return jsonify({
+        "errors": [
+            {
+                "code":"401",
+                "message": "UNAUTHORIZED",
+                "level": "error",
+                "description": f"Acesso denegado"
+            }
+        ]
+    }), 401
