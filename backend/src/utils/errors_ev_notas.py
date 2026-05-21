@@ -1,8 +1,6 @@
-from flask import jsonify
-
 
 def error_400(msg):
-    return jsonify({
+    return ({
                 "errors": [
                     {
                         "code": "400",
@@ -14,7 +12,7 @@ def error_400(msg):
             }), 400
 
 def error_404(msg):
-    return jsonify({
+    return ({
                 "errors": [
                     {
                         "code": "404",
@@ -24,3 +22,15 @@ def error_404(msg):
                     }
                 ]
             }), 404
+
+def error_500(msg):
+    return ({
+                "errors": [
+                    {
+                        "code": "500",
+                        "message": "INTERNAL SERVER ERROR",
+                        "level": "error",
+                        "description": str(msg)
+                    }
+                ]
+            }), 500
