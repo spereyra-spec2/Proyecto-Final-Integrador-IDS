@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta, timezone
+import bcrypt
 import jwt
 
 SECRET_KEY = "ids2026_puntoycoma"
@@ -31,3 +32,9 @@ def verificar_token(headers):
 
     return False
 
+def hashear_contrasena(contrasena):
+    hashear_contrasena = bcrypt.hashpw(contrasena.encode('utf-8'), bcrypt.gensalt())
+    return hashear_contrasena
+
+def comparar_contrasena(contrasena, contrasena_hash):
+    return bcrypt.checkpw(contrasena.encode('utf-8'), contrasena_hash.encode('utf-8'))

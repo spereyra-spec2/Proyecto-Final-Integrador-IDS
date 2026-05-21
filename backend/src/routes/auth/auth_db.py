@@ -55,3 +55,26 @@ def existe_usuario(padron):
     
     if usuario:
         return True
+
+def actualizar_contrasena(padron, contrasena_hash):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute(
+            """
+            UPDATE Usuarios
+            SET contrasena_hash = %s
+            WHERE padron = %s
+            """,
+            (contrasena_hash, padron)
+        )
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+    except Exception:
+        return errors.server_error()
+
+    return None
