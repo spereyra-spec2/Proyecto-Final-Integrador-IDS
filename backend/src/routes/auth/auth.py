@@ -3,11 +3,9 @@ import mysql.connector
 import src.routes.auth.auth_db as auth_db
 import src.utils.seguridad as seguridad
 import src.utils.errors as errors
-from src.utils.validaciones import es_email_valido
+import jwt
 
 auth_bp = Blueprint("auth",__name__)
-
-
 
 
 @auth_bp.route("/verificar_token", methods=["GET"])
@@ -31,11 +29,7 @@ def verificar_token():
             "description": "Token válido"
         }), 200
 
-    except (
-        jwt.ExpiredSignatureError,
-        jwt.InvalidSignatureError,
-        jwt.InvalidTokenError
-    ):
+    except jwt.PyJWTError:
         return errors.acceso_denegado()
 
 
@@ -57,11 +51,7 @@ def resetear_token():
             algorithms = ["HS256"]
         )
 
-    except (
-        jwt.ExpiredSignatureError,
-        jwt.InvalidTokenError,
-        jwt.InvalidSignatureError,
-    ):
+    except jwt.PyJWTError:
 
         return errors.acceso_denegado()
 
