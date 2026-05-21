@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS Usuarios (
     mail VARCHAR(255),
     contrasena_hash VARCHAR(255),
     cursando_actualmente TINYINT,
-    created_at DATETIME
+    created_at DATETIME DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS Curso_has_Usuarios (
@@ -31,7 +31,6 @@ CREATE TABLE IF NOT EXISTS Asistencias (
     fecha DATETIME,
     justificado TINYINT,
     Usuarios_padron INT NOT NULL,
-    ip_address VARCHAR(45),
     FOREIGN KEY (Usuarios_padron) REFERENCES Usuarios(padron) ON DELETE CASCADE
 );
 

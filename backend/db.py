@@ -24,3 +24,24 @@ def obtener_alumno_por_padron(padron):
         cursor.close()
         conn.close()
 
+def get_asistencia():
+
+    con = get_connection()
+    cursor = con.cursor(dictionary=True)
+    query = "SELECT * FROM Asistencias"
+    cursor.execute(query)
+    asistencia = cursor.fetchall()
+    cursor.close()
+    con.close()
+    return asistencia
+
+def get_asistencia_id(id):
+
+    con = get_connection()
+    cursor = con.cursor(dictionary=True)
+    query = "SELECT * FROM Asistencias WHERE Usuarios_padron = %s "
+    cursor.execute(query,(id,))
+    asistencia = cursor.fetchall()
+    cursor.close()
+    con.close()
+    return asistencia

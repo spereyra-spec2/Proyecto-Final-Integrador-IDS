@@ -1,23 +1,59 @@
-from flask import Blueprint, request
+from flask import Blueprint, jsonify, request
+from mysql.connector import Error
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
-from db import obtener_alumno_por_padron
+from db import obtener_alumno_por_padron, get_asistencia_id, get_asistencia
 from src.utils.asistencia_utils import alumno_asistio, ip_registrado, registrar_asistencia, hacer_y_guardar_qr
 from src.utils.errors import error_response, bad_request, not_found, server_error, conflict
 import config
 from datetime import date
 import os
 
-asistencia_qr_bp = Blueprint("asistencia_qr", __name__)
 serializer = URLSafeTimedSerializer(config.SECRET_KEY)
 
-@asistencia_qr_bp.route("/generar-qr", methods=["POST"])
+asistencia_bp = Blueprint("asistencia",__name__)
+
+@asistencia_bp.route('', methods=['GET'])
+def asistencia():
+
+    try:
+        asistencia = get_asistencia()
+        if len(asistencia) == 0:
+            return jsonify("insertar mensaje codigo 204"), 204
+        
+        return jsonify(asistencia),200
+    
+    except Error as e:
+        error_payload= "insertar mensaje codigo 500"
+
+        return jsonify(error_payload),500
+    
+
+@asistencia_bp.route('/<int:id>', methods=['GET'])
+def asistencia_id(id):
+
+    try:
+        #funcion de validación de este id!!!
+
+        asistencia = get_asistencia_id(id)
+        if len(asistencia) == 0:
+            return jsonify("insertar mensaje codigo 204"),204
+        
+        return jsonify(asistencia),200
+    
+    except Error as e:
+        error_payload= "insertar mensaje codigo 500"
+
+        return jsonify(error_payload),500
+    
+
+@asistencia_bp.route("/generar-qr", methods=["POST"])
 def generar_qr():
     try:
         payload = {"tipo": "asistencia", "timestamp": date.today().isoformat()}
         token = serializer.dumps(payload, salt="asistencia-qr")
 
         base_url = config.BASE_URL
-        formulario_url = f"{base_url}/api/formulario-asistencia?token={token}"
+        formulario_url = f"{base_url}/api/asistencia/formulario-asistencia?token={token}"
 
         hacer_y_guardar_qr(formulario_url)
 
@@ -29,7 +65,7 @@ def generar_qr():
     except Exception as e:
         return server_error(str(e))
 
-@asistencia_qr_bp.route("formulario-asistencia", methods=["GET"])
+@asistencia_bp.route("/formulario-asistencia", methods=["GET"])
 def formulario_asistencia():
     token = request.args.get("token")
     if not token:
@@ -49,13 +85,12 @@ def formulario_asistencia():
         with open(template_path, "r", encoding="utf-8") as f:
             html_template = f.read()
     except FileNotFoundError:
-        print(f"no se encontró el template en: {template_path}")  # Para debug, BORRAR
         return "<h1>Error</h1><p>No se encontró el formulario</p>", 500
 
     html_content = html_template.replace("{{ token }}", token)
     return html_content, 200
 
-@asistencia_qr_bp.route("/confirmar-asistencia", methods=["POST"])
+@asistencia_bp.route("/confirmar-asistencia", methods=["POST"])
 def confirmar_asistencia():
     data = request.get_json(silent=True)
     if not data:
@@ -69,12 +104,6 @@ def confirmar_asistencia():
     elif not token:
         return bad_request("No se incluyo el token")
 
-    ip_adress = request.remote_addr
-    if request.headers.get('X-Forwarded-For'):
-        ip_adress = request.headers.get('X-Forwarded-For').split(',')[0]
-
-    if ip_registrado(ip_adress):
-        return conflict("solo esta permitido registrar una asistencia por IP, por cualquier problema avisar al docente")
     try:
         serializer.loads(token, salt="asistencia-qr", max_age=config.QR_EXPIRATION_SECONDS)
     except SignatureExpired:
@@ -87,7 +116,7 @@ def confirmar_asistencia():
         return not_found("no existe alumno con ese padron en la base de datos")
     elif alumno_asistio(alumno["padron"]):
         return conflict("ya has registrado tu asistencia hoy")
-    elif not registrar_asistencia(alumno["padron"], ip_adress):
+    elif not registrar_asistencia(alumno["padron"]):
         return server_error("no se pudo registrar la asistencia")
 
     return {

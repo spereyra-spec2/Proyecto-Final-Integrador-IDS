@@ -1,18 +1,15 @@
 from flask import Flask
-from init_db import init_db
 from flask_cors import CORS
-from src.routes.asistencia_por_qr import asistencia_qr_bp
+from init_db import init_db
+from src.routes.asistencia import asistencia_bp
 import config
 
-def create_app():
-    app = Flask(__name__)
+app = Flask(__name__)
+CORS(app)
 
-    app.config["SECRET_KEY"] = config.SECRET_KEY
+app.config["SECRET_KEY"] = config.SECRET_KEY
 
-    CORS(app)
-    app.register_blueprint(asistencia_qr_bp, url_prefix="/api/asistencia-qr")
-
-    return app
+app.register_blueprint(asistencia_bp, url_prefix="/api/asistencia")
 
 try:
     init_db()
@@ -21,5 +18,4 @@ except Exception as e:
     exit(1)
 
 if __name__ == "__main__":
-    app = create_app()
-    app.run(debug=True, port=5000)
+    app.run(port=5000, debug=True)

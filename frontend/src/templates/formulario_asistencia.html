@@ -29,7 +29,7 @@
             mensajeDiv.innerHTML = 'Procesando...';
             
             try {
-                const response = await fetch('/api/confirmar-asistencia', {
+                const response = await fetch('/api/asistencia/confirmar-asistencia', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
