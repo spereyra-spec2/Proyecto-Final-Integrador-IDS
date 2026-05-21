@@ -1,13 +1,13 @@
 from flask import jsonify
 
-def server_error():
+def server_error(e):
     return jsonify({  
         "errors": [
             {
                 "code": "500",
                 "message": "INTERNAL SERVER ERROR",
                 "level": "error",
-                "description": "Hubo un error al conectarse con la base de datos."
+                "description": str(e)
             }
     ]}), 500
 
@@ -18,7 +18,7 @@ def no_registrado(padron):
                     "code": "404",
                     "message": "NOT FOUND",
                     "level": "error",
-                    "description": f"No se encontró un usuario con el padrón {padron}."
+                    "description": f"No se encontró registrado un usuario con el padrón {padron}."
             }
         ]
     }), 404

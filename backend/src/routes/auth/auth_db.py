@@ -13,8 +13,8 @@ def login_user(padron, contrasena):
         usuario_logueado = cursor.fetchone()
         cursor.close()
         conn.close()
-    except Exception:
-        return None, errors.server_error()
+    except Exception as e:
+        return None, errors.server_error(e)
 
     if not usuario_logueado:
         return None, errors.no_registrado(padron)
@@ -38,7 +38,7 @@ def alta_usuario(padron, rol, nombres, mail, contrasena):
         conn.close()
     except Exception as e:
         print(e)
-        return errors.server_error()
+        return errors.server_error(e)
     
     return None
 
@@ -50,8 +50,8 @@ def existe_usuario(padron):
         usuario= cursor.fetchone()
         cursor.close()
         conn.close()
-    except Exception:
-        return None, errors.server_error()
+    except Exception as e:
+        return None, errors.server_error(e)
     
     if usuario:
         return True
