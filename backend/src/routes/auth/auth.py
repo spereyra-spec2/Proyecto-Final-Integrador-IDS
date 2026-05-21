@@ -7,7 +7,7 @@ from src.utils.validaciones import es_email_valido
 
 auth_bp = Blueprint("auth",__name__)
 
-@auth_bp.route("/", methods = ["POST"])
+@auth_bp.route("/login", methods = ["POST"])
 def login():
     data = request.get_json(silent=True)
 
@@ -57,4 +57,16 @@ def alta_usuario():
     
     return ("", 201)
     
+'''
+Ejemplo de implementación (BORRAR LUEGO)
+@auth_bp.route("/prueba", methods = ["GET"])
+def prueba():
+    palabra = "hola"
 
+    tiene_acceso = seguridad.verificar_token(request.headers, ["Docente"])
+    
+    if tiene_acceso:
+        return jsonify({"palabra": palabra}), 200
+    else:
+        return jsonify({"error": "no autorizado"}), 401
+'''

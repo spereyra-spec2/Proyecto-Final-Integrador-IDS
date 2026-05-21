@@ -13,13 +13,28 @@ def generar_token(usuario):
     }
     return jwt.encode(payload, SECRET_KEY, algorithm="HS256")
 
-def verify_token(headers):
-    #falta implementar con rol Docente
-    return False
-
 def hashear_contrasena(contrasena):
     hashear_contrasena = bcrypt.hashpw(contrasena.encode('utf-8'), bcrypt.gensalt())
     return hashear_contrasena
 
 def comparar_contrasena(contrasena, contrasena_hash):
     return bcrypt.checkpw(contrasena.encode('utf-8'), contrasena_hash.encode('utf-8'))
+
+
+def verificar_token(headers, roles_permitidos):
+    if "Authorization" in headers.keys():
+        authorization=headers["Authorization"]
+        encoded_token=authorization.split(" ")[1]
+
+        try:
+            payload=jwt.decode(encoded_token, SECRET_KEY, algorithms=["HS256"])
+            roles = payload["rol"]
+
+            if roles in roles_permitidos:
+                return True
+            return False
+        except (jwt.ExpiredSignatureError, jwt.InvalidSignatureError):
+            return False
+
+    return False
+
