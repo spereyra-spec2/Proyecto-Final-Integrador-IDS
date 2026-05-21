@@ -1,8 +1,8 @@
 from flask import Blueprint, jsonify, request
 from mysql.connector import Error
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
-from db import obtener_alumno_por_padron, get_asistencia_id, get_asistencia
-from src.utils.asistencia_utils import alumno_asistio, ip_registrado, registrar_asistencia, hacer_y_guardar_qr
+from src.db.db import obtener_alumno_por_padron, get_asistencia_id, get_asistencia
+from src.utils.asistencia_utils import alumno_asistio, registrar_asistencia, hacer_y_guardar_qr
 from src.utils.errors import error_response, bad_request, not_found, server_error, conflict
 import config
 from datetime import date

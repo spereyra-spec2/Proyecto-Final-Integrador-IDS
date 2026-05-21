@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_cors import CORS
-from init_db import init_db
+from src.db.init_db import init_db
 from src.routes.asistencia import asistencia_bp
 import config
 
