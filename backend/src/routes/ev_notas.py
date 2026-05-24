@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 import mysql.connector
-from db import get_conection
+from db import get_connection
     
 from src.db.ev_notas_db import validar_id, validar_curso, validar_evaluacion, validar_equipo
 from src.utils.validar_numeros import valido_numero
@@ -10,15 +10,16 @@ from src.utils.errors_ev_notas import error_400, error_404, error_500
 cursos_bp=Blueprint('cursos', __name__)
 
 
-@cursos_bp.route('/<curso_id>/evaluaciones/<idEvaluacion>/notas/', methods=['GET'])
+@cursos_bp.route('/<curso_id>/evaluaciones/<idEvaluacion>/notas', methods=['GET'])
 def obtener_nota(curso_id, idEvaluacion):
 
     padron = request.args.get('padron', type=int)
     id_equipo = request.args.get('id_equipo', type=int)
 
 
-    conn = get_conection()
+    conn = get_connection()
     cursor = conn.cursor(dictionary=True)
+    
     try:
 
         if not valido_numero(idEvaluacion):
@@ -32,7 +33,6 @@ def obtener_nota(curso_id, idEvaluacion):
             
         if validar_evaluacion(idEvaluacion) == None:
             return jsonify(error_404(f"No se encontró la evaluación con id {idEvaluacion}."))
-        
         
         nota = None
         
@@ -87,7 +87,7 @@ def obtener_nota(curso_id, idEvaluacion):
 @cursos_bp.route('/<curso_id>/evaluaciones/<padron>/<idEvaluacion>/notas', methods=['POST'])
 def guardar_nota(curso_id, padron, idEvaluacion):
 
-    conn = get_conection()
+    conn = get_connection()
     cursor = conn.cursor(dictionary=True)
 
     try:
@@ -151,7 +151,6 @@ def guardar_nota(curso_id, padron, idEvaluacion):
             conn.commit()
             return jsonify({"message": "Nota individual agregada!"}), 201
         
-
     except mysql.connector.Error as e:
         return jsonify(error_500("Error al obtener información de la base de datos: " + str(e)))
     finally:
@@ -162,7 +161,7 @@ def guardar_nota(curso_id, padron, idEvaluacion):
 @cursos_bp.route('/<curso_id>/evaluaciones/<padron>/<idEvaluacion>/notas', methods=['PATCH'])
 def actualizar_nota(curso_id, padron, idEvaluacion):
 
-    conn = get_conection()
+    conn = get_connection()
     cursor = conn.cursor(dictionary=True)
 
     try:
