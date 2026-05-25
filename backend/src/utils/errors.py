@@ -71,3 +71,28 @@ def ya_existe_alumno():
                 }
             ]
         }), 409
+
+
+def acceso_denegado():
+    return jsonify({
+        "errors": [
+            {
+                "code":"401",
+                "message": "UNAUTHORIZED",
+                "level": "error",
+                "description": f"Acesso denegado"
+            }
+        ]
+    }), 401
+
+def error_enviando_correo(e):
+    return jsonify({
+        "errors": [
+            {
+                    "code": "500",
+                    "message": "SERVER ERROR",
+                    "level": "error",
+                    "description": str(e)
+            }
+        ]
+    }), 401
