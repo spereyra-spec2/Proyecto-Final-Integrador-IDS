@@ -1,18 +1,31 @@
 import io
 import csv
 from db import get_connection
-from flask import request, jsonify, Blueprint
+from flask import request, Blueprint
 from mysql.connector import IntegrityError
-from src.utils.funciones import (
-    not_found, validar_email_fiuba, conflict, server_error, bad_request
-)
+from src.utils.errors import (
+    not_found, conflict, server_error, bad_request, ok_response, well_response, unauthorized, acceso_denegado)
+from src.utils.validaciones import validar_email_fiuba
+from src.utils.seguridad import verify_token
 
 alumnos_bp = Blueprint('alumnos', __name__)
 
 #-------------------------
+#Se puededn probar los 3 endpoints si se sacan la autentificacion de rol 
+#-------------------------
 
 @alumnos_bp.route('', methods=['POST']) 
 def add_alumno(idCurso):
+    payload, error, code = verify_token(request)
+    if error:
+        return error
+    
+    usuario_rol = payload.get("rol")
+
+    if usuario_rol != "Docente":
+        return acceso_denegado("No tiene permisos para agregar alumnos") 
+    
+    
     conn = None
     cursor = None
     
@@ -57,30 +70,36 @@ def add_alumno(idCurso):
         cursor.execute(query_relacion, (idCurso, padron))
 
         conn.commit()
-        return jsonify({"mensage": "Alumno registrado correctamente en el curso"}), 201
-
+        return well_response(f"Alumno con padrón {padron} agregado correctamente al curso {idCurso}")
+    
     except IntegrityError:
-        if conn:
-            conn.rollback()
+        if conn: conn.rollback()
         return conflict("El padrón o correo electrónico ya se encuentra registrado")
     except Exception as e:
-        if conn:
-            conn.rollback()
+        if conn: conn.rollback()
         return server_error(str(e))
         
     finally:
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
+        if cursor: cursor.close()
+        if conn: conn.close()
 
 
 # -------------------------
 
 @alumnos_bp.route('/importar', methods=['POST'])
 def importar_alumnos(idCurso):
+    payload, error, code = verify_token(request)
+    if error:
+        return error
+    
+    usuario_rol = payload.get("rol")
+
+    if usuario_rol != "Docente":
+        return acceso_denegado("No tiene permisos para agregar alumnos") 
+    
     conn = None
     cursor = None   
+
     try:
         # Verificar si el archivo viene en la request
         if 'file' not in request.files:
@@ -138,30 +157,36 @@ def importar_alumnos(idCurso):
             VALUES (%s, %s)
         """
         
-        cursor.executemany(query_relacion, alumnos_a_insertar)
+        cursor.executemany(query_relacion, relaciones)
 
         conn.commit()
         registros_insertados = cursor.rowcount
 
-        return jsonify({
-            "message": "Archivo procesado con éxito", 
-            "registros_insertados": registros_insertados
-        }), 201
-
+        return well_response(f"Importación finalizada. {registros_insertados} registros insertados o actualizados.")
+    
     except IntegrityError:
         return conflict("Uno o más registros en el CSV ya existen (Padrón o Email duplicado).")
     except Exception as e:
         return server_error(str(e))
     finally:
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
+        if cursor: cursor.close()
+        if conn: conn.close()
     
 #-------------------------
 
 @alumnos_bp.route('/<int:padron>', methods=['DELETE'])
 def delete_alumno(idCurso, padron):
+    
+    payload, error, code = verify_token(request)
+    if error:
+        return error
+
+    usuario_rol = payload.get("rol")
+
+    if usuario_rol != "Docente":
+        return acceso_denegado() 
+  
+
     conn = None
     cursor = None
     
@@ -169,43 +194,35 @@ def delete_alumno(idCurso, padron):
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
         
-        # Verificar si el alumno existe 
+        # 1. Verificar si el alumno está inscrito en este curso y cuál es su estado
         query_verificar = """
-            SELECT cursando_actualmente 
-            FROM Usuarios 
-            WHERE padron = %s 
+            SELECT Estado 
+            FROM Curso_has_Usuarios 
+            WHERE Curso_idCurso = %s AND Usuarios_padron = %s
         """
-        cursor.execute(query_verificar, (padron,))
-        alumno = cursor.fetchone()
+        cursor.execute(query_verificar, (idCurso, padron))
+        inscripcion = cursor.fetchone()
         
-        if not alumno:
-            return not_found(f"No se encontró ningún alumno con el padrón {padron}")
+        if not inscripcion:
+            return not_found(f"El alumno con padrón {padron} no está inscrito en el curso {idCurso}")
             
-        # Verificar si ya se encontraba dado de baja 
-        if not alumno['cursando_actualmente']:
-            return bad_request(f"El alumno con padrón {padron} ya se encuentra dado de baja")
+        if inscripcion['Estado'] == 0:
+            return bad_request(f"El alumno con padrón {padron} ya se encuentra dado de baja en este curso")
 
-        
+        # 2. Aplicar la baja lógica cambiando el estado a 'abandonó' solo para esta materia
         query_baja = """
-            UPDATE Usuarios 
-            SET cursando_actualmente = 0
-            WHERE padron = %s
+            UPDATE Curso_has_Usuarios 
+            SET Estado = 0
+            WHERE Curso_idCurso = %s AND Usuarios_padron = %s
         """
-    
-        cursor.execute(query_baja, (padron,))
+        cursor.execute(query_baja, (idCurso, padron))
         conn.commit()
         
-        return jsonify({
-            "message": f"Alumno con padrón {padron} desactivado correctamente del sistema"
-        }), 200
-
-    except Exception as e:
-        if conn:
-            conn.rollback()
-        return server_error(str(e))
+        return ok_response(f"Alumno con padrón {padron} dado de baja correctamente del curso {idCurso}")
         
+    except Exception as e:
+        if conn: conn.rollback()
+        return server_error(str(e))
     finally:
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
+        if cursor: cursor.close()
+        if conn: conn.close()
