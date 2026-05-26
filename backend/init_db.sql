@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS Usuarios (
 CREATE TABLE IF NOT EXISTS Curso_has_Usuarios (
     Curso_idCurso INT NOT NULL,
     Usuarios_padron INT NOT NULL,
+	Estado TINYINT,
     FOREIGN KEY (Curso_idCurso) REFERENCES Curso(idCurso) ON DELETE CASCADE,
     FOREIGN KEY (Usuarios_padron) REFERENCES Usuarios(padron) ON DELETE CASCADE
 );
