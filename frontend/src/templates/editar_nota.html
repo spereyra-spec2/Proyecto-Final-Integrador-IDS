@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="cont_formulario">
+    <h2>Modificar Calificación</h2>
+    
+    <form id="form_editar_nota" action="" method="PATCH">
+        
+        <div class="formulario">
+            <label>ID del Curso:</label>
+            <input type="number" id="edit_curso_id" value="{{ curso_id }}" readonly>
+        </div>
+
+        <div class="formulario">
+            <label>ID de la Evaluación:</label>
+            <input type="number" id="edit_idEvaluacion" value="{{ id_ev }}" readonly>
+        </div>
+
+        {% if padron %}
+        <div class="formulario">
+            <label>Padrón del Alumno:</label>
+            <input type="number" id="edit_identificador" value="{{ padron }}" readonly>
+            <input type="hidden" id="edit_tipo" value="padron">
+        </div>
+        {% else %}
+        <div class="formulario">
+            <label>ID del Equipo:</label>
+            <input type="number" id="edit_identificador" value="{{ id_equipo }}" readonly>
+            <input type="hidden" id="edit_tipo" value="equipo">
+        </div>
+        {% endif %}
+
+        <hr>
+
+        <div class="formulario">
+            <label for="edit_puntaje">Nuevo Puntaje:</label>
+            <input type="number" step="0.1" id="edit_puntaje" required placeholder="Ingrese la nueva nota">
+        </div>
+
+        <button type="submit" class="btn-advertencia">Actualizar Nota</button>
+    </form>
+    
+    <div id="mensaje_respuesta"></div>
+</div>
+
+{% endblock %}

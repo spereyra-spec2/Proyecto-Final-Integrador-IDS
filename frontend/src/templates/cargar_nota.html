@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="cont_formulario">
+    <h2>Cargar Nueva Nota (Individual o Grupal)</h2>
+    
+    <form id="form_cargar_nota" action="/notas/cargar" method="POST">
+        
+        <div class="formulario">
+            <label for="curso_id">ID del Curso:</label>
+            <input type="number" id="curso_id" required placeholder="Ej: 1">
+        </div>
+
+        <div class="formulario">
+            <label for="padron">Padrón del Alumno:</label>
+            <input type="number" id="padron" required placeholder="Ej: 12345">
+        </div>
+
+        <div class="formulario">
+            <label for="idEvaluacion">ID de la Evaluación:</label>
+            <input type="number" id="idEvaluacion" required placeholder="Ej: 2">
+        </div>
+
+        <hr>
+
+        <div class="formulario">
+            <label for="puntaje">Puntaje:</label>
+            <input type="number" step="0.1" id="puntaje" required placeholder="Ej: 8.5">
+        </div>
+
+        <div class="formulario">
+            <label for="es_grupal">¿Es una nota Grupal?</label>
+            <input type="checkbox" id="es_grupal" onchange="habilitar_equipo()">
+        </div>
+
+        <div class="formulario" id="grupo_equipo" style="display: none;">
+            <label for="Equipos_idEquipos">ID del Equipo:</label>
+            <input type="number" id="Equipos_idEquipos" placeholder="Ej: 1">
+        </div>
+
+        <button type="submit">Guardar Nota</button>
+    </form>
+    
+    <div id="mensaje_respuesta"></div>
+</div>
+
+<script src="{{ url_for('static', filename='js/script_cargar_nota.js') }}"></script>
+{% endblock %}

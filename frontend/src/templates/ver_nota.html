@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+
+    <form action="/ver/notas/{{ padron }}" method="GET">
+
+    <div class="nota-card">
+        <div class="card-header">
+            <h2>Resultado de Evaluación</h2>
+            <span class="badge">{{ id_evaluaciones }}</span>
+        </div>
+        
+        <div class="card-body">
+            <p class="label">Padrón / Equipo:</p>
+            <p class="value">{{ id }}</p>
+            
+            <div class="score-container">
+                <p class="label">Calificación:</p>
+                <h1 class="score {{ 'aprobado' if nota >= 4 else 'desaprobado' }}">
+                    {{ nota if nota else "No hay una nota cargada en el sistema" }}
+                </h1>
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/script_ver_nota.js') }}"></script>
+
+    </form>
+
+</div>
+{% endblock %}              
