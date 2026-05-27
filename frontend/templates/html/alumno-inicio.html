@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portal Alumno — AcademiQ</title>
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+  <link rel="stylesheet" href="../css/layout.css" />
+  <style>
+    .hero {
+      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+      color: #fff;
+      padding: 60px 32px 50px;
+      text-align: center;
+    }
+    .hero h1 { font-size: 36px; font-weight: 800; margin-bottom: 10px; }
+    .hero p  { font-size: 17px; opacity: 0.85; margin-bottom: 32px; }
+    .search-box {
+      display: flex; gap: 0;
+      max-width: 500px; margin: 0 auto;
+      background: #fff; border-radius: var(--radius-md);
+      overflow: hidden; box-shadow: var(--shadow-lg);
+    }
+    .search-box input {
+      flex: 1; border: none; padding: 14px 18px;
+      font-size: 15px; outline: none; color: var(--color-text);
+    }
+    .search-box select {
+      border: none; border-left: 1px solid #e5e7eb;
+      padding: 0 14px; font-size: 14px; color: var(--color-text);
+      background: #fff; outline: none; cursor: pointer;
+    }
+    .search-box button {
+      background: var(--color-accent); color: #fff;
+      border: none; padding: 0 22px;
+      font-size: 15px; font-weight: 700; cursor: pointer;
+      transition: background var(--transition);
+    }
+    .search-box button:hover { background: var(--color-accent-hover); }
+    .features {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      max-width: 860px;
+      margin: 40px auto 0;
+      padding: 0 20px;
+    }
+    .feature-card {
+      background: #fff;
+      border-radius: var(--radius-md);
+      padding: 28px 24px;
+      text-align: center;
+      border: 1px solid var(--color-border);
+      box-shadow: var(--shadow-sm);
+      transition: transform var(--transition), box-shadow var(--transition);
+    }
+    .feature-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+    .feature-icon { font-size: 36px; margin-bottom: 12px; }
+    .feature-title { font-size: 16px; font-weight: 700; color: var(--color-primary); margin-bottom: 6px; }
+    .feature-desc { font-size: 13px; color: var(--color-text-muted); }
+    @media (max-width: 700px) {
+      .features { grid-template-columns: 1fr; }
+      .hero h1 { font-size: 26px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="public-shell">
+  <!-- Topbar -->
+  <header class="public-topbar">
+    <div class="public-topbar-logo">
+      <span>🎓</span> AcademiQ
+    </div>
+    <nav class="public-topbar-nav">
+      <a href="alumno-inicio.html" class="active">Inicio</a>
+      <a href="alumno-notas.html">Mis Notas</a>
+      <a href="alumno-grupos.html">Mi Grupo</a>
+      <a href="alumno-asistencia.html">Asistencia</a>
+      <a href="login.html" style="background:rgba(255,255,255,0.15);margin-left:8px">Soy Docente</a>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <h1>Portal del Alumno</h1>
+    <p>Consultá tus notas, grupos y asistencia sin necesidad de registrarte</p>
+
+    <div class="search-box">
+      <input type="text" id="padron-input" placeholder="Ingresá tu padrón" />
+      <select id="curso-select">
+        <option value="">Seleccioná curso</option>
+      </select>
+      <button onclick="buscar()">Consultar →</button>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <div class="features">
+    <a href="alumno-notas.html" class="feature-card" style="text-decoration:none">
+      <div class="feature-icon">📝</div>
+      <div class="feature-title">Mis Notas</div>
+      <div class="feature-desc">Consultá tus calificaciones en parciales, parcialitos y TPs</div>
+    </a>
+    <a href="alumno-grupos.html" class="feature-card" style="text-decoration:none">
+      <div class="feature-icon">🤝</div>
+      <div class="feature-title">Mi Grupo</div>
+      <div class="feature-desc">Mirá tu equipo, uníte a uno o creá el tuyo con un código</div>
+    </a>
+    <a href="alumno-asistencia.html" class="feature-card" style="text-decoration:none">
+      <div class="feature-icon">✅</div>
+      <div class="feature-title">Asistencia</div>
+      <div class="feature-desc">Registrá tu asistencia con el código QR de tu docente</div>
+    </a>
+  </div>
+
+  <p style="text-align:center;margin-top:48px;color:var(--color-text-muted);font-size:13px;padding-bottom:32px">
+    ¿Sos docente? <a href="login.html" style="color:var(--color-primary);font-weight:600">Accedé al panel de administración →</a>
+  </p>
+</div>
+
+<script type="module">
+import api from '../js/api.js';
+
+async function loadCourses() {
+  const res = await api.filter('Course', { estado: 'activo' });
+  const courses = res.results || [];
+  const sel = document.getElementById('curso-select');
+  courses.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.id;
+    opt.textContent = `${c.nombre} (${c.codigo})`;
+    sel.appendChild(opt);
+  });
+  // Restore from localStorage if exists
+  const saved = localStorage.getItem('alumno_curso');
+  if (saved) sel.value = saved;
+  const savedPadron = localStorage.getItem('alumno_padron');
+  if (savedPadron) document.getElementById('padron-input').value = savedPadron;
+}
+
+window.buscar = () => {
+  const padron = document.getElementById('padron-input').value.trim();
+  const curso  = document.getElementById('curso-select').value;
+  if (!padron || !curso) { alert('Ingresá tu padrón y seleccioná un curso'); return; }
+  localStorage.setItem('alumno_padron', padron);
+  localStorage.setItem('alumno_curso', curso);
+  window.location.href = 'alumno-notas.html';
+};
+
+loadCourses();
+</script>
+</body>
+</html>
