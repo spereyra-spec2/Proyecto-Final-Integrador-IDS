@@ -7,10 +7,10 @@ from src.utils.validar_numeros import valido_numero
 from src.utils.errors_ev_notas import error_400, error_404, error_500
 
 
-cursos_bp=Blueprint('cursos', __name__)
+api_prefijo=Blueprint('api', __name__)
 
 
-@cursos_bp.route('/<curso_id>/evaluaciones/<idEvaluacion>/notas', methods=['GET'])
+@api_prefijo.route('/curso/<curso_id>/evaluaciones/<id_evaluacion>/notas', methods=['GET'])
 def obtener_nota(curso_id, idEvaluacion):
 
     padron = request.args.get('padron', type=int)
@@ -84,7 +84,7 @@ def obtener_nota(curso_id, idEvaluacion):
 
 
 
-@cursos_bp.route('/<curso_id>/evaluaciones/<padron>/<idEvaluacion>/notas', methods=['POST'])
+@api_prefijo.route('/curso/<curso_id>/evaluaciones/<padron>/<idEvaluacion>/notas', methods=['POST'])
 def guardar_nota(curso_id, padron, idEvaluacion):
 
     conn = get_connection()
@@ -158,7 +158,7 @@ def guardar_nota(curso_id, padron, idEvaluacion):
         cursor.close()
 
 
-@cursos_bp.route('/<curso_id>/evaluaciones/<padron>/<idEvaluacion>/notas', methods=['PATCH'])
+@api_prefijo.route('/curso/<curso_id>/evaluaciones/<padron>/<idEvaluacion>/notas', methods=['PATCH'])
 def actualizar_nota(curso_id, padron, idEvaluacion):
 
     conn = get_connection()
@@ -201,7 +201,7 @@ def actualizar_nota(curso_id, padron, idEvaluacion):
     finally:
         conn.close()
         cursor.close()
-        
+            
 
 
 

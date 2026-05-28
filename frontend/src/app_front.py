@@ -36,7 +36,6 @@ def ver_notas(padron):
     
     query_parameters = {}
 
-
     if padron:
         query_parameters['padron'] = padron
     elif id_equipo:
