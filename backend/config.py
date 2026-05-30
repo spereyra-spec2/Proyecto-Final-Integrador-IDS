@@ -1,10 +1,11 @@
 host: str = "localhost"
 user: str = "root"
-password: str = ""
+password: str = "P!assW0rd33"
 database: str = "ids_db"
 
 # generacion de QR
-SECRET_KEY = ""
+SECRET_KEY = "idaowjdaoi"
 QR_EXPIRATION_SECONDS = 900 # 15 min
-BASE_URL = "http://localhost:5000"
+BACK_URL = "http://localhost:5000"
+FRONT_URL = "http://localhost:5001"
 
