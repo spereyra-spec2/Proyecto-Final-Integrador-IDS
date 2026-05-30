@@ -35,12 +35,12 @@ def get_asistencia():
     con.close()
     return asistencia
 
-def get_asistencia_id(id):
+def get_asistencia_padron(padron):
 
     con = get_connection()
     cursor = con.cursor(dictionary=True)
     query = "SELECT * FROM Asistencias WHERE Usuarios_padron = %s "
-    cursor.execute(query,(id,))
+    cursor.execute(query,(padron,))
     asistencia = cursor.fetchall()
     cursor.close()
     con.close()

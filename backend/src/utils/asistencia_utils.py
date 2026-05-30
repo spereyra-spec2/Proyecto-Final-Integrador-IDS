@@ -1,6 +1,9 @@
 from src.db.db import get_connection
 import os
 import qrcode
+import re
+import jwt
+from config import  SECRET_KEY
 
 def alumno_asistio(padron):
     conn = get_connection()
@@ -30,3 +33,24 @@ def hacer_y_guardar_qr(url):
     filepath = os.path.join(".","qr_asistencia.png")
     img.save(filepath)
     print(f"QR generado y guardado en {filepath}")
+
+def validar_padron(padron):
+    regular_expresion = re.compile(r"^[1-9][0-9]{5}$")
+    return bool(regular_expresion.match(str(padron)))
+
+def verificar_token(headers, roles_permitidos):
+    if "Authorization" not in headers:
+        return False
+        
+    encoded_token = headers["Authorization"]
+
+    try:
+        payload = jwt.decode(encoded_token, SECRET_KEY, algorithms=["HS256"])
+        rol_usuario = payload.get("rol")
+
+        if rol_usuario in roles_permitidos:
+            return True
+            
+        return False
+    except jwt.PyJWTError: 
+        return False

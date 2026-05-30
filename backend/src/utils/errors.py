@@ -19,3 +19,6 @@ def server_error(detail="Error interno del servidor"):
 
 def conflict(detail="Conflicto"):
     return error_response(409, "Conflicto", "warning", detail)
+
+def forbidden(detail="Acceso Denegado"):
+    return error_response(403, "Usted no tiene acceso al recurso solicitado", "warning", detail)

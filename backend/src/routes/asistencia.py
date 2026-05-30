@@ -1,9 +1,9 @@
 from flask import Blueprint, jsonify, request
 from mysql.connector import Error
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
-from src.db.db import obtener_alumno_por_padron, get_asistencia_id, get_asistencia
-from src.utils.asistencia_utils import alumno_asistio, registrar_asistencia, hacer_y_guardar_qr
-from src.utils.errors import error_response, bad_request, not_found, server_error, conflict
+from src.db.db import obtener_alumno_por_padron, get_asistencia_padron, get_asistencia
+from src.utils.asistencia_utils import verificar_token, alumno_asistio, registrar_asistencia, hacer_y_guardar_qr, validar_padron
+from src.utils.errors import forbidden, error_response, bad_request, not_found, server_error, conflict
 import config
 from datetime import date
 import os
@@ -16,34 +16,38 @@ asistencia_bp = Blueprint("asistencia",__name__)
 def asistencia():
 
     try:
+
+        if not(verificar_token(request.headers, roles_permitidos=["Docente"])):
+               return forbidden()
+               
         asistencia = get_asistencia()
         if len(asistencia) == 0:
-            return jsonify("insertar mensaje codigo 204"), 204
+            return "",204
         
         return jsonify(asistencia),200
     
     except Error as e:
-        error_payload= "insertar mensaje codigo 500"
-
-        return jsonify(error_payload),500
+       server_error()
     
 
-@asistencia_bp.route('/<int:id>', methods=['GET'])
-def asistencia_id(id):
+@asistencia_bp.route('/<int:padron>', methods=['GET'])
+def asistencia_id(padron):
 
     try:
-        #funcion de validación de este id!!!
+        if not(verificar_token(request.headers, roles_permitidos=["Docente"])):
+               return forbidden()
 
-        asistencia = get_asistencia_id(id)
+        if not(validar_padron(padron)):
+            return bad_request()
+
+        asistencia = get_asistencia_padron(padron)
         if len(asistencia) == 0:
-            return jsonify("insertar mensaje codigo 204"),204
+            return not_found("recurso")
         
         return jsonify(asistencia),200
     
     except Error as e:
-        error_payload= "insertar mensaje codigo 500"
-
-        return jsonify(error_payload),500
+        return server_error()
     
 
 @asistencia_bp.route("/generar-qr", methods=["POST"])
