@@ -4,7 +4,7 @@ import mysql.connector
 
 def init_db():
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    sql_path = os.path.join(base_dir, "src", "models", "init_db.sql")
+    sql_path = os.path.join(base_dir, "init_db.sql")
     
     with open(sql_path) as f:
         sql = f.read()

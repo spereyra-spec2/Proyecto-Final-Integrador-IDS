@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, send_file
 from mysql.connector import Error
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 from src.db.db import obtener_alumno_por_padron, get_asistencia_id, get_asistencia
@@ -19,14 +19,14 @@ def asistencia():
         asistencia = get_asistencia()
         if len(asistencia) == 0:
             return jsonify("insertar mensaje codigo 204"), 204
-        
+
         return jsonify(asistencia),200
-    
+
     except Error as e:
         error_payload= "insertar mensaje codigo 500"
 
         return jsonify(error_payload),500
-    
+
 
 @asistencia_bp.route('/<int:id>', methods=['GET'])
 def asistencia_id(id):
@@ -37,22 +37,23 @@ def asistencia_id(id):
         asistencia = get_asistencia_id(id)
         if len(asistencia) == 0:
             return jsonify("insertar mensaje codigo 204"),204
-        
+
         return jsonify(asistencia),200
-    
+
     except Error as e:
         error_payload= "insertar mensaje codigo 500"
 
         return jsonify(error_payload),500
-    
 
-@asistencia_bp.route("/generar-qr", methods=["POST"])
+
+# accedido por el boton de "generar qr en /asistencia/profe
+@asistencia_bp.route("/generar-qr", methods=["GET"])
 def generar_qr():
     try:
         payload = {"tipo": "asistencia", "timestamp": date.today().isoformat()}
         token = serializer.dumps(payload, salt="asistencia-qr")
 
-        base_url = config.BASE_URL
+        base_url = config.BACK_URL
         formulario_url = f"{base_url}/api/asistencia/formulario-asistencia?token={token}"
 
         hacer_y_guardar_qr(formulario_url)
@@ -64,31 +65,6 @@ def generar_qr():
 
     except Exception as e:
         return server_error(str(e))
-
-@asistencia_bp.route("/formulario-asistencia", methods=["GET"])
-def formulario_asistencia():
-    token = request.args.get("token")
-    if not token:
-        return bad_request("token no fue enviado")
-
-    try:
-        serializer.loads(token, salt="asistencia-qr", max_age=config.QR_EXPIRATION_SECONDS)
-    except SignatureExpired:
-        return "<h1> QR expirado </h1>", 401
-    except BadSignature:
-        return "<h1> token invalido </h1>", 403
-
-    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-    template_path = os.path.join(base_dir, "frontend", "src", "templates", "formulario_asistencia.html")
-    
-    try:
-        with open(template_path, "r", encoding="utf-8") as f:
-            html_template = f.read()
-    except FileNotFoundError:
-        return "<h1>Error</h1><p>No se encontró el formulario</p>", 500
-
-    html_content = html_template.replace("{{ token }}", token)
-    return html_content, 200
 
 @asistencia_bp.route("/confirmar-asistencia", methods=["POST"])
 def confirmar_asistencia():
@@ -125,3 +101,10 @@ def confirmar_asistencia():
         "padron": alumno["padron"],
         "fecha": date.today().isoformat()
     }, 200
+
+@asistencia_bp.route('/qr-imagen', methods=['GET'])
+def servir_qr():
+    ruta = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..', 'backend', 'qr_asistencia.png')
+    ruta = os.path.normpath(ruta)
+    print("Buscando QR en:", ruta)
+    return send_file(ruta, mimetype='image/png')
