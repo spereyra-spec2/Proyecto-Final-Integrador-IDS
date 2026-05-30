@@ -1,10 +1,12 @@
 from flask import Flask
 from flask_cors import CORS
 from init_db import init_db
+from src.routes.evaluaciones import evaluaciones_bp
 
 app = Flask(__name__)
 CORS(app)
 
+app.register_blueprint(evaluaciones_bp, url_prefix="/evaluaciones")
 
 try:
     init_db()

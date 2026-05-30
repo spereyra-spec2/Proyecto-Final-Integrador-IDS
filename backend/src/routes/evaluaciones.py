@@ -5,34 +5,42 @@ from db import get_connection
 
 evaluaciones_bp = Blueprint('evaluaciones', __name__)
 
-@evaluaciones_bp.route('/evaluaciones', methods=['POST'])
+@evaluaciones_bp.route('', methods=['POST'])
 def create_evaluacion():
     data = request.get_json()
+    
+    # Obtener todos los campos
+    tipo = data.get('tipo')
+    descripcion = data.get('descripcion')
+    fecha = data.get('fecha')
     curso_id = data.get('curso_id')
-    notas_id = data.get('notas_id')
 
-    if not all([curso_id, notas_id]):
-        return jsonify({'error': 'Faltan campos requeridos'}), 400
+    # Validar campos requeridos
+    if not all([tipo, descripcion, fecha, curso_id]):
+        return jsonify({'error': 'Faltan campos requeridos: tipo, descripcion, fecha, curso_id'}), 400
 
     try:
         conn = get_connection()
         cursor = conn.cursor()
 
-        # Verificar que el curso exista
-        cursor.execute("SELECT id FROM cursos WHERE id = %s", (curso_id,))
+        # Verificar que el curso exista (usando curso_id como está en tu tabla)
+        cursor.execute("SELECT curso_id FROM cursos WHERE curso_id = %s", (curso_id,))
         if cursor.fetchone() is None:
             return jsonify({'error': 'Curso no encontrado'}), 404
-        
 
-        # Insertar la evaluación
-        fecha_evaluacion = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        # Insertar la evaluación (usando los campos correctos)
         cursor.execute(
-            "INSERT INTO evaluaciones (tipo,descripcion,fecha,curso_id, notas_id) VALUES (%s, %s, %s, %s, %s)",
-            ( tipo, descripcion, fecha, curso_id, notas_id)
+            "INSERT INTO evaluaciones (tipo, descripcion, fecha, curso_id) VALUES (%s, %s, %s, %s)",
+            (tipo, descripcion, fecha, curso_id)
         )
         conn.commit()
+        
+        evaluacion_id = cursor.lastrowid
 
-        return jsonify({'message': 'Evaluación creada exitosamente'}), 201
+        return jsonify({
+            'message': 'Evaluación creada exitosamente',
+            'evaluacion_id': evaluacion_id
+        }), 201
 
     except IntegrityError as e:
         return jsonify({'error': 'Error de integridad: {}'.format(str(e))}), 400
@@ -42,7 +50,26 @@ def create_evaluacion():
         cursor.close()
         conn.close()
 
-@evaluaciones_bp.route('/evaluaciones/<int:evaluacion_id>', methods=['GET'])
+
+@evaluaciones_bp.route('', methods=['GET'])
+def get_evaluaciones():
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        cursor.execute("SELECT * FROM evaluaciones")
+        evaluaciones = cursor.fetchall()
+
+        return jsonify(evaluaciones), 200
+
+    except Exception as e:
+        return jsonify({'error': 'Error al obtener evaluaciones: {}'.format(str(e))}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+
+@evaluaciones_bp.route('/<int:evaluacion_id>', methods=['GET'])
 def get_evaluacion(evaluacion_id):
     try:
         conn = get_connection()
@@ -62,12 +89,14 @@ def get_evaluacion(evaluacion_id):
         cursor.close()
         conn.close()
 
-@evaluaciones_bp.route('/evaluaciones/<int:evaluacion_id>', methods=['PATCH'])
+
+@evaluaciones_bp.route('/<int:evaluacion_id>', methods=['PUT'])
 def update_evaluacion(evaluacion_id):
     data = request.get_json()
     tipo = data.get('tipo')
     descripcion = data.get('descripcion')
     fecha = data.get('fecha')
+    curso_id = data.get('curso_id')
 
     try:
         conn = get_connection()
@@ -80,8 +109,8 @@ def update_evaluacion(evaluacion_id):
 
         # Actualizar la evaluación
         cursor.execute(
-            "UPDATE evaluaciones SET tipo = %s, descripcion = %s, fecha = %s WHERE evaluacion_ID = %s",
-            (tipo, descripcion, fecha, evaluacion_id)
+            "UPDATE evaluaciones SET tipo = %s, descripcion = %s, fecha = %s, curso_id = %s WHERE evaluacion_ID = %s",
+            (tipo, descripcion, fecha, curso_id, evaluacion_id)
         )
         conn.commit()
 
