@@ -9,7 +9,7 @@ CORS(app)
 
 @app.route('/')
 def index():
-    return render_template('alumno-inicio.html')
+    return render_template('profesor-evaluaciones.html')
 
 
 if __name__ == "__main__":
