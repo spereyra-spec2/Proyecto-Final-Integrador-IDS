@@ -1,0 +1,78 @@
+from flask import Blueprint, jsonify, request
+
+from src.db import delete_equipo, patch_equipo
+from src.utils.errors import not_found, server_error, bad_request
+
+equipos_bp = Blueprint("equipos", __name__)
+
+@equipos_bp.route("/<int:curso_id>/equipos/<int:usuarios_padron>", methods=["PATCH"])
+def actualizar_equipo(curso_id, usuarios_padron):
+    if curso_id <= 0:
+        return jsonify(bad_request("El ID del curso debe ser un número positivo.")), 400
+    if usuarios_padron <= 0:
+        return jsonify(bad_request("El padrón del usuario debe ser un número positivo.")), 400
+
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify(bad_request("El body debe ser JSON")), 400
+
+    if not isinstance(data, dict):
+        return jsonify(bad_request("El body JSON debe ser un objeto.")), 400
+
+    alumno_padron = data.get("alumno_padron", data.get("padron"))
+    activo = data.get("activo")
+    evaluacion_id = data.get("evaluacion_id", data.get("tp_id"))
+
+    if alumno_padron is None and activo is not None:
+        return jsonify(bad_request("El body debe incluir 'alumno_padron' para cambiar el estado de un alumno.")), 400
+
+    if alumno_padron is not None and (not isinstance(alumno_padron, int) or alumno_padron <= 0):
+        return jsonify(bad_request("El padrón del alumno debe ser un número positivo.")), 400
+
+    if activo is not None and activo not in (0, 1):
+        return jsonify(bad_request("El campo 'activo' debe ser 0 o 1.")), 400
+
+    if alumno_padron is not None and activo is None:
+        return jsonify(bad_request("El body debe incluir 'activo' para cambiar el estado de un alumno.")), 400
+
+    if evaluacion_id is not None and (not isinstance(evaluacion_id, int) or evaluacion_id <= 0):
+        return jsonify(bad_request("El ID de la evaluación/TP debe ser un número positivo.")), 400
+
+    if alumno_padron is None and evaluacion_id is None:
+        return jsonify(bad_request("El body debe incluir un alumno para agregar/remover o una evaluación/TP.")), 400
+
+    try:
+        equipo = patch_equipo(
+            curso_id,
+            usuarios_padron,
+            {
+                "alumno_padron": alumno_padron,
+                "activo": activo,
+                "evaluacion_id": evaluacion_id,
+            },
+        )
+        if equipo is None:
+            return jsonify(not_found("No existe un equipo activo para ese curso y padrón.")), 404
+        return jsonify(equipo), 200
+    except ValueError as error:
+        return jsonify(bad_request(str(error))), 400
+    except Exception as error:
+        return jsonify(server_error(error)), 500
+
+
+@equipos_bp.route("/<int:curso_id>/equipos/<int:usuarios_padron>", methods=["DELETE"])
+def eliminar_equipo(curso_id, usuarios_padron):
+    if curso_id <= 0:
+        return jsonify(bad_request("El ID del curso debe ser un número positivo.")), 400
+    if usuarios_padron <= 0:
+        return jsonify(bad_request("El padrón del usuario debe ser un número positivo.")), 400
+
+    try:
+        eliminado = delete_equipo(curso_id, usuarios_padron)
+        if not eliminado:
+            return jsonify(not_found("No existe un equipo activo para ese curso y padrón.")), 404
+
+        return jsonify({"message": "Equipo disuelto correctamente."}), 200
+
+    except Exception as e:
+        return jsonify(server_error(e)), 500
