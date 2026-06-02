@@ -4,7 +4,9 @@ import os
 import hashlib
 import time
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+if BASE_DIR not in sys.path:
+    sys.path.insert(0, BASE_DIR)
 import config
 
 

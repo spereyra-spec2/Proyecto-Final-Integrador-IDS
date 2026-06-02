@@ -1,8 +1,8 @@
 from flask import Flask, Blueprint, jsonify, request, url_for, Response
-from db import get_equipos, crear_equipo
+from backend.db import get_equipos, crear_equipo
 from typing import Any
 import mysql.connector
-from src.utils.errors import error_response, not_found, bad_request, server_error, conflict
+from backend.src.utils.errors import error_response, not_found, bad_request, server_error, conflict
 
 equipos_bp = Blueprint("equipos",__name__)
 
