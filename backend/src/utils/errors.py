@@ -1,21 +1,49 @@
-def error_response(code, message, level="error", description=""):
-    return {
-        "error": [{
-            "code": code,
-            "message": message,
-            "level": level,
-            "description": description
-        }]
-    }, code
+def not_found(error):
+        error404 ={
+                "error": [
+                    {
+                        "code": 404,
+                        "message": "No encontrado",
+                        "level": "info",
+                        "description": str(error)
+                    }
+                ]
+            }
+        return error404
 
-def not_found(resource="recurso"):
-    return error_response(404, f"{resource} no encontrado", "info", f"No se encontró el {resource} solicitado.")
+def server_error(error):
+    error500 = {"error": [
+                    {
+                        "code": 500,
+                        "message": "Error interno en el servidor",
+                        "level": "error",
+                        "description": str(error)
+                    }
+                ]
+            }
+    return error500
 
-def bad_request(detail="Petición inválida"):
-    return error_response(400, "Petición inválida", "warning", detail)
+def bad_request(error):
+    error400 = {"error": [
+            {
+                "code": 400,
+                "message": "Petición inválida",
+                "level": "info",
+                "description": error
+            }
+        ]
+    }
+    return error400
 
-def server_error(detail="Error interno del servidor"):
-    return error_response(500, "Error interno", "critical", detail)
-
-def conflict(detail="Conflicto"):
-    return error_response(409, "Conflicto", "warning", detail)
+def conflict_error(error):
+    error409 = {
+        "error": [
+            {
+                "code": 409,
+                "message": "Conflicto",
+                "level": "warning",
+                "description": str(error)
+            }
+        ]
+    }
+    return error409

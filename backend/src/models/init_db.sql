@@ -95,3 +95,4 @@ CREATE TABLE IF NOT EXISTS logs (
                                     Usuarios_padron INT NOT NULL,
                                     FOREIGN KEY (Usuarios_padron) REFERENCES usuarios(padron)
 );
+
