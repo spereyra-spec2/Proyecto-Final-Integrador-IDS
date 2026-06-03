@@ -85,13 +85,13 @@ input[type="number"]::-webkit-inner-spin-button {
     justify-content:center;
 }
 
-#contrasena_olvidada {
+.alogin {
     color: #7e8286; 
     font-weight: 300; 
     font-size: small;
 }
 
-#contrasena_olvidada:hover {
+.alogin:hover {
   color: #1e3a5f; 
 }
 
