@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mis Notas — AcademiQ</title>
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+  <link rel="stylesheet" href="../css/layout.css" />
+  <style>
+    .grade-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid #f0f0f0; }
+    .grade-row:last-child { border-bottom: none; }
+    .nota-circle {
+      width: 46px; height: 46px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 18px; flex-shrink: 0;
+    }
+    .nota-aprobado { background: #e8f5e9; color: #2e7d32; }
+    .nota-regular  { background: #fff8e1; color: #e65100; }
+    .nota-bajo     { background: #ffebee; color: #c62828; }
+    .nota-sin      { background: #f3f4f6; color: #9ca3af; }
+    .avg-bar { height: 10px; background: #e5e7eb; border-radius: 99px; overflow: hidden; margin-top: 6px; }
+    .avg-bar-fill { height: 100%; border-radius: 99px; transition: width 0.6s ease; }
+  </style>
+</head>
+<body>
+
+<div class="public-shell">
+  <header class="public-topbar">
+    <div class="public-topbar-logo"><span>🎓</span> AcademiQ</div>
+    <nav class="public-topbar-nav">
+      <a href="alumno-inicio.html">Inicio</a>
+      <a href="alumno-notas.html" class="active">Mis Notas</a>
+      <a href="alumno-grupos.html">Mi Grupo</a>
+      <a href="alumno-asistencia.html">Asistencia</a>
+    </nav>
+  </header>
+
+  <div class="public-container">
+    <!-- Buscador -->
+    <div class="card" style="margin-bottom:24px">
+      <div class="card-body" style="display:flex;gap:12px;flex-wrap:wrap;padding:16px 20px">
+        <input class="form-input" id="padron-input" placeholder="Tu padrón" style="flex:1;min-width:130px" />
+        <select class="form-select" id="curso-select" style="flex:2;min-width:200px">
+          <option value="">Seleccioná curso</option>
+        </select>
+        <button class="btn btn-primary" onclick="buscar()">🔍 Consultar</button>
+      </div>
+    </div>
+
+    <!-- Resultado -->
+    <div id="result" style="display:none">
+      <!-- Perfil alumno -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-body" style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+          <div style="width:56px;height:56px;border-radius:50%;background:var(--color-primary);display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;font-weight:800" id="student-avatar">?</div>
+          <div style="flex:1">
+            <h2 style="font-size:20px;font-weight:800" id="student-name">—</h2>
+            <p style="color:#6b7280;font-size:14px">Padrón: <strong id="student-padron">—</strong></p>
+          </div>
+          <div>
+            <span class="badge" id="student-status">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resumen promedio -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-body">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <span style="font-weight:600">Promedio general</span>
+            <span style="font-size:28px;font-weight:800;color:var(--color-primary)" id="avg-value">—</span>
+          </div>
+          <div class="avg-bar"><div class="avg-bar-fill" id="avg-bar" style="width:0%;background:var(--color-primary)"></div></div>
+        </div>
+      </div>
+
+      <!-- Detalle por evaluación -->
+      <div class="card">
+        <div class="card-header"><span class="card-title">Calificaciones</span></div>
+        <div class="card-body" id="grades-list">
+          <p style="color:#9ca3af;text-align:center">Sin notas cargadas</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="not-found" style="display:none" class="card">
+      <div class="card-body" style="text-align:center;padding:40px">
+        <div style="font-size:40px;margin-bottom:12px">🔍</div>
+        <strong>No se encontró el alumno</strong>
+        <p style="color:#6b7280;margin-top:8px;font-size:14px">Verificá el padrón y el curso seleccionado.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import api from '../js/api.js';
+import { buscarAlumno, calcularEstado } from '../js/alumno.js';
+import { average, formatDate, initial } from '../js/utils.js';
+
+async function loadCourses() {
+  const res = await api.filter('Course', { estado: 'activo' });
+  const courses = res.results || [];
+  const sel = document.getElementById('curso-select');
+  courses.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.id; opt.textContent = `${c.nombre} (${c.codigo})`;
+    sel.appendChild(opt);
+  });
+  const savedCurso = localStorage.getItem('alumno_curso');
+  if (savedCurso) sel.value = savedCurso;
+  document.getElementById('padron-input').value = localStorage.getItem('alumno_padron') || '';
+
+  if (savedCurso) buscar();
+}
+
+window.buscar = async () => {
+  const padron  = document.getElementById('padron-input').value.trim();
+  const cursoId = document.getElementById('curso-select').value;
+  if (!padron || !cursoId) return;
+
+  localStorage.setItem('alumno_padron', padron);
+  localStorage.setItem('alumno_curso', cursoId);
+
+  const { student, grades, evaluations } = await buscarAlumno(cursoId, padron);
+
+  document.getElementById('not-found').style.display = 'none';
+  document.getElementById('result').style.display = 'none';
+
+  if (!student) {
+    document.getElementById('not-found').style.display = 'block';
+    return;
+  }
+
+  document.getElementById('result').style.display = 'block';
+  document.getElementById('student-avatar').textContent = initial(student.nombre);
+  document.getElementById('student-name').textContent = student.nombre;
+  document.getElementById('student-padron').textContent = student.padron;
+
+  const estado = calcularEstado(grades);
+  const statusEl = document.getElementById('student-status');
+  statusEl.textContent = student.estado === 'abandono' ? 'Abandonó' : estado.label;
+  statusEl.className = `badge ${student.estado === 'abandono' ? 'badge-danger' : estado.cls}`;
+
+  const avg = average(grades.map(g => g.nota));
+  const avgNum = parseFloat(avg) || 0;
+  document.getElementById('avg-value').textContent = avg || '—';
+  document.getElementById('avg-bar').style.width = `${Math.min(avgNum * 10, 100)}%`;
+  document.getElementById('avg-bar').style.background = avgNum >= 7 ? '#2e7d32' : avgNum >= 4 ? '#e8a020' : '#c62828';
+
+  const tipoLabel = { parcial: 'Parcial', parcialito: 'Parcialito', trabajo_practico: 'Trabajo Práctico' };
+
+  const gradesList = document.getElementById('grades-list');
+  if (!grades.length) {
+    gradesList.innerHTML = '<p style="color:#9ca3af;text-align:center">Sin notas cargadas</p>';
+    return;
+  }
+
+  gradesList.innerHTML = grades.map(g => {
+    const ev = evaluations.find(e => e.id === g.evaluacion_id);
+    const nota = g.nota;
+    const cls = nota >= 7 ? 'nota-aprobado' : nota >= 4 ? 'nota-regular' : 'nota-bajo';
+    return `
+      <div class="grade-row">
+        <div>
+          <strong style="font-size:15px">${ev?.nombre || 'Evaluación'}</strong>
+          <p style="font-size:12px;color:#6b7280">${tipoLabel[ev?.tipo] || ''}${ev?.fecha ? ' · ' + formatDate(ev.fecha) : ''}</p>
+        </div>
+        <div class="nota-circle ${cls}">${nota}</div>
+      </div>
+    `;
+  }).join('');
+};
+
+loadCourses();
+</script>
+</body>
+</html>
