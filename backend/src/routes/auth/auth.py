@@ -24,7 +24,7 @@ def login():
         return error
 
     token = seguridad.generar_token(usuario)
-    return jsonify({'success': True, 'token': token}), 200
+    return jsonify({'success': True, 'token': token, 'padron': usuario['padron'], 'rol': usuario['rol']}), 200
 
 
 @auth_bp.route("/registro", methods = ["POST"])
