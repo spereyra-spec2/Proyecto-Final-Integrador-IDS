@@ -31,7 +31,7 @@ def login():
 def alta_usuario():
     data = request.get_json(silent=True)
 
-    if not data or "padron" not in data or "rol" not in data or "nombres" not in data or "mail" not in data or "contrasena" not in data:
+    if not data or "padron" not in data or "nombres" not in data or "mail" not in data or "contrasena" not in data:
         return errors.datos_incompletos()
     
     if not isinstance(data["padron"], int):
@@ -49,12 +49,12 @@ def alta_usuario():
     existe_usuario, error = auth_db.existe_usuario(data["padron"])
 
     if existe_usuario:
-        return errors.ya_existe_alumno()
+        return errors.ya_existe()
     
     if error:
         return error
     
-    resultado = auth_db.alta_usuario(data["padron"], data["rol"], data["nombres"], data["mail"], data["contrasena"])
+    resultado = auth_db.alta_usuario(data["padron"], "Docente", data["nombres"], data["mail"], data["contrasena"])
 
     if resultado:
         return resultado #si llega acá es porque tiró error

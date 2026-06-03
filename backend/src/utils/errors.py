@@ -60,7 +60,7 @@ def datos_incorrectos(dato):
     }), 400
 
 
-def ya_existe_alumno():
+def ya_existe():
     return jsonify({
         'errors': [
             {
