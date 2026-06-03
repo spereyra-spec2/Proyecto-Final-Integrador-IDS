@@ -33,7 +33,6 @@ def login():
             flash("El padrón debe ser un número", "error")
             return render_template('login.html')
 
-
         resultado = api.login(int(padron), contrasena)
 
         if resultado.get('ok'):
@@ -48,3 +47,31 @@ def login():
         return render_template('login.html')
     
     return render_template('login.html') #si es get
+
+@auth_bp.route('/contrasena_olvidada', methods = ['GET', 'POST'])
+def reset_contrasena():
+
+    if request.method == 'POST':
+        padron = request.form.get('padron', '').strip()
+
+        if not padron:
+            flash("No ingresaste tu padrón", "error")
+            return render_template('recuperar-contrasena.html')
+        
+        try:
+            padron = int(padron)
+        except ValueError:
+            flash("El padrón debe ser un número", "error")
+            return render_template('recuperar-contrasena.html')
+
+        resultado = api.reset_contrasena(padron)
+
+        if resultado.get('ok'):
+            flash("Se ha enviado un correo para restablecer tu contraseña", 'success')
+
+        for mensaje in utils.extraer_mensaje_error(resultado.get('error_response')):
+            flash(mensaje, 'error')
+
+        return render_template('recuperar-contrasena.html')
+    
+    return render_template('recuperar-contrasena.html') 

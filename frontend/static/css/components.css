@@ -247,7 +247,6 @@
 .flash--success {
     background: var(--color-success-bg);
     color: var(--color-success);
-    display: none;
 }
 .flash--error {
     background: var(--color-danger-bg);

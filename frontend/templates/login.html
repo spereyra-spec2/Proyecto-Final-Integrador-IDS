@@ -63,7 +63,7 @@
   {% endwith %}
 
     <div id="contrasena-divider">
-      <a class="alogin" href="">¿Olvidaste tu contraseña?</a>
+      <a class="alogin" href="{{url_for('auth.reset_contrasena')}}">¿Olvidaste tu contraseña?</a>
     </div>
 
     <div class="divider">o</div>
@@ -72,12 +72,10 @@
       ¿Sos alumno? <a href="alumno-inicio.html">Accedé al portal de estudiantes →</a>
     </p>
 
-        <div id="contrasena-divider">
+    <div id="contrasena-divider">
       <a class="alogin" href="">¿No tenés cuenta? Registrate</a>
     </div>
   </div>
 </div>
-
-<script src="{{url_for('static', filename='js/auth.js')}}"></script>
 </body>
 </html>
