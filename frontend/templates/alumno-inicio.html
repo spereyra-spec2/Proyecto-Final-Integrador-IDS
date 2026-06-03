@@ -41,7 +41,7 @@
 {% endblock %}
 
 <script type="module">
-import api from '../js/api.js';
+import api from '/static/js/api.js';
 
 async function loadCourses() {
   const res = await api.filter('Course', { estado: 'activo' });

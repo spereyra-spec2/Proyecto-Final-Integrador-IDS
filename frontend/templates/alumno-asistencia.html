@@ -4,9 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Asistencia — AcademiQ</title>
-  <link rel="stylesheet" href="../css/base.css" />
-  <link rel="stylesheet" href="../css/components.css" />
-  <link rel="stylesheet" href="../css/layout.css" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}" />
   <style>
     .att-row { display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #f0f0f0; }
     .att-row:last-child { border-bottom:none; }
@@ -93,9 +93,9 @@
 </div>
 
 <script type="module">
-import api from '../js/api.js';
-import { buscarAlumno } from '../js/alumno.js';
-import { formatDate, toast } from '../js/utils.js';
+import api from '/static/js/api.js';
+import { buscarAlumno } from '/static/js/alumno.js';
+import { formatDate, toast } from '/static/js/utils.js';
 
 let currenStudent = null;
 let cursoId = '';

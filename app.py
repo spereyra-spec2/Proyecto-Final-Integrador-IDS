@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template
+from flask import Flask, render_template, send_from_directory
 from flask_cors import CORS
 from backend.init_db import init_db
 from backend.src.routes.equipos import equipos_bp
@@ -26,6 +26,7 @@ except Exception as e:
 @app.route('/')
 def index():
     return render_template('base_general.html')
+
 
 @app.route('/alumno-inicio.html')
 def alumno_inicio():
@@ -59,6 +60,17 @@ def docente_dashboard():
 def docente_evaluaciones():
     return render_template('profesor-evaluaciones.html')
 
+@app.route('/profesor-cursos.html')
+def docente_cursos():
+    return render_template('profesor-cursos.html')
+
+@app.route("/css/<path:filename>")
+def css(filename):
+    return send_from_directory("templates/css", filename)
+
+@app.route("/js/<path:filename>")
+def js(filename):
+    return send_from_directory("templates/js", filename)
 
 if __name__ == "__main__":
     app.run(port=5000, debug=True)
