@@ -1,9 +1,90 @@
 {% extends "base_profesores.html" %}
 {% block title %}Evaluaciones — AcademiQ{% endblock %}
-{% block contenido %}
+{% block content %}
 
+<div class="main-content">
+  <div class="topbar">
+    <button class="hamburger">☰</button>
+    <span class="topbar-title" id="topbar-title">Evaluaciones</span>
+  </div>
 
+  <div class="page-content">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Evaluaciones</h1>
+        <p class="page-subtitle" id="course-sub">Cargando...</p>
+      </div>
+      <button class="btn btn-primary" onclick="openModal('modal-eval')">➕ Nueva evaluación</button>
+    </div>
+
+    <div id="evals-list">
+      <div class="loading-spinner-container" style="text-align:center;padding:40px">
+        <div class="loading-spinner"></div>
+        <p style="margin-top:16px;color:var(--color-text-light)">Cargando evaluaciones...</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal nueva evaluación -->
+<div class="modal-overlay hidden" id="modal-eval">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Nueva evaluación</span>
+      <button class="modal-close" onclick="closeModal('modal-eval')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Nombre *</label>
+        <input class="form-input" id="e-nombre" placeholder="Ej: Primer Parcial" />
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="form-group">
+          <label class="form-label">Tipo</label>
+          <select class="form-select" id="e-tipo">
+            <option value="parcial">Parcial</option>
+            <option value="parcialito">Parcialito</option>
+            <option value="trabajo_practico">Trabajo Práctico</option>
+            <option value="final">Final</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Fecha</label>
+          <input class="form-input" id="e-fecha" type="date" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Descripción</label>
+        <textarea class="form-textarea" id="e-desc" rows="3" placeholder="Opcional"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-eval')">Cancelar</button>
+      <button class="btn btn-primary" id="btn-save-eval">Crear</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal cargar notas -->
+<div class="modal-overlay hidden" id="modal-grades">
+  <div class="modal" style="max-width:660px">
+    <div class="modal-header">
+      <span class="modal-title" id="grades-modal-title">Calificaciones</span>
+      <button class="modal-close" onclick="closeModal('modal-grades')">✕</button>
+    </div>
+    <div class="modal-body" style="padding:0">
+      <div class="table-wrapper">
+        <table class="table" id="grades-table">
+          <thead>
+            <tr><th>Alumno</th><th>Padrón</th><th>Nota</th><th>Acción</th></tr>
+          </thead>
+          <tbody id="grades-tbody">
+            <tr><td colspan="4" style="text-align:center">Cargando alumnos...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
 
 {% endblock %}
-
-
