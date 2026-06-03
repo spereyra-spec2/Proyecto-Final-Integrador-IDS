@@ -35,7 +35,7 @@ def bad_request(error):
     }
     return error400
 
-def conflict_error(error):
+def conflict(error):
     error409 = {
         "error": [
             {
@@ -47,3 +47,14 @@ def conflict_error(error):
         ]
     }
     return error409
+
+
+def error_response(code, message, level="error", description=""):
+    return {
+        "error": [{
+            "code": code,
+            "message": message,
+            "level": level,
+            "description": description
+        }]
+    }, code

@@ -1,5 +1,5 @@
 from flask import Flask, Blueprint, jsonify, request, url_for, Response
-from backend.db import get_equipos, crear_equipo
+from backend.db import get_equipos, crear_equipo, delete_equipo, patch_equipo
 from typing import Any
 import mysql.connector
 from backend.src.utils.errors import error_response, not_found, bad_request, server_error, conflict
@@ -57,12 +57,6 @@ def registrar_equipo(curso_id: int) -> Response:
     except Exception as e:
         res, code = server_error(str(e))
         return jsonify(res), code
-from flask import Blueprint, jsonify, request
-
-from src.db import delete_equipo, patch_equipo
-from src.utils.errors import not_found, server_error, bad_request
-
-equipos_bp = Blueprint("equipos", __name__)
 
 @equipos_bp.route("/<int:curso_id>/equipos/<int:usuarios_padron>", methods=["PATCH"])
 def actualizar_equipo(curso_id, usuarios_padron):
