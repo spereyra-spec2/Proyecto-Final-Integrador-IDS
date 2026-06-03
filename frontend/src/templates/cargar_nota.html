@@ -1,48 +1,47 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="cont_formulario">
-    <h2>Cargar Nueva Nota (Individual o Grupal)</h2>
+<div class="public-container">
     
-    <form id="form_cargar_nota" action="/notas/cargar" method="POST">
-        
-        <div class="formulario">
-            <label for="curso_id">ID del Curso:</label>
-            <input type="number" id="curso_id" required placeholder="Ej: 1">
+    <div class="card">
+        <div class="card-header"><span class="card-title">Cargar Nueva Nota</span></div>
+        <div class="card-body">
+            
+            {% if estado == 'exito' %}
+            <div style="background:#e8f5e9; color:#2e7d32; padding:12px; border-radius:6px; margin-bottom:20px; font-weight:600;">
+                ✅ La nota se ha guardado correctamente.
+            </div>
+            {% endif %}
+
+            <form action="/notas/guardar" method="POST" style="display:flex; flex-direction:column; gap:16px;">
+                
+                <div>
+                    <label style="font-weight:600; font-size:14px; color:#374151; display:block; margin-bottom:6px;">ID del Curso:</label>
+                    <input type="number" name="curso_id" class="form-input" style="width:100%" required>
+                </div>
+
+                <div>
+                    <label style="font-weight:600; font-size:14px; color:#374151; display:block; margin-bottom:6px;">ID de la Evaluación:</label>
+                    <input type="number" name="id_evaluacion" class="form-input" style="width:100%" required>
+                </div>
+
+                <div>
+                    <label style="font-weight:600; font-size:14px; color:#374151; display:block; margin-bottom:6px;">Padrón / Equipo:</label>
+                    <input type="number" name="padron" class="form-input" style="width:100%" required>
+                </div>
+
+                <div>
+                    <label style="font-weight:600; font-size:14px; color:#374151; display:block; margin-bottom:6px;">Puntaje (Nota):</label>
+                    <input type="number" step="0.1" name="puntaje" class="form-input" style="width:100%" required>
+                </div>
+
+                <div style="margin-top:10px;">
+                    <button type="submit" class="btn btn-primary" style="width:100%">💾 Guardar Nota</button>
+                </div>
+            </form>
+            
         </div>
+    </div>
 
-        <div class="formulario">
-            <label for="padron">Padrón del Alumno:</label>
-            <input type="number" id="padron" required placeholder="Ej: 12345">
-        </div>
-
-        <div class="formulario">
-            <label for="idEvaluacion">ID de la Evaluación:</label>
-            <input type="number" id="idEvaluacion" required placeholder="Ej: 2">
-        </div>
-
-        <hr>
-
-        <div class="formulario">
-            <label for="puntaje">Puntaje:</label>
-            <input type="number" step="0.1" id="puntaje" required placeholder="Ej: 8.5">
-        </div>
-
-        <div class="formulario">
-            <label for="es_grupal">¿Es una nota Grupal?</label>
-            <input type="checkbox" id="es_grupal" onchange="habilitar_equipo()">
-        </div>
-
-        <div class="formulario" id="grupo_equipo" style="display: none;">
-            <label for="Equipos_idEquipos">ID del Equipo:</label>
-            <input type="number" id="Equipos_idEquipos" placeholder="Ej: 1">
-        </div>
-
-        <button type="submit">Guardar Nota</button>
-    </form>
-    
-    <div id="mensaje_respuesta"></div>
 </div>
-
-<script src="{{ url_for('static', filename='js/script_cargar_nota.js') }}"></script>
 {% endblock %}
