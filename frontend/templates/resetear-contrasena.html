@@ -16,14 +16,17 @@
   <div class="login-card">
     <h2>Recuperá tu contraseña</h2>
 
-    <form action="{{url_for('auth.contrasena_olvidada')}}" method="POST">
+    <form action="{{url_for('auth.resetear_contrasena', token=token)}}" method="POST">
       <div class="form-group">
-        <label for="padron" class="form-label">Padrón</label>
-        <input class="form-input" id="padron" type="number" name="padron" placeholder="Ingresá tu número de padrón institucional" />
+        <label for="contrasena" class="form-label">Restablecer contraseña (minimo 8 caracteres)</label>
+        <input class="form-input" id="contrasena" type="password" name="contrasena" placeholder="Ingresá tu nueva contraseña." />
+
+        <label for="contrasena_confirmacion" class="form-label">Repita la contraseña</label>
+        <input class="form-input" id="contrasena_confirmacion" type="password" name="contrasena_confirmacion" placeholder="Ingresá tu nueva contraseña." />
       </div>
 
       <button class="btn btn-primary btn-lg" id="btn-login" type="submit">
-        Recuperar contraseña →
+        Restablecer contraseña →
       </button>
 
     {% with messages = get_flashed_messages(with_categories=true) %}

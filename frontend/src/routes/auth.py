@@ -49,7 +49,7 @@ def login():
     return render_template('login.html') #si es get
 
 @auth_bp.route('/contrasena_olvidada', methods = ['GET', 'POST'])
-def reset_contrasena():
+def contrasena_olvidada():
 
     if request.method == 'POST':
         padron = request.form.get('padron', '').strip()
@@ -64,7 +64,7 @@ def reset_contrasena():
             flash("El padrón debe ser un número", "error")
             return render_template('recuperar-contrasena.html')
 
-        resultado = api.reset_contrasena(padron)
+        resultado = api.contrasena_olvidada(padron)
 
         if resultado.get('ok'):
             flash("Se ha enviado un correo para restablecer tu contraseña", 'success')
@@ -75,3 +75,51 @@ def reset_contrasena():
         return render_template('recuperar-contrasena.html')
     
     return render_template('recuperar-contrasena.html') 
+
+@auth_bp.route('/resetear_contrasena', methods = ['GET', 'POST'])
+def resetear_contrasena():
+    token = request.args.get('token')
+    print(f"token recibido: {token}")
+
+    if not token:
+        flash("Token inválido o expirado. Debe pedir un nuevo email de recuperación", 'error')
+        return render_template('resetear-contrasena.html', token=token)
+    
+    if request.method == 'POST':
+        contrasena = request.form.get('contrasena', '')
+        contrasena_confirmacion = request.form.get('contrasena_confirmacion', '')
+
+        errores = []
+
+        if not contrasena:
+            errores.append("No ingresaste la nueva contraseña")
+
+        if not contrasena_confirmacion:
+            errores.append("Debes confirmar tu nueva contraseña")
+
+        if len(contrasena) < 8:
+            errores.append("La contraseña debe tener al menos 8 caracteres")
+
+        if contrasena != contrasena_confirmacion:
+            errores.append("Las contraseñas no coinciden")
+
+        if errores:
+            for e in errores:
+                flash(e, 'error')
+            
+            return render_template('resetear-contrasena.html', token=token)
+
+        resultado = api.resetear_contrasena(token, contrasena)
+
+        if resultado.get('ok'):
+            flash("Se restableció correctamente tu contraseña", 'success')
+
+        for mensaje in utils.extraer_mensaje_error(resultado.get('error_response')):
+            flash(mensaje, 'error')
+
+        return render_template('resetear-contrasena.html', token=token)
+    
+    return render_template('resetear-contrasena.html', token=token) 
+
+
+

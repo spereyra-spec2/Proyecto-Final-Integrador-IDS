@@ -32,11 +32,29 @@ def login(padron, contrasena):
         return {'ok': False, 'error_response':{'errors': [{'description': f'Error inesperado: {e}'}]}}
             
 
-def reset_contrasena(padron):
+def contrasena_olvidada(padron):
     try:
         response = requests.post(
             f'{API_BASE_URL}/auth/contrasena_olvidada',
             json={'padron': padron},
+            timeout= 30
+        )
+        if response.status_code == 200:
+            return {'ok': True}
+        
+        return {'ok': False, 'error_response': respuesta_error(response)}
+    except requests.exceptions.ConnectionError:
+        return {'ok': False, 'error_response': error_conexion()}
+    except Exception as e:
+        return {'ok': False, 'error_response':{'errors': [{'description': f'Error inesperado: {e}'}]}}
+    
+
+def resetear_contrasena(token, contrasena):
+    try:
+        response = requests.patch(
+            f'{API_BASE_URL}/auth/resetear_contrasena',
+            json={'contrasena': contrasena},
+            params={'token': token},
             timeout= 30
         )
         if response.status_code == 200:
