@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_cors import CORS
 from init_db import init_db
+<<<<<<< HEAD
 from src.routes.auth.auth import auth_bp
 from mail import mail
 app = Flask(__name__)
@@ -18,6 +19,14 @@ app.config['MAIL_PASSWORD'] = 'xdkv alji fnmx euxz'
 app.register_blueprint(auth_bp, url_prefix="/api/auth")
 
 mail.init_app(app)
+=======
+from src.routes.evaluaciones import evaluaciones_bp
+
+app = Flask(__name__)
+CORS(app)
+
+app.register_blueprint(evaluaciones_bp, url_prefix="/evaluaciones")
+>>>>>>> emanuel_dev
 
 try:
     init_db()
