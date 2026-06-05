@@ -82,14 +82,68 @@
       </div>
     </div>
 
+        
+          <form action="{{url_for('obtener_asistencia')}}" method="POST" class="form-group">
+              <div class="form-group">
+                <label for="padron" class="form-label">Buscador por Padron</label>
+                <input
+                    type="int"
+                    id="padron"
+                    name="padron"
+                    class="form-input"
+                    placeholder="Ingrese un Padron"
+                    required
+                    autofocus
+                >
+              </div>
+              <div class="form-actions form__actions--single">
+                <button type="submit" class="form-btn form-btn-submit">Buscar</button>
+              </div>
+          </form>
+        
+
     <div class="card">
       <div class="card-header"><span class="card-title">Historial de clases</span></div>
-      <div class="card-body" style="padding:14px">
-        <p style="color:#9ca3af;text-align:center">Sin historial</p>
+      <div class="table-wrapper" >
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Padron</th>
+              <th>fecha</th>
+              <th>asistio</th>
+              <th>justificado</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for registro in asistencias %}
+              <tr>
+                <td>  {{ registro.Usuarios_padron}} </td>
+                <td>  {{ registro.fecha }} </td>
+                {% if registro.asistio == 1 %}
+                  <td> si </td>
+                {% else %}
+                  <td> no </td>
+                {% endif %}
+                
+                {% if registro.justificado == 1 %}
+                  <td> si </td>
+                {% else %}
+                  <td> no </td>
+                {% endif %}
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="2" style="text-align: center; color: #aaa; padding: 20px;">
+                    Sin asistencias registradas 
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
 </div>
-
 </body>
 </html>
+

@@ -16,28 +16,23 @@ asistencia_bp = Blueprint("asistencia",__name__)
 def asistencia():
 
     try:
-
-        if not(verificar_token(request.headers, roles_permitidos=["Docente"])):
-               return forbidden()
-               
+        #if not(verificar_token(request.headers, roles_permitidos=["Docente"])):
+          #     return forbidden()     
         asistencia = get_asistencia()
         if len(asistencia) == 0:
             return "",204
         
-
         return jsonify(asistencia),200
 
     except Error as e:
        server_error()
     
-
-
 @asistencia_bp.route('/<int:padron>', methods=['GET'])
 def asistencia_id(padron):
 
     try:
-        if not(verificar_token(request.headers, roles_permitidos=["Docente"])):
-               return forbidden()
+        #if not(verificar_token(request.headers, roles_permitidos=["Docente"])):
+         #      return forbidden()
 
         if not(validar_padron(padron)):
             return bad_request()
