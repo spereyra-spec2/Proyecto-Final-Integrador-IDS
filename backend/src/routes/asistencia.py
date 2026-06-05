@@ -107,7 +107,7 @@ def confirmar_asistencia():
 
 @asistencia_bp.route('/qr-imagen', methods=['GET'])
 def servir_qr():
-    ruta = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..', 'qr_asistencia.png')
+    ruta = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'qr_asistencia.png')
     ruta = os.path.normpath(ruta)
     print("Buscando QR en:", ruta)
     return send_file(ruta, mimetype='image/png')
