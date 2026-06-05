@@ -32,6 +32,7 @@ def asistencia_profe():
 
     resp_asistencias = requests.get(f"{BACK_URL}/api/asistencia")
     asistencias = resp_asistencias.json() if resp_asistencias.status_code == 200 else []
+
     return render_template('profesor-asistencia.html', qr_generado=qr_generado, asistencias=asistencias)
 
 @app.route('/asistencia/formulario')
@@ -42,7 +43,7 @@ def formulario_asistencia():
 @app.route('/asistencia/registrar', methods=['POST'])
 def registrar_asistencia():
     padron = request.form.get('padron')
-    token = request.args.get('token')
+    token = request.form.get('token')
 
     respuesta = requests.post(
         f"{BACK_URL}/api/asistencia/confirmar-asistencia",
@@ -55,12 +56,13 @@ def registrar_asistencia():
         return render_template('alumno-asistencia.html', token=token, mensaje="asistencia registrada", exito=True)
 
     else:
-        return render_template("alumno.asistencia.html", token=token, mensaje=datos.get("mensajes", "error al registrar asistencia"), exito=False)
+        return render_template("alumno-asistencia.html", token=token, mensaje=datos.get("mensajes", "error al registrar asistencia"), exito=False)
 
 @app.route('/asistencia/qr-imagen')
 def qr_imagen():
     respuesta = requests.get(f"{BACK_URL}/api/asistencia/qr-imagen", stream=True)
     return respuesta.content, 200, {'Content-Type': 'image/png'}
+
 
 @app.route("/asistencia", methods=["GET", "POST"])
 def obtener_asistencia():
@@ -115,8 +117,7 @@ def obtener_asistencia_padron(padron):
     except requests.exceptions.RequestException as e:
         print(f"Error de conexión con el Back: {e}")
         datos_asistencia = [] 
-    return render_template("alumno-asistencia.html", asistencias=datos_asistencia)
-
+    return render_template("asistencia_padron.html", asistencias=datos_asistencia)
 
 if __name__ == '__main__':
     app.run(port=5001, debug=True)

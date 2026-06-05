@@ -7,35 +7,68 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}"/>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}"/>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}"/>
+  <style>
+    .att-row { display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #f0f0f0; }
+    .att-row:last-child { border-bottom:none; }
+    .att-dot { width:12px;height:12px;border-radius:50%;flex-shrink:0; }
+    .att-present { background:#2e7d32; }
+    .att-absent  { background:#c62828; }
+  </style>
 </head>
 <body>
 
-<div class="sidebar-overlay"></div>
-<aside class="sidebar">
-  <div class="sidebar-logo">
-    <div class="sidebar-logo-icon">🎓</div>
-    <div><div class="sidebar-logo-text">AcademiQ</div><div class="sidebar-logo-sub">Panel Docente</div></div>
-  </div>
-  <nav class="sidebar-nav">
-    <div class="nav-section-label">General</div>
-    <a class="nav-item" href="profesor-dashboard.html"><span class="nav-icon">📊</span> Dashboard</a>
-    <a class="nav-item" href="profesor-cursos.html"><span class="nav-icon">📚</span> Mis Cursos</a>
-    <div class="nav-section-label">Curso actual</div>
-    <a class="nav-item" href="#"><span class="nav-icon">👥</span> Alumnos</a>
-    <a class="nav-item" href="#"><span class="nav-icon">🤝</span> Equipos</a>
-    <a class="nav-item" href="#"><span class="nav-icon">📝</span> Evaluaciones</a>
-    <a class="nav-item active" href="#"><span class="nav-icon">✅</span> Asistencia</a>
-  </nav>
-  <div class="sidebar-footer">
-    <a class="nav-item" href="login.html"><span class="nav-icon">🚪</span> Cerrar sesión</a>
-  </div>
-</aside>
+<div class="public-shell">
+  <header class="public-topbar">
+    <div class="public-topbar-logo"><span>🎓</span> AcademiQ</div>
+    <nav class="public-topbar-nav">
+      <a href="alumno-inicio.html">Inicio</a>
+      <a href="alumno-notas.html">Mis Notas</a>
+      <a href="alumno-grupos.html">Mi Grupo</a>
+      <a href="alumno-asistencia.html" class="active">Asistencia</a>
+    </nav>
+  </header>
 
-<div class="main-content">
-  
-  
+  <div class="card">
+      <div class="card-header"><span class="card-title">Historial de clases</span></div>
+      <div class="table-wrapper" >
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Padron</th>
+              <th>fecha</th>
+              <th>asistio</th>
+              <th>justificado</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for registro in asistencias %}
+              <tr>
+                <td>  {{ registro.Usuarios_padron}} </td>
+                <td>  {{ registro.fecha }} </td>
+                {% if registro.asistio == 1 %}
+                  <td> si </td>
+                {% else %}
+                  <td> no </td>
+                {% endif %}
+                
+                {% if registro.justificado == 1 %}
+                  <td> si </td>
+                {% else %}
+                  <td> no </td>
+                {% endif %}
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="2" style="text-align: center; color: #aaa; padding: 20px;">
+                    Sin asistencias registradas 
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
 </div>
 
 </body>
 </html>
-
