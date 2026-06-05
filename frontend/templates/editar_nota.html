@@ -1,0 +1,47 @@
+{% extends "base_notas.html" %}
+
+{% block content %}
+<div class="public-container">
+    
+    <div class="card">
+        <div class="card-header"><span class="card-title">Modificar Calificación</span></div>
+        <div class="card-body">
+            
+            <form action="/notas/actualizar" method="POST" style="display:flex; flex-direction:column; gap:16px;">
+                
+                <input type="hidden" name="tipo" value="{{ tipo }}">
+
+                <div>
+                    <label style="font-weight:600; font-size:14px; color:#6b7280; display:block; margin-bottom:6px;">ID del Curso:</label>
+                    <input type="number" name="curso_id" class="form-input" value="{{ curso_id }}" style="width:100%; background:#f3f4f6; color:#6b7280;" readonly>
+                </div>
+
+                <div>
+                    <label style="font-weight:600; font-size:14px; color:#6b7280; display:block; margin-bottom:6px;">ID de la Evaluación:</label>
+                    <input type="number" name="id_evaluacion" class="form-input" value="{{ id_ev }}" style="width:100%; background:#f3f4f6; color:#6b7280;" readonly>
+                </div>
+
+                <div>
+                    <label style="font-weight:600; font-size:14px; color:#6b7280; display:block; margin-bottom:6px;">
+                        {% if tipo == 'padron' %} Padrón del alumno: {% else %} ID del equipo: {% endif %}
+                    </label>
+                    <input type="number" name="id_g" class="form-input" value="{{ padron if padron else id_equipo }}" style="width:100%; background:#f3f4f6; color:#6b7280;" readonly>
+                </div>
+
+                <hr style="border:0; border-top:1px solid #e5e7eb; margin:8px 0;">
+
+                <div>
+                    <label style="font-weight:600; font-size:14px; color:#374151; display:block; margin-bottom:6px;">Nueva nota:</label>
+                    <input type="number" step="0.1" name="nota" class="form-input" style="width:100%" required placeholder="Ej: 8.5">
+                </div>
+
+                <div style="margin-top:10px;">
+                    <button type="submit" class="btn btn-primary" style="width:100%; background:#e65100; border-color:#e65100;">⚠️ Actualizar Nota</button>
+                </div>
+            </form>
+            
+        </div>
+    </div>
+
+</div>
+{% endblock %}
