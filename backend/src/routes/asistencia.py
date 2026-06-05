@@ -62,8 +62,7 @@ def generar_qr():
         payload = {"tipo": "asistencia", "timestamp": date.today().isoformat()}
         token = serializer.dumps(payload, salt="asistencia-qr")
 
-        base_url = config.BACK_URL
-        formulario_url = f"{base_url}/api/asistencia/formulario-asistencia?token={token}"
+        formulario_url = f"{config.FRONT_URL}/asistencia/formulario?token={token}"
 
         hacer_y_guardar_qr(formulario_url)
 
@@ -113,7 +112,7 @@ def confirmar_asistencia():
 
 @asistencia_bp.route('/qr-imagen', methods=['GET'])
 def servir_qr():
-    ruta = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..', 'backend', 'qr_asistencia.png')
+    ruta = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..', 'qr_asistencia.png')
     ruta = os.path.normpath(ruta)
     print("Buscando QR en:", ruta)
     return send_file(ruta, mimetype='image/png')

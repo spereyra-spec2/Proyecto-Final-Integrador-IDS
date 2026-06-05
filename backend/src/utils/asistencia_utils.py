@@ -19,7 +19,7 @@ def registrar_asistencia(padron):
     conn = get_connection()
     cursor = conn.cursor()
     try:
-        cursor.execute("INSERT INTO Asistencias (asistio, fecha, justificado, Usuarios_padron) VALUES (1, NOW(), 0, %s)", (padron))
+        cursor.execute("INSERT INTO Asistencias (asistio, fecha, justificado, Usuarios_padron) VALUES (1, NOW(), 0, %s)", (padron,))
         conn.commit()
         return cursor.rowcount > 0
     finally:
