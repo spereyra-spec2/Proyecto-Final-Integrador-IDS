@@ -9,7 +9,7 @@ def error_400(msg):
                         "description": str(msg)
                     }
                 ]
-            }), 400
+            })
 
 def error_404(msg):
     return ({
@@ -21,7 +21,7 @@ def error_404(msg):
                         "description": str(msg)
                     }
                 ]
-            }), 404
+            })
 
 def error_500(msg):
     return ({
@@ -33,4 +33,4 @@ def error_500(msg):
                         "description": str(msg)
                     }
                 ]
-            }), 500
+            })
