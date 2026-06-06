@@ -28,3 +28,11 @@ def init_db():
 
     cursor.close()
     conn.close()
+
+
+if __name__ == "__main__":
+    try:
+        init_db()
+    except Exception as e:
+        print(f"error al inicializar la base de datos: {e}")
+        exit(1)

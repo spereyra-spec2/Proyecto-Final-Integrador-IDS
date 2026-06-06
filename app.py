@@ -15,7 +15,7 @@ app = Flask(
 CORS(app)
 app.config["JSON_SORT_KEYS"] = False
 
-app.register_blueprint(equipos_bp)
+app.register_blueprint(equipos_bp, url_prefix="/api/cursos")
 
 try:
     init_db()

@@ -1,12 +1,13 @@
 from flask import Flask, Blueprint, jsonify, request, url_for, Response
-from backend.db import get_equipos, crear_equipo, delete_equipo, patch_equipo
+from db import get_equipos, crear_equipo, delete_equipo, patch_equipo
+from src.utils.validaciones import validar_curso_id, validar_padron
 from typing import Any
 import mysql.connector
-from backend.src.utils.errors import error_response, not_found, bad_request, server_error, conflict
+from src.utils.errors import error_response, not_found, bad_request, server_error, conflict
 
 equipos_bp = Blueprint("equipos",__name__)
 
-@equipos_bp.route("/api/cursos/<int:curso_id>/equipos", methods = ["GET"])
+@equipos_bp.route("/<int:curso_id>/equipos", methods = ["GET"])
 def obtener_equipos(curso_id: int) -> Response:
     try:
     
@@ -25,7 +26,7 @@ def obtener_equipos(curso_id: int) -> Response:
 
 
 
-@equipos_bp.route("/api/cursos/<int:curso_id>/equipos", methods=["POST"])
+@equipos_bp.route("/<int:curso_id>/equipos", methods=["POST"])
 def registrar_equipo(curso_id: int) -> Response:
     try:
         data = request.get_json()
@@ -46,9 +47,7 @@ def registrar_equipo(curso_id: int) -> Response:
         crear_equipo(curso_id, nombre_equipo, padrones)
         
         
-        return jsonify({
-            "message": "Equipo creado y alumnos vinculados exitosamente",
-        }), 201
+        return jsonify({"message": "Equipo creado y alumnos vinculados exitosamente",}), 201
         
     except mysql.connector.Error as db_err:
 
@@ -58,12 +57,13 @@ def registrar_equipo(curso_id: int) -> Response:
         res, code = server_error(str(e))
         return jsonify(res), code
 
-@equipos_bp.route("/<int:curso_id>/equipos/<int:usuarios_padron>", methods=["PATCH"])
-def actualizar_equipo(curso_id, usuarios_padron):
-    if curso_id <= 0:
-        return jsonify(bad_request("El ID del curso debe ser un número positivo.")), 400
-    if usuarios_padron <= 0:
-        return jsonify(bad_request("El padrón del usuario debe ser un número positivo.")), 400
+@equipos_bp.route("/<int:curso_id>/equipos/<int:usuario_padron>", methods=["PATCH"])
+def actualizar_equipo(curso_id, usuario_padron):
+    try:
+        curso_id = validar_curso_id(curso_id)
+        usuario_padron = validar_padron(usuario_padron)
+    except ValueError as e:
+        return jsonify(bad_request(str(e))), 400
 
     data = request.get_json(silent=True)
     if not data:
@@ -97,7 +97,7 @@ def actualizar_equipo(curso_id, usuarios_padron):
     try:
         equipo = patch_equipo(
             curso_id,
-            usuarios_padron,
+            usuario_padron,
             {
                 "alumno_padron": alumno_padron,
                 "activo": activo,
@@ -113,15 +113,15 @@ def actualizar_equipo(curso_id, usuarios_padron):
         return jsonify(server_error(error)), 500
 
 
-@equipos_bp.route("/<int:curso_id>/equipos/<int:usuarios_padron>", methods=["DELETE"])
-def eliminar_equipo(curso_id, usuarios_padron):
-    if curso_id <= 0:
-        return jsonify(bad_request("El ID del curso debe ser un número positivo.")), 400
-    if usuarios_padron <= 0:
-        return jsonify(bad_request("El padrón del usuario debe ser un número positivo.")), 400
-
+@equipos_bp.route("/<int:curso_id>/equipos/<int:usuario_padron>", methods=["DELETE"])
+def disolver_equipo(curso_id, usuario_padron):
     try:
-        eliminado = delete_equipo(curso_id, usuarios_padron)
+        curso_id = validar_curso_id(curso_id)
+        usuario_padron = validar_padron(usuario_padron)
+    except ValueError as e:
+        return jsonify(bad_request(str(e))), 400
+    try:
+        eliminado = delete_equipo(curso_id, usuario_padron)
         if not eliminado:
             return jsonify(not_found("No existe un equipo activo para ese curso y padrón.")), 404
 
