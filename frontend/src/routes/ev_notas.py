@@ -41,7 +41,7 @@ def procesar_guardado():
             # Determino un nuevo valor para 'estado'.
             return redirect(url_for('notas.procesar_guardado', estado='ok'))
         else:
-            return f"<h3>Se ha producido un error al cargar la nota: {resultado['error']}</h3><a href='/notas/cargar'>Volver a intentar</a>", resultado["codigo"]
+            return render_template('manejo_de_error.html', error_msg=resultado['error']), resultado["codigo"]
 
     estado = request.args.get('estado')
     return render_template('cargar_nota.html', estado=estado)
@@ -63,7 +63,7 @@ def procesar_actualizacion():
         if resultado["codigo"] == 200:
             return redirect(f"/notas/ver?curso_id={curso_id}&id_ev={id_ev}&id_g={id_g}&tipo={tipo}")
         else:
-            return f"<h3>Error al actualizar: {resultado['error']}</h3><a href='javascript:history.back()'>Regresar</a>", resultado["codigo"]
+            return render_template('manejo_de_error.html', error_msg=resultado['error']), resultado["codigo"]
     
     query_params = {
         'curso_id': request.args.get('curso_id'), 
