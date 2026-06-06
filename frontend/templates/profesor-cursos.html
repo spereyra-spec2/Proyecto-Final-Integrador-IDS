@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mis Cursos — AcademiQ</title>
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+  <link rel="stylesheet" href="../css/layout.css" />
+</head>
+<body>
+
+<div class="sidebar-overlay"></div>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-icon">🎓</div>
+    <div>
+      <div class="sidebar-logo-text">AcademiQ</div>
+      <div class="sidebar-logo-sub">Panel Docente</div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">General</div>
+    <a class="nav-item" href="profesor-dashboard.html"><span class="nav-icon">📊</span> Dashboard</a>
+    <a class="nav-item active" href="profesor-cursos.html"><span class="nav-icon">📚</span> Mis Cursos</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar" id="user-avatar">P</div>
+      <div>
+        <div class="sidebar-user-name" id="user-name">Profesor</div>
+        <div class="sidebar-user-role">Docente</div>
+      </div>
+    </div>
+    <a class="nav-item" href="login.html" style="margin-top:6px"><span class="nav-icon">🚪</span> Cerrar sesión</a>
+  </div>
+</aside>
+
+<div class="main-content">
+  <div class="topbar">
+    <button class="hamburger">☰</button>
+    <span class="topbar-title">Mis Cursos</span>
+  </div>
+
+  <div class="page-content">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Mis Cursos</h1>
+        <p class="page-subtitle">Creá y administrá tus materias</p>
+      </div>
+      <button class="btn btn-primary" onclick="openModal('modal-create')">➕ Nuevo curso</button>
+    </div>
+
+    <div class="grid-3" id="courses-grid">
+      <div style="grid-column:1/-1;text-align:center;padding:40px;color:#9ca3af">Cargando...</div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal crear curso -->
+<div class="modal-overlay hidden" id="modal-create">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Nuevo Curso</span>
+      <button class="modal-close" onclick="closeModal('modal-create')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Nombre del curso *</label>
+        <input class="form-input" id="f-nombre" placeholder="Ej: Algoritmos II" />
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="form-group">
+          <label class="form-label">Código *</label>
+          <input class="form-input" id="f-codigo" placeholder="Ej: 75.41" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Cuatrimestre</label>
+          <input class="form-input" id="f-cuatri" placeholder="Ej: 1C2025" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Descripción</label>
+        <textarea class="form-textarea" id="f-desc" placeholder="Opcional..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-create')">Cancelar</button>
+      <button class="btn btn-primary" id="btn-crear">Crear curso</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import api from '../js/api.js';
+import { toast, openModal, closeModal, initSidebar } from '../js/utils.js';
+
+initSidebar();
+window.openModal = openModal;
+window.closeModal = closeModal;
+
+const userEmail = localStorage.getItem('profesor_email') || '';
+const name = localStorage.getItem('profesor_name') || 'Profesor';
+document.getElementById('user-name').textContent = name;
+document.getElementById('user-avatar').textContent = name.charAt(0).toUpperCase();
+
+async function load() {
+  const res = await api.list('Course');
+  const courses = (res.results || []).filter(c => c.profesor_email === userEmail);
+  const grid = document.getElementById('courses-grid');
+
+  if (!courses.length) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:50px;color:#9ca3af">
+      <div style="font-size:40px;margin-bottom:12px">📚</div>
+      <strong>No tenés cursos</strong><br>
+      <span style="font-size:14px">Creá tu primer curso con el botón de arriba.</span>
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = courses.map(c => `
+    <div class="card">
+      <div class="card-header" style="display:flex;align-items:center;justify-content:space-between">
+        <span class="card-title">${c.nombre}</span>
+        <span class="badge ${c.estado === 'activo' ? 'badge-success' : 'badge-neutral'}">${c.estado}</span>
+      </div>
+      <div class="card-body">
+        <p style="color:#6b7280;font-size:13px;margin-bottom:12px">${c.codigo}${c.cuatrimestre ? ' · ' + c.cuatrimestre : ''}</p>
+        ${c.descripcion ? `<p style="font-size:14px;margin-bottom:16px">${c.descripcion}</p>` : ''}
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a href="profesor-alumnos.html?curso=${c.id}" class="btn btn-outline btn-sm">👥 Alumnos</a>
+          <a href="profesor-equipos.html?curso=${c.id}" class="btn btn-outline btn-sm">🤝 Equipos</a>
+          <a href="profesor-evaluaciones.html?curso=${c.id}" class="btn btn-primary btn-sm">📝 Evaluaciones</a>
+          <a href="profesor-asistencia.html?curso=${c.id}" class="btn btn-outline btn-sm">✅ Asistencia</a>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+document.getElementById('btn-crear').addEventListener('click', async () => {
+  const nombre = document.getElementById('f-nombre').value.trim();
+  const codigo = document.getElementById('f-codigo').value.trim();
+  const cuatrimestre = document.getElementById('f-cuatri').value.trim();
+  const descripcion = document.getElementById('f-desc').value.trim();
+
+  if (!nombre || !codigo) { toast('Completá nombre y código', 'error'); return; }
+
+  await api.create('Course', { nombre, codigo, cuatrimestre, descripcion, profesor_email: userEmail, estado: 'activo' });
+  toast('Curso creado', 'success');
+  closeModal('modal-create');
+  ['f-nombre','f-codigo','f-cuatri','f-desc'].forEach(id => document.getElementById(id).value = '');
+  load();
+});
+
+load();
+</script>
+</body>
+</html>

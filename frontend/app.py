@@ -1,22 +1,23 @@
 import os
 from flask import Flask, render_template, request,redirect, url_for, flash
 import requests, re
-
+from flask_cors import CORS
 
 BACK_URL = "http://localhost:5000"
 FRONT_URL = "http://localhost:5001"
 
 base_path = os.path.abspath(os.path.dirname(__file__))
 
-
 app = Flask(__name__, 
     template_folder=os.path.join(base_path, 'templates'),
     static_folder=os.path.join(base_path, 'static')
 )
 
+CORS(app)
+
 @app.route('/')
-def home():
-    return render_template('profesor-asistencia.html')
+def index():
+    return render_template('profesor-evaluaciones.html')
 
 @app.route("/login")
 def sin_autorizacion():
@@ -121,4 +122,8 @@ def obtener_asistencia_padron(padron):
 
 if __name__ == '__main__':
     app.run(port=5001, debug=True)
+
+
+
+
 
