@@ -24,13 +24,13 @@ def create_evaluacion():
         cursor = conn.cursor()
 
         # Verificar que el curso exista (usando curso_id como está en tu tabla)
-        cursor.execute("SELECT curso_id FROM cursos WHERE curso_id = %s", (curso_id,))
+        cursor.execute("SELECT curso_id FROM CursoWHERE curso_id = %s", (curso_id,))
         if cursor.fetchone() is None:
             return jsonify({'error': 'Curso no encontrado'}), 404
 
         # Insertar la evaluación (usando los campos correctos)
         cursor.execute(
-            "INSERT INTO evaluaciones (tipo, descripcion, fecha, curso_id) VALUES (%s, %s, %s, %s)",
+            "INSERT INTO Evaluaciones (tipo, descripcion, fecha, curso_id) VALUES (%s, %s, %s, %s)",
             (tipo, descripcion, fecha, curso_id)
         )
         conn.commit()
@@ -57,7 +57,7 @@ def get_evaluaciones():
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
 
-        cursor.execute("SELECT * FROM evaluaciones")
+        cursor.execute("SELECT * FROM Evaluaciones")
         evaluaciones = cursor.fetchall()
 
         return jsonify(evaluaciones), 200
@@ -75,7 +75,7 @@ def get_evaluacion(evaluacion_id):
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
 
-        cursor.execute("SELECT * FROM evaluaciones WHERE evaluacion_ID = %s", (evaluacion_id,))
+        cursor.execute("SELECT * FROM Evaluaciones WHERE evaluacion_ID = %s", (evaluacion_id,))
         evaluacion = cursor.fetchone()
 
         if evaluacion is None:
@@ -103,13 +103,13 @@ def update_evaluacion(evaluacion_id):
         cursor = conn.cursor()
 
         # Verificar que la evaluación exista
-        cursor.execute("SELECT evaluacion_ID FROM evaluaciones WHERE evaluacion_ID = %s", (evaluacion_id,))
+        cursor.execute("SELECT evaluacion_ID FROM Evaluaciones WHERE evaluacion_ID = %s", (evaluacion_id,))
         if cursor.fetchone() is None:
             return jsonify({'error': 'Evaluación no encontrada'}), 404
 
         # Actualizar la evaluación
         cursor.execute(
-            "UPDATE evaluaciones SET tipo = %s, descripcion = %s, fecha = %s, curso_id = %s WHERE evaluacion_ID = %s",
+            "UPDATE Evaluaciones SET tipo = %s, descripcion = %s, fecha = %s, curso_id = %s WHERE evaluacion_ID = %s",
             (tipo, descripcion, fecha, curso_id, evaluacion_id)
         )
         conn.commit()
