@@ -96,3 +96,5 @@ CREATE TABLE IF NOT EXISTS Logs (
     FOREIGN KEY (Usuarios_padron) REFERENCES Usuarios(padron)
 );
 
+
+

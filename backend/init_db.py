@@ -2,7 +2,7 @@ from config import user, password, host
 import mysql.connector
 
 def init_db():
-    with open("backend/src/db/init_db.sql") as f:
+    with open("init_db.sql") as f:
         sql = f.read()
 
     conn = mysql.connector.connect(
