@@ -259,3 +259,15 @@
   border-left: none;
   margin-bottom: 8px;
 }
+
+.admin-topbar {
+            background-color: #1f2937; /* Un tono más oscuro/profesional para el docente */
+            color: white;
+        }
+        .admin-topbar a {
+            color: #d1d5db;
+        }
+        .admin-topbar a.active, .admin-topbar a:hover {
+            color: white;
+            font-weight: bold;
+        }
