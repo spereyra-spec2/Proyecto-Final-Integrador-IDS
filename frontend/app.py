@@ -17,7 +17,7 @@ CORS(app)
 
 @app.route('/')
 def index():
-    return render_template('profesor-evaluaciones.html')
+    return render_template('index.html')
 
 @app.route("/login")
 def sin_autorizacion():
@@ -119,6 +119,11 @@ def obtener_asistencia_padron(padron):
         print(f"Error de conexión con el Back: {e}")
         datos_asistencia = [] 
     return render_template("asistencia_padron.html", asistencias=datos_asistencia)
+
+@app.route('/evaluaciones', methods=['GET', 'POST'])
+def evaluaciones():
+    return render_template('profesor-evaluaciones.html')
+
 
 if __name__ == '__main__':
     app.run(port=5001, debug=True)
