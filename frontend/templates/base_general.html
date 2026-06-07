@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css', _external=True) }}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css', _external=True) }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css', _external=True) }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css', _external=True) }}" />
+    <title>{% block title %} Portal AcademiQ {% endblock %}</title>
+</head>
+<body>
+<!-- Topbar -->
+<header class="public-topbar">
+    <div class="public-topbar-logo">
+      <span>🎓</span> AcademiQ
+    </div>
+    <nav class="public-topbar-nav">
+        <a href="{{ url_for('base.home') }}" class="nav_logo"></a>
+        <a href="alumno-inicio.html" class="active">Inicio</a>
+        <a href="alumno-notas.html">Mis Notas</a>
+        <a href="alumno-grupos.html">Mi Grupo</a>
+        <a href="alumno-asistencia.html">Asistencia</a>
+        <a href="{{ url_for('auth.login') }}" id="boton_rol" method="POST">Soy Docente</a>
+        <!--<a href="login.html" id="boton_rol">Soy Docente</a>-->
+    </nav>
+</header>
+    
+{% block content %}{% endblock %}
+
+<footer>
+    <p id="footer">
+    ¿Todavía no te registraste? <a href="{{ url_for('auth.registro') }}" id="a_registro" method="POST">Accedé al panel de Registro →</a>
+    </p>
+</footer>
+</body>
+</html>

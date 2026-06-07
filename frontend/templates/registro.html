@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Registro — AcademiQ</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles_login.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles_registro.css') }}" />
+
+</head>
+
+
+<body>
+
+<!-- Lado derecho (login form) -->
+<div class="login-right">
+  <div class="registro-card">
+    <h1 class="registro-title">Registrate en AcademiQ</h1>
+
+    <form action="{{url_for('auth.registro')}}" method="POST" class="registro-form">
+      <div class="form-group">
+        <label for="padron" class="form-label">Padrón</label>
+        <input class="form-input registro-input" id="padron" type="number" name="padron" placeholder="Ingresá tu número de padrón institucional" />
+      </div>
+
+      <div class="form-group">
+        <label for="nombre" class="form-label">Nombre completo</label>
+        <input class="form-input registro-input" id="nombre" type="text" name="nombre" placeholder="Ingresá tu nombre completo" />
+      </div>
+
+      <div class="form-group">
+        <label for="email" class="form-label">Email institucional</label>
+        <input class="form-input registro-input" id="email" type="email" name="mail" placeholder="Colocá tu email institucional" />
+      </div>
+
+      <div class="form-group">
+        <label for="rol" class="form-label">Rol que cumplis</label>
+        <select class="form-input registro-input" id="rol" name="rol">
+          <option value="">Seleccioná una opción</option>
+          <option value="alumno">Alumno</option>
+          <option value="docente">Docente</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="contrasena" class="form-label">Contraseña</label>
+        <input class="form-input registro-input" id="contrasena" type="password" name="contrasena" placeholder="Ingresá tu contraseña" />
+      </div>
+
+
+
+      <button class="btn btn-primary btn-lg full-width" id="btn-login" type="submit">
+        Ingresar al panel →
+      </button>
+    </form>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-container">
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+  {% endwith %}
+
+    <div id="registro_academiq">
+     <p>
+      ¿Ya registrado? <a class="alogin" href="{{url_for('auth.login')}}">Ingresa directamente con tu padrón y tu contraseña →</a>
+     </p>
+    </div>
+
+    <div class="divider">o</div>
+
+    <p class="student-link">
+      ¿Sos alumno? <a href="{{url_for('alumno.inicio')}}">Accedé al portal de estudiantes →</a>
+    </p>
+
+  </div>
+</div>
+
+</body>
+</html>
