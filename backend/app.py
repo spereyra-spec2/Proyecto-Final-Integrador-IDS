@@ -1,14 +1,14 @@
-from flask import Flask, Blueprint
+from flask import Flask
 from flask_cors import CORS
 from init_db import init_db
 
-from src.routes.ev_notas import cursos_bp
+from src.routes.api_ev_notas import api_bp
 
 app = Flask(__name__)
 
 CORS(app)
 
-app.register_blueprint(cursos_bp, url_prefix='/cursos')
+app.register_blueprint(api_bp, url_prefix='/api')
 
 try:
     init_db()
