@@ -24,7 +24,7 @@ def create_evaluacion():
         cursor = conn.cursor()
 
         # Verificar que el curso exista (usando curso_id como está en tu tabla)
-        cursor.execute("SELECT curso_id FROM CursoWHERE curso_id = %s", (curso_id,))
+        cursor.execute("SELECT curso_id FROM Curso WHERE curso_id = %s", (curso_id,))
         if cursor.fetchone() is None:
             return jsonify({'error': 'Curso no encontrado'}), 404
 
