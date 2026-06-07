@@ -13,7 +13,7 @@ def create_evaluacion():
     tipo = data.get('tipo')
     descripcion = data.get('descripcion')
     fecha = data.get('fecha')
-    curso_id = data.get('curso_id')
+    curso_id= data.get('Curso_idCurso')
 
     # Validar campos requeridos
     if not all([tipo, descripcion, fecha, curso_id]):
@@ -24,22 +24,22 @@ def create_evaluacion():
         cursor = conn.cursor()
 
         # Verificar que el curso exista (usando curso_id como está en tu tabla)
-        cursor.execute("SELECT curso_id FROM Curso WHERE curso_id = %s", (curso_id,))
+        cursor.execute("SELECT idCurso FROM Curso WHERE idCurso = %s", (curso_id,))
         if cursor.fetchone() is None:
             return jsonify({'error': 'Curso no encontrado'}), 404
 
         # Insertar la evaluación (usando los campos correctos)
         cursor.execute(
-            "INSERT INTO Evaluaciones (tipo, descripcion, fecha, curso_id) VALUES (%s, %s, %s, %s)",
+            "INSERT INTO Evaluaciones (tipo, descripcion, fecha, Curso_idCurso) VALUES (%s, %s, %s, %s)",
             (tipo, descripcion, fecha, curso_id)
         )
         conn.commit()
         
-        evaluacion_id = cursor.lastrowid
+        idEvaluacion = cursor.lastrowid
 
         return jsonify({
             'message': 'Evaluación creada exitosamente',
-            'evaluacion_id': evaluacion_id
+            'idEvaluacion': idEvaluacion
         }), 201
 
     except IntegrityError as e:
@@ -69,13 +69,13 @@ def get_evaluaciones():
         conn.close()
 
 
-@evaluaciones_bp.route('/<int:evaluacion_id>', methods=['GET'])
-def get_evaluacion(evaluacion_id):
+@evaluaciones_bp.route('/<int:idEvaluacion>', methods=['GET'])
+def get_evaluacion(idEvaluacion):
     try:
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
 
-        cursor.execute("SELECT * FROM Evaluaciones WHERE evaluacion_ID = %s", (evaluacion_id,))
+        cursor.execute("SELECT * FROM Evaluaciones WHERE idEvaluacion = %s", (idEvaluacion,))
         evaluacion = cursor.fetchone()
 
         if evaluacion is None:
@@ -90,27 +90,27 @@ def get_evaluacion(evaluacion_id):
         conn.close()
 
 
-@evaluaciones_bp.route('/<int:evaluacion_id>', methods=['PUT'])
-def update_evaluacion(evaluacion_id):
+@evaluaciones_bp.route('/<int:idEvaluacion>', methods=['PUT'])
+def update_evaluacion(idEvaluacion):
     data = request.get_json()
     tipo = data.get('tipo')
     descripcion = data.get('descripcion')
     fecha = data.get('fecha')
-    curso_id = data.get('curso_id')
+    curso_id = data.get('Curso_idCurso')
 
     try:
         conn = get_connection()
         cursor = conn.cursor()
 
         # Verificar que la evaluación exista
-        cursor.execute("SELECT evaluacion_ID FROM Evaluaciones WHERE evaluacion_ID = %s", (evaluacion_id,))
+        cursor.execute("SELECT idEvaluacion FROM Evaluaciones WHERE idEvaluacion = %s", (idEvaluacion,))
         if cursor.fetchone() is None:
             return jsonify({'error': 'Evaluación no encontrada'}), 404
 
         # Actualizar la evaluación
         cursor.execute(
-            "UPDATE Evaluaciones SET tipo = %s, descripcion = %s, fecha = %s, curso_id = %s WHERE evaluacion_ID = %s",
-            (tipo, descripcion, fecha, curso_id, evaluacion_id)
+            "UPDATE Evaluaciones SET tipo = %s, descripcion = %s, fecha = %s, Curso_idCurso = %s WHERE idEvaluacion = %s",
+            (tipo, descripcion, fecha, curso_id, idEvaluacion)
         )
         conn.commit()
 

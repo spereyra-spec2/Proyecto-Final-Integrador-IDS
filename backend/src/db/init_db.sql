@@ -57,7 +57,6 @@ CREATE TABLE IF NOT EXISTS Evaluaciones (
     descripcion VARCHAR(255),
     tipo VARCHAR(255),
     fecha DATETIME,
-    instancia INT,
     Curso_idCurso INT NOT NULL,
     FOREIGN KEY (Curso_idCurso) REFERENCES Curso(idCurso)
 );
