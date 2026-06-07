@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Acceso Docente — AcademiQ</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles_login.css') }}" />
+</head>
+
+
+<body>
+
+<div class="login-right">
+  <div class="login-card">
+    <h2>Recuperá tu contraseña</h2>
+
+    <form action="{{url_for('auth.resetear_contrasena', token=token)}}" method="POST">
+      <div class="form-group">
+        <label for="contrasena" class="form-label">Restablecer contraseña (minimo 8 caracteres)</label>
+        <input class="form-input" id="contrasena" type="password" name="contrasena" placeholder="Ingresá tu nueva contraseña." />
+
+        <label for="contrasena_confirmacion" class="form-label">Repita la contraseña</label>
+        <input class="form-input" id="contrasena_confirmacion" type="password" name="contrasena_confirmacion" placeholder="Ingresá tu nueva contraseña." />
+      </div>
+
+      <button class="btn btn-primary btn-lg" id="btn-login" type="submit">
+        Restablecer contraseña →
+      </button>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-container">
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+      {% endif %}
+    {% endwith %}
+    </form>
+
+    <div id="contrasena-divider">
+      <a class="alogin" href="{{url_for('auth.login')}}">Volver al inicio de sesión</a>
+    </div>
+
+
+  </div>
+</div>
+</body>

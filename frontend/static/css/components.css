@@ -231,3 +231,31 @@
 @media (max-width: 600px) {
   .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
 }
+
+.flash-container {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+   
+    color: #d06469;
+    align-items: center;
+}
+.flash {
+    border-radius: 8px;
+    font-weight: 500;
+}
+.flash--success {
+    background: var(--color-success-bg);
+    color: var(--color-success);
+}
+.flash--error {
+    background: var(--color-danger-bg);
+    color: var(--color-danger);
+    border: 1px solid var(--color-danger);
+}
+
+.alert {
+  padding: 5px;
+  border-left: none;
+  margin-bottom: 8px;
+}

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+    <title>{% block title %} Portal AcademiQ {% endblock %}</title>
+</head>
+<body>
+<!-- Topbar -->
+<header class="public-topbar">
+    <div class="public-topbar-logo">
+      <span>🎓</span> AcademiQ
+    </div>
+    <nav class="public-topbar-nav">
+      <a href="alumno-inicio.html" class="active">Inicio</a>
+      <a href="alumno-notas.html">Mis Notas</a>
+      <a href="alumno-grupos.html">Mi Grupo</a>
+      <a href="alumno-asistencia.html">Asistencia</a>
+      <a href="login.html" id="boton_rol">Soy Docente</a>
+    </nav>
+</header>
+    
+{% block content %}{% endblock %}
+
+<footer>
+    <p id="footer">
+    ¿Sos docente? <a href="{{url_for('auth.login')}}" id="a_footer">Accedé al panel de administración →</a>
+    </p>
+</footer>
+</body>
+</html>

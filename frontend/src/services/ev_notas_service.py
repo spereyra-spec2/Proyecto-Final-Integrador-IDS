@@ -1,6 +1,5 @@
 import requests
-
-url_api = "http://127.0.0.1:3006/api"
+from src.constants import API_BASE_URL
 
 
 
@@ -22,15 +21,19 @@ def consultar_nota(curso_id, id_ev, id_g, tipo):
 
     "Consume la API dando como resultado una nota o none en caso de ser false."
     
-    API = f"{url_api}/curso/{curso_id}/evaluaciones/{id_ev}/notas"
+    API = f"{API_BASE_URL}/notas/ver"
     
+    query_params = {
+        'curso_id': curso_id,
+        'id_ev': id_ev
+    }
     if tipo == 'padron':
-        query_param = {'padron': id_g}
+        query_params['padron'] = int(id_g)
     else:
-        query_param = {'id_equipo': id_g}
+        query_params['id_equipo'] = int(id_g)
 
     try:
-        respuesta = requests.get(API, params=query_param, timeout=10)
+        respuesta = requests.get(API, params=query_params, timeout=10)
         if respuesta.status_code == 200:
             return {"datos": respuesta.json(), "error": None, "codigo": 200}
         else:
@@ -47,7 +50,7 @@ def cargar_nota(curso_id, id_evaluacion, id_g, nota, tipo):
     
     "Envía los datos a la API para crear una nueva nota."
     
-    API = f"{url_api}/curso/{curso_id}/evaluaciones/{id_evaluacion}/notas"
+    API = f"{API_BASE_URL}/notas/cargar"
 
     payload = {
         "curso_id": int(curso_id), 
@@ -77,17 +80,22 @@ def actualizar_nota(curso_id, id_ev, id_g, nuevo_puntaje, tipo):
     
     "Envía los datos a la API para modificar una nota existente."
 
-    API = f"{url_api}/curso/{curso_id}/evaluaciones/{id_ev}/notas"
+    API = f"{API_BASE_URL}/notas/editar"
+
+    query_params = {
+        'curso_id': curso_id,
+        'id_ev': id_ev
+    }
 
     if tipo == 'padron':
-        query_param = {'padron': id_g}
+        query_params['padron'] = int(id_g)
     else:
-        query_param = {'id_equipo': id_g}
+        query_params['id_equipo'] = int(id_g)
 
     json = {'puntaje': float(nuevo_puntaje)}
     
     try:
-        respuesta = requests.patch(API, params=query_param, json=json, timeout=10)
+        respuesta = requests.patch(API, params=query_params, json=json, timeout=10)
         if respuesta.status_code == 200:
             return {"error": None, "codigo": 200}
         else:

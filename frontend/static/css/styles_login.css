@@ -1,0 +1,111 @@
+
+body {
+    min-height: 100vh;
+    display: flex;
+    background: linear-gradient(135deg, #1e3a5f 0%, #2d5986 60%, #1e3a5f 100%);
+}
+.login-left {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+}
+.login-right {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+}
+.login-brand { color: #fff; max-width: 380px; }
+.login-brand .logo { display:flex;align-items:center;gap:14px;margin-bottom:32px; }
+.login-brand .logo-icon {
+    width: 56px; height: 56px;
+    background: #e8a020;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+}
+.login-brand h1 { font-size: 42px; font-weight: 800; margin-bottom: 14px; }
+.login-brand p { font-size: 17px; opacity: 0.75; line-height: 1.7; }
+.login-features { margin-top: 36px; display: flex; flex-direction: column; gap: 14px; }
+.login-feature { display:flex;align-items:center;gap:12px;font-size:15px;opacity:0.85; }
+.login-feature span { font-size:20px; }
+
+.login-card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 44px 40px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+}
+.login-card h2 { font-size: 24px; font-weight: 800; color: #1e3a5f; margin-bottom: 6px; }
+.login-card p  { font-size: 14px; color: #6b7280; margin-bottom: 28px; }
+.divider {
+    text-align: center;
+    position: relative;
+    margin: 20px 0;
+    color: #9ca3af;
+    font-size: 13px;
+}
+.divider::before, .divider::after {
+    content:''; position:absolute;top:50%;width:40%;height:1px;background:#e5e7eb;
+}
+.divider::before { left:0; }
+.divider::after  { right:0; }
+.student-link {
+    display: block;
+    text-align: center;
+    margin-top: 20px;
+    font-size: 14px;
+    color: #6b7280;
+}
+.student-link a { color: #1e3a5f; font-weight: 600; }
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+#login_academiq {
+    font-size:26px;
+    font-weight:800;
+}
+
+#titulo_login {
+    font-size:13px;
+    opacity:0.6;
+}
+
+#btn-login {
+    width:100%;
+    justify-content:center;
+}
+
+.alogin {
+    color: #7e8286; 
+    font-weight: 300; 
+    font-size: small;
+}
+
+.alogin:hover {
+  color: #1e3a5f; 
+}
+
+#contrasena-divider {
+    text-align: center;
+    justify-content: center;
+    width: 100%;
+    display: block;
+    margin-top: 20px;
+}
+
+
+@media (max-width: 768px) {
+    body { flex-direction: column; }
+    .login-left { display: none; }
+    .login-right { padding: 24px 16px; }
+}
