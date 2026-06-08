@@ -46,7 +46,7 @@ def consultar_nota(curso_id, id_ev, id_g, tipo):
     
 
 
-def cargar_nota(curso_id, id_evaluacion, id_g, nota, tipo):
+def cargar_nota(curso_id, id_ev, id_g, nota, tipo):
     
     "Envía los datos a la API para crear una nueva nota."
     
@@ -54,7 +54,7 @@ def cargar_nota(curso_id, id_evaluacion, id_g, nota, tipo):
 
     payload = {
         "curso_id": int(curso_id), 
-        "id_evaluacion": int(id_evaluacion), 
+        "id_ev": int(id_ev), 
         "nota": float(nota)
     }
 

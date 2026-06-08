@@ -6,10 +6,10 @@ from src.db.ev_notas_db import validar_id, validar_curso, validar_evaluacion, va
 from src.utils.validar_numeros import valido_numero
 from src.utils.errors import bad_request, not_found, server_error
 
-api_bp=Blueprint('api/notas', __name__)
+ev_notas_bp=Blueprint('api/notas', __name__)
 
 
-@api_bp.route('/ver', methods=['GET'])
+@ev_notas_bp.route('/ver', methods=['GET'])
 def obtener_nota():
 
     padron = request.args.get('padron', type=int)
@@ -86,7 +86,7 @@ def obtener_nota():
 
 
 
-@api_bp.route('/cargar', methods=['POST'])
+@ev_notas_bp.route('/cargar', methods=['POST'])
 def guardar_nota():
 
     conn = get_connection()
@@ -163,7 +163,7 @@ def guardar_nota():
 
 
 
-@api_bp.route('/editar', methods=['PATCH'])
+@ev_notas_bp.route('/editar', methods=['PATCH'])
 def actualizar_nota():
 
     padron = request.args.get('padron', type=int)

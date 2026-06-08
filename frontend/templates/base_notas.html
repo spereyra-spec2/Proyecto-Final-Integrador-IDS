@@ -21,7 +21,7 @@
         
         <nav class="public-topbar-nav" style="display: flex; gap: 20px;">
             <a href="/notas/cargar" id="nav-cargar">Cargar Notas</a>
-            <a href="#" id="nav-ver" class="active">Buscar / Editar Notas</a>
+            <a href="/notas/ver" id="nav-ver" class="active">Buscar / Editar Notas</a>
         </nav>
     </header>
         
@@ -29,6 +29,8 @@
         {% block content %}
         {% endblock %}
     </main>
+
+    <script src="{{ url_for('static', filename='js/notas_ui.js') }}"></script>
 
 
 </body>
