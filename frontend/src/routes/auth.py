@@ -166,4 +166,7 @@ def resetear_contrasena():
     return render_template('resetear-contrasena.html', token=token) 
 
 
-
+@auth_bp.route('/cerrar_sesion', methods=['POST'])
+def cerrar_sesion():
+    utils.limpiar_sesion()
+    return redirect(url_for('auth.login'))

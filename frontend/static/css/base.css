@@ -27,12 +27,14 @@ img { max-width: 100%; display: block; }
   overflow: hidden; clip: rect(0,0,0,0);
 }
 
+#btn_logout {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1em;
+  padding: 0.5em 1em;
+}
 
-/*h1 {
-    text-align: center;
-    font-size: 3rem;
-    margin-top: 60px;
-    color: #1a1a2e;
-
-    animation: aparecer 1.5s ease-out;
-}*/
+#btn_logout:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
