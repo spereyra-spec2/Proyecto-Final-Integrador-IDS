@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, flash, url_for
-from src import utils as utils
-from src.services import auth as api
+from frontend_src import utils as utils
+from frontend_src.services import auth as api
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -12,16 +12,13 @@ def registro():
         padron = request.form.get('padron', '').strip()
         nombre = request.form.get('nombre', '').strip()
         mail = request.form.get('mail', '').strip()
-        contrasena = request.form.get('contrasena', '')
+        rol = request.form.get('rol', '').strip()
+        contrasena = request.form.get('contrasena', '').strip()
 
 
 
-        if not padron or not nombre or not mail or not contrasena:
+        if not padron or not nombre or not mail or not rol or not contrasena:
             flash("Porfavor, complete todos los campos requeridos.", "error")
-            return render_template("registro.html")
-        
-        if len(contrasena) < 8:
-            flash("La contraseña debe tener al menos 8 caracteres", "error")
             return render_template("registro.html")
 
         try:
@@ -29,21 +26,21 @@ def registro():
         except ValueError:
             flash("Padrón inválido", "error")
             return render_template("registro.html")
-        #no se pasa rol porque en el back automaticamente lo pone como docente
+
+        # 👇 ACÁ está la integración real con backend
         resultado = api.registro(
             padron=padron,
+            rol=rol,
             nombres=nombre,
             mail=mail,
             contrasena=contrasena
         )
 
-        if resultado.get('ok'):
-            flash("Usuario creado correctamente. Inicie sesión.", "success")
+        if resultado.status_code == 201:
+            flash("Usuario creado correctamente", "success")
             return redirect(url_for("auth.login"))
-        
-        for mensaje in utils.extraer_mensaje_error(resultado.get('error_response')):
-            flash(mensaje, 'error')
-    
+
+        flash("Error al registrar usuario", "error")
         return render_template("registro.html")
 
     return render_template("registro.html")
@@ -164,6 +161,4 @@ def resetear_contrasena():
         return render_template('resetear-contrasena.html', token=token)
     
     return render_template('resetear-contrasena.html', token=token) 
-
-
 
