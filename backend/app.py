@@ -2,6 +2,8 @@ from flask import Flask
 from flask_cors import CORS
 from src.routes.auth.auth import auth_bp
 from src.routes.api_ev_notas import ev_notas_bp
+from src.routes.alumnos import alumnos_bp
+from src.routes.cursos import cursos_bp
 from src.db.init_db import init_db
 from mail import mail
 app = Flask(__name__)
@@ -17,6 +19,8 @@ app.config['MAIL_PASSWORD'] = 'xdkv alji fnmx euxz'
 
 app.register_blueprint(auth_bp, url_prefix="/api/auth")
 app.register_blueprint(ev_notas_bp, url_prefix="/api/notas")
+app.register_blueprint(alumnos_bp, url_prefix='/api/cursos/<int:idCurso>/alumnos')
+app.register_blueprint(cursos_bp, url_prefix='/api/cursos')
 mail.init_app(app)
 
 try:

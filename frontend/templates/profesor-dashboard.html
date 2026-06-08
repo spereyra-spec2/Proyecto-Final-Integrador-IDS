@@ -4,9 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard — AcademiQ Profesor</title>
-  <link rel="stylesheet" href="../css/base.css" />
-  <link rel="stylesheet" href="../css/components.css" />
-  <link rel="stylesheet" href="../css/layout.css" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}" />
 </head>
 <body>
 
@@ -23,24 +23,24 @@
 
   <nav class="sidebar-nav">
     <div class="nav-section-label">General</div>
-    <a class="nav-item" href="profesor-dashboard.html">
+    <a class="nav-item active" href="{{ url_for('profesor.dashboard') }}">
       <span class="nav-icon">📊</span> Dashboard
     </a>
-    <a class="nav-item" href="profesor-cursos.html">
+    <a class="nav-item" href="{{ url_for('profesor.vista_cursos') }}">
       <span class="nav-icon">📚</span> Mis Cursos
     </a>
 
     <div class="nav-section-label" id="curso-nav-label" style="display:none">Curso Actual</div>
-    <a class="nav-item" href="profesor-alumnos.html" id="nav-alumnos" style="display:none">
+    <a class="nav-item" href="#" id="nav-alumnos" style="display:none">
       <span class="nav-icon">👥</span> Alumnos
     </a>
-    <a class="nav-item" href="profesor-equipos.html" id="nav-equipos" style="display:none">
+    <a class="nav-item" href="#" id="nav-equipos" style="display:none">
       <span class="nav-icon">🤝</span> Equipos
     </a>
-    <a class="nav-item" href="profesor-evaluaciones.html" id="nav-evals" style="display:none">
+    <a class="nav-item" href="#" id="nav-evals" style="display:none">
       <span class="nav-icon">📝</span> Evaluaciones
     </a>
-    <a class="nav-item" href="profesor-asistencia.html" id="nav-asist" style="display:none">
+    <a class="nav-item" href="#" id="nav-asist" style="display:none">
       <span class="nav-icon">✅</span> Asistencia
     </a>
   </nav>
@@ -53,7 +53,7 @@
         <div class="sidebar-user-role">Docente</div>
       </div>
     </div>
-    <a class="nav-item" href="login.html" style="margin-top:6px">
+    <a class="nav-item" href="{{ url_for('auth.cerrar_sesion') }}" style="margin-top:6px">
       <span class="nav-icon">🚪</span> Cerrar sesión
     </a>
   </div>
@@ -72,7 +72,7 @@
         <h1 class="page-title">Bienvenido 👋</h1>
         <p class="page-subtitle">Resumen general de tus cursos activos</p>
       </div>
-      <a href="profesor-cursos.html" class="btn btn-primary">
+      <a href="{{ url_for('profesor.vista_cursos') }}" class="btn btn-primary">
         ➕ Nuevo curso
       </a>
     </div>
@@ -83,28 +83,29 @@
         <div class="stat-icon blue">📚</div>
         <div>
           <div class="stat-label">Cursos activos</div>
-          <div class="stat-value" id="stat-cursos">—</div>
+          <!-- Calculamos la cantidad de elementos en la lista de forma nativa -->
+          <div class="stat-value" id="stat-cursos">{{ cursos|length }}</div>
         </div>
       </div>
       <div class="stat-card">
         <div class="stat-icon gold">👥</div>
         <div>
           <div class="stat-label">Total alumnos</div>
-          <div class="stat-value" id="stat-alumnos">—</div>
+          <div class="stat-value" id="stat-alumnos">-</div>
         </div>
       </div>
       <div class="stat-card">
         <div class="stat-icon green">🤝</div>
         <div>
           <div class="stat-label">Equipos formados</div>
-          <div class="stat-value" id="stat-equipos">—</div>
+          <div class="stat-value" id="stat-equipos">-</div>
         </div>
       </div>
       <div class="stat-card">
         <div class="stat-icon red">📝</div>
         <div>
           <div class="stat-label">Evaluaciones</div>
-          <div class="stat-value" id="stat-evals">—</div>
+          <div class="stat-value" id="stat-evals">-</div>
         </div>
       </div>
     </div>
@@ -113,7 +114,7 @@
     <div class="card">
       <div class="card-header" style="display:flex;align-items:center;justify-content:space-between">
         <span class="card-title">Mis cursos</span>
-        <a href="profesor-cursos.html" class="btn btn-outline btn-sm">Ver todos</a>
+        <a href="{{ url_for('profesor.vista_cursos') }}" class="btn btn-outline btn-sm">Ver todos</a>
       </div>
       <div class="card-body" style="padding:0">
         <div class="table-wrapper">
@@ -128,7 +129,24 @@
               </tr>
             </thead>
             <tbody id="courses-tbody">
-              <tr><td colspan="5" style="text-align:center;padding:30px;color:#9ca3af">Cargando...</td></tr>
+              {% if cursos %}
+                {% for curso in cursos %}
+                  <tr>
+                    <td><strong>{{ curso.nombre }}</strong></td>
+                    <td>{{ curso.codigo }}</td>
+                    <td>{{ curso.cuatrimestre or '—' }}</td>
+                    <td><span class="badge badge-success">Activo</span></td>
+                    <td>
+                      <a href="{{ url_for('profesor.vista_alumnos', id_curso=curso.idCurso) }}" class="btn btn-sm btn-outline">👥 Alumnos</a>
+                      <a href="#" class="btn btn-sm btn-primary" style="margin-left:6px">📝 Notas</a>
+                    </td>
+                  </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td colspan="5" style="text-align:center;padding:30px;color:#9ca3af">No tenés cursos creados</td>
+                </tr>
+              {% endif %}
             </tbody>
           </table>
         </div>
@@ -137,62 +155,7 @@
   </div>
 </div>
 
-<script type="module">
-import api from '../js/api.js';
-import { initSidebar } from '../js/utils.js';
-
-initSidebar();
-
-// Simular usuario logueado (en producción viene del token)
-const userEmail = localStorage.getItem('profesor_email') || '';
-
-async function load() {
-  const [coursesRes, studentsRes, teamsRes, evalsRes] = await Promise.all([
-    api.list('Course'),
-    api.list('Student'),
-    api.list('Team'),
-    api.list('Evaluation'),
-  ]);
-
-  const allCourses   = coursesRes.results || [];
-  const allStudents  = studentsRes.results || [];
-  const allTeams     = teamsRes.results || [];
-  const allEvals     = evalsRes.results || [];
-
-  const myCourses   = allCourses.filter(c => c.profesor_email === userEmail);
-  const myCourseIds = myCourses.map(c => c.id);
-
-  document.getElementById('stat-cursos').textContent  = myCourses.filter(c => c.estado === 'activo').length;
-  document.getElementById('stat-alumnos').textContent = allStudents.filter(s => myCourseIds.includes(s.curso_id) && s.estado === 'activo').length;
-  document.getElementById('stat-equipos').textContent = allTeams.filter(t => myCourseIds.includes(t.curso_id)).length;
-  document.getElementById('stat-evals').textContent   = allEvals.filter(e => myCourseIds.includes(e.curso_id)).length;
-
-  const tbody = document.getElementById('courses-tbody');
-  if (!myCourses.length) {
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px;color:#9ca3af">No tenés cursos creados</td></tr>';
-    return;
-  }
-
-  tbody.innerHTML = myCourses.map(c => `
-    <tr>
-      <td><strong>${c.nombre}</strong></td>
-      <td>${c.codigo}</td>
-      <td>${c.cuatrimestre || '—'}</td>
-      <td><span class="badge ${c.estado === 'activo' ? 'badge-success' : 'badge-neutral'}">${c.estado}</span></td>
-      <td>
-        <a href="profesor-alumnos.html?curso=${c.id}" class="btn btn-sm btn-outline">👥 Alumnos</a>
-        <a href="profesor-evaluaciones.html?curso=${c.id}" class="btn btn-sm btn-primary" style="margin-left:6px">📝 Notas</a>
-      </td>
-    </tr>
-  `).join('');
-}
-
-// Nombre del usuario
-const name = localStorage.getItem('profesor_name') || 'Profesor';
-document.getElementById('user-name').textContent = name;
-document.getElementById('user-avatar').textContent = name.charAt(0).toUpperCase();
-
-load();
-</script>
+<script src="{{ url_for('static', filename='js/utils.js') }}"></script>
+<script src="{{ url_for('static', filename='js/profesor.js') }}"></script>
 </body>
 </html>

@@ -1,3 +1,4 @@
+/* Archhivo: frontend/static/css/components.css */
 /* ===== COMPONENTES REUTILIZABLES ===== */
 @import 'variables.css';
 
@@ -260,14 +261,33 @@
   margin-bottom: 8px;
 }
 
-.admin-topbar {
-            background-color: #1f2937; /* Un tono más oscuro/profesional para el docente */
-            color: white;
-        }
-        .admin-topbar a {
-            color: #d1d5db;
-        }
-        .admin-topbar a.active, .admin-topbar a:hover {
-            color: white;
-            font-weight: bold;
-        }
+/* ===== AGREGADOS PARA INTEGRACIÓN SÍNCRONA ===== */
+
+/* Estilos para las alertas de Flask en el tope de la página */
+.alert {
+  padding: 13px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+.alert-success { 
+  background: #e8f5e9; 
+  color: var(--color-success); 
+  border-left: 4px solid var(--color-success); 
+}
+.alert-danger { 
+  background: #ffebee; 
+  color: var(--color-danger); 
+  border-left: 4px solid var(--color-danger); 
+}
+
+/* Modificadores extras para botones pequeños en tablas */
+.btn-sm { 
+  padding: 6px 14px; 
+  font-size: 13px; 
+}
+
+/* Asegura que el modal oculto use tu clase nativa */
+.modal-overlay.hidden { 
+  display: none !important; 
+}

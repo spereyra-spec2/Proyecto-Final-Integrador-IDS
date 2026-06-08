@@ -1,5 +1,56 @@
 from flask import jsonify
 
+# errors.py
+from flask import jsonify
+
+def error_response(code, message, level="error", description=""):
+    return jsonify({
+        "error": [{
+            "code": code,
+            "message": message,
+            "level": level,
+            "description": description
+        }]
+    }), code
+
+
+def not_found(detail):
+    return error_response(404, "Petición inválida", "warning", detail)
+
+def conflict(detail):
+    return error_response(409, "Conflicto", "warning", detail)
+
+def server_error(detail="Error interno del servidor"):
+    return error_response(500, "Error interno", "critical", detail)
+
+def bad_request(detail):
+    return error_response(400, "Petición inválida", "warning", detail)
+
+def acceso_denegado1(details):
+    return error_response(403, "Acceso denegado", "error", details)
+
+def ok_response(detail):
+    return error_response(200, "OK", "success", detail)
+
+def well_response(detail):
+    return error_response(201, "Creado", "success", detail)
+
+  
+def unauthorized(detail):
+    return error_response(401, "No autorizado", "error", detail)
+
+
+
+def unsupported_media_type(detail):
+    return error_response(415, "Formato del cuerpo no soportado", "error", detail)
+
+
+def forbidden(detail):
+    return error_response(403, "Prohibido", "error", detail)
+
+def unprocessable_entity(detail):
+    return error_response(422, "Entidad no procesable", "error", detail)
+
 def server_error(e):
     return jsonify({  
         "errors": [

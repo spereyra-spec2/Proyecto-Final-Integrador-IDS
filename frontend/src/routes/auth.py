@@ -1,4 +1,5 @@
-from flask import Blueprint, render_template, request, redirect, flash, url_for
+from flask import Blueprint, render_template, request, redirect, flash, url_for, session
+
 from src.utils import utils as utils
 from src.services import auth as api
 
@@ -169,4 +170,11 @@ def resetear_contrasena():
 @auth_bp.route('/cerrar_sesion', methods=['POST'])
 def cerrar_sesion():
     utils.limpiar_sesion()
+    return redirect(url_for('auth.login'))
+
+
+@auth_bp.route('/logout', methods=['GET'])
+def logout():
+    session.clear()  # Limpia el token y datos guardados por utils.guardar_sesion
+    flash("Sesión cerrada correctamente", "success")
     return redirect(url_for('auth.login'))

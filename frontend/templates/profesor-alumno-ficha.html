@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ficha del Alumno — AcademiQ</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}" />
+</head>
+<body>
+
+<div class="sidebar-overlay"></div>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-icon">🎓</div>
+    <div>
+      <div class="sidebar-logo-text">AcademiQ</div>
+      <div class="sidebar-logo-sub">Panel Docente</div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">General</div>
+    <a class="nav-item" href="{{ url_for('profesor.dashboard') }}"><span class="nav-icon">📊</span> Dashboard</a>
+    <a class="nav-item" href="{{ url_for('profesor.vista_cursos') }}"><span class="nav-icon">📚</span> Mis Cursos</a>
+    <div class="nav-section-label">Curso actual</div>
+    <a class="nav-item active" href="{{ url_for('profesor.vista_alumnos', id_curso=curso.idCurso) }}"><span class="nav-icon">👥</span> Alumnos</a>
+  </nav>
+  <div class="sidebar-footer">
+    <a class="nav-item" href="{{ url_for('auth.logout') }}"><span class="nav-icon">🚪</span> Cerrar sesión</a>
+  </div>
+</aside>
+
+<div class="main-content">
+  <div class="topbar">
+    <span class="topbar-title">Ficha Técnica del Estudiante</span>
+  </div>
+
+  <div class="page-content">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">{{ alumno.nombres }}</h1>
+        <p class="page-subtitle">Padrón: {{ alumno.padron }} · Correo: {{ alumno.mail or '—' }}</p>
+      </div>
+      <a href="{{ url_for('profesor.vista_alumnos', id_curso=curso.idCurso) }}" class="btn btn-outline">
+        ← Volver al listado
+      </a>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 20px;">
+      
+      <!-- Bloque 1: Notas -->
+      <div class="card">
+        <div class="card-header"><span class="card-title">📝 Calificaciones</span></div>
+        <div class="card-body" style="padding:0">
+          <table class="table">
+            <thead>
+              <tr><th>Evaluación</th><th>Tipo</th><th>Nota</th></tr>
+            </thead>
+            <tbody>
+              {% if alumno.notas %}
+                {% for nota in alumno.notas %}
+                <tr>
+                  <td><strong>{{ nota.evaluacion }}</strong></td>
+                  <td>{{ nota.tipo }}</td>
+                  <td><span class="badge {{ 'badge-success' if nota.puntaje >= 4 else 'badge-danger' }}">{{ nota.puntaje }}</span></td>
+                </tr>
+                {% endfor %}
+              {% else %}
+                <tr><td colspan="3" style="text-align:center;color:#9ca3af;padding:20px">No tiene notas cargadas</td></tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Bloque 2: Asistencias -->
+      <div class="card">
+        <div class="card-header"><span class="card-title">✅ Registro de Asistencia</span></div>
+        <div class="card-body" style="padding:0">
+          <table class="table">
+            <thead>
+              <tr><th>Fecha</th><th>Condición</th><th>Justificado</th></tr>
+            </thead>
+            <tbody>
+              {% if alumno.asistencias %}
+                {% for asistencia in alumno.asistencias %}
+                <tr>
+                  <td>{{ asistencia.fecha }}</td>
+                  <td>
+                    {% if asistencia.asistio == 1 %}
+                      <span class="badge badge-success">Presente</span>
+                    {% else %}
+                      <span class="badge badge-danger">Ausente</span>
+                    {% endif %}
+                  </td>
+                  <td>{{ 'Sí' if asistencia.justificado == 1 else 'No' }}</td>
+                </tr>
+                {% endfor %}
+              {% else %}
+                <tr><td colspan="3" style="text-align:center;color:#9ca3af;padding:20px">No registra asistencias</td></tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/utils.js') }}"></script>
+<script src="{{ url_for('static', filename='js/profesor.js') }}"></script>
+</body>
+</html>
