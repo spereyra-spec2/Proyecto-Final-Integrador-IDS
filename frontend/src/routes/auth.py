@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, flash, url_for
-from src import utils as utils
+from src.utils import utils as utils
 from src.services import auth as api
 
 auth_bp = Blueprint('auth', __name__)

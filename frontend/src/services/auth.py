@@ -1,5 +1,5 @@
 import requests
-from ..constants import API_BASE_URL
+from ..utils.constants import API_BASE_URL
 
 def respuesta_error(response):
     #devuelve el json de error de la api

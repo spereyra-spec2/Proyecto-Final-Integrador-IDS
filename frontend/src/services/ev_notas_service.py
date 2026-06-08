@@ -1,5 +1,5 @@
 import requests
-from src.constants import API_BASE_URL
+from src.utils.constants import API_BASE_URL
 
 
 
