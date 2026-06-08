@@ -1,6 +1,8 @@
 import os
+import re
 from flask import Flask, render_template, request,redirect, url_for, flash
-import requests, re
+import requests
+import re
 from flask_cors import CORS
 
 BACK_URL = "http://localhost:5000"
@@ -122,6 +124,24 @@ def obtener_asistencia_padron(padron):
 
 @app.route('/evaluaciones', methods=['GET', 'POST'])
 def evaluaciones():
+    if request.method == 'POST':
+        tipo = request.form.get('tipo')
+        descripcion = request.form.get('descripcion')
+        fecha = request.form.get('fecha')
+        curso_id = request.form.get('curso_id')
+        try:
+            respuesta = requests.post(f"{BACK_URL}/api/evaluaciones", json={
+                "tipo": tipo,
+                "descripcion": descripcion,
+                "fecha": fecha,
+                "Curso_idCurso": curso_id
+            })
+            if respuesta.status_code == 201:
+                flash('Evaluación creada exitosamente', 'success')
+            else:
+                flash('Error al crear la evaluación: {}'.format(respuesta.json().get('error', 'Error desconocido')), 'danger')
+        except requests.exceptions.RequestException as e:
+            flash('Error de conexión con el servidor: {}'.format(str(e)), 'danger')
     return render_template('profesor-evaluaciones.html')
 
 
