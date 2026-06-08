@@ -19,3 +19,10 @@ def guardar_sesion(token, padron, rol):
 def extraer_mensaje_error(api_response):
     errores = (api_response or {}).get('errors', [])
     return [e.get('description') or e.get('message') or 'Error desconocido' for e in errores]
+
+def limpiar_sesion() -> None:
+    """Borra todos los datos de autenticacion de la sesion."""
+    session.pop('token', None)
+    session.pop('padron', None)
+    session.pop('rol', None)
+

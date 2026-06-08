@@ -1,5 +1,5 @@
 import requests
-from ..constants import API_BASE_URL
+from ..utils.constants import API_BASE_URL
 
 def respuesta_error(response):
     #devuelve el json de error de la api
@@ -8,6 +8,30 @@ def respuesta_error(response):
     except Exception:
         return {'errors': [{'description': f'Error del servidor: HTTP. Código de estado: {response.status_code}'}]}
 
+
+def registro(padron, nombres, mail, contrasena):
+    try:
+        response = requests.post(
+        f"{API_BASE_URL}/auth/registro",
+        json={
+            "padron": padron,
+            "nombres": nombres,
+            "mail": mail,
+            "contrasena": contrasena
+        },
+        timeout=10
+    )
+
+        if response.status_code == 201:
+            return {'ok': True}
+
+        return {'ok': False, 'error_response': respuesta_error(response)}
+
+    except requests.exceptions.ConnectionError:
+        return {'ok': False, 'error_response': error_conexion()}
+    except Exception as e:
+        return {'ok': False, 'error_response': {'errors': [{'description': str(e)}]}}
+    
 def error_conexion():
     return {'errors': [{'description': "No se pudo conectar con el servidor. Verificá que la API esté corriendo"}]}
 

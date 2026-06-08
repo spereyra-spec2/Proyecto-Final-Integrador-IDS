@@ -28,8 +28,11 @@
     <a class="nav-item" id="nav-evals" href="#"><span class="nav-icon">📝</span> Evaluaciones</a>
     <a class="nav-item active" href="#"><span class="nav-icon">✅</span> Asistencia</a>
   </nav>
+
   <div class="sidebar-footer">
-    <a class="nav-item" href="login.html"><span class="nav-icon">🚪</span> Cerrar sesión</a>
+    <form action="{{ url_for('auth.cerrar_sesion') }}" method="POST" class="nav__form">
+        <button type="submit" id="btn_logout">🚪 Cerrar sesión</button>
+    </form>
   </div>
 </aside>
 

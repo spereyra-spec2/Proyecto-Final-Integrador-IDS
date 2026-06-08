@@ -16,3 +16,10 @@
     font-weight:600;
 }
 
+.a_registro {
+    color: #7e8286; 
+    font-weight: 300; 
+    font-size: small;
+    color:var(--color-primary);
+    font-weight:600;
+}

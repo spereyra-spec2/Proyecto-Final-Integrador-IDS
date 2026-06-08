@@ -1,14 +1,58 @@
 from flask import Blueprint, render_template, request, redirect, flash, url_for
-from src import utils as utils
+from src.utils import utils as utils
 from src.services import auth as api
 
 auth_bp = Blueprint('auth', __name__)
+
+@auth_bp.route('/registro', methods=['GET', 'POST'])
+def registro():
+
+    if request.method == 'POST':
+
+        padron = request.form.get('padron', '').strip()
+        nombre = request.form.get('nombre', '').strip()
+        mail = request.form.get('mail', '').strip()
+        contrasena = request.form.get('contrasena', '')
+
+
+
+        if not padron or not nombre or not mail or not contrasena:
+            flash("Porfavor, complete todos los campos requeridos.", "error")
+            return render_template("registro.html")
+        
+        if len(contrasena) < 8:
+            flash("La contraseña debe tener al menos 8 caracteres", "error")
+            return render_template("registro.html")
+
+        try:
+            padron = int(padron)
+        except ValueError:
+            flash("Padrón inválido", "error")
+            return render_template("registro.html")
+        #no se pasa rol porque en el back automaticamente lo pone como docente
+        resultado = api.registro(
+            padron=padron,
+            nombres=nombre,
+            mail=mail,
+            contrasena=contrasena
+        )
+
+        if resultado.get('ok'):
+            flash("Usuario creado correctamente. Inicie sesión.", "success")
+            return redirect(url_for("auth.login"))
+        
+        for mensaje in utils.extraer_mensaje_error(resultado.get('error_response')):
+            flash(mensaje, 'error')
+    
+        return render_template("registro.html")
+
+    return render_template("registro.html")
 
 @auth_bp.route('/login', methods = ['GET', 'POST'])
 def login():
     #si ya tiene sesión lo manda al inicio
     if utils.usuario_actual():
-        return redirect(url_for('profesor.dashboard'))
+        return redirect(url_for('profesor.asistencia'))
     
     if request.method == 'POST':
         padron = request.form.get('padron', '').strip() #obtiene datos del json
@@ -39,7 +83,7 @@ def login():
             utils.guardar_sesion(resultado['token'], resultado['padron'], resultado['rol'])
             flash('Bienvenido', 'success')
 
-            return redirect(url_for('profesor.dashboard'))
+            return redirect(url_for('profesor.asistencia'))
     
         for mensaje in utils.extraer_mensaje_error(resultado.get('error_response')):
             flash(mensaje, 'error')
@@ -122,4 +166,7 @@ def resetear_contrasena():
     return render_template('resetear-contrasena.html', token=token) 
 
 
-
+@auth_bp.route('/cerrar_sesion', methods=['POST'])
+def cerrar_sesion():
+    utils.limpiar_sesion()
+    return redirect(url_for('auth.login'))
