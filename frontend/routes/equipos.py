@@ -1,10 +1,9 @@
 from flask import Blueprint, jsonify, request
-from backend.src.utils.errors import bad_request, not_found
-from backend.src.utils.validaciones import validar_curso_id,validar_padron
-from services.equipos import listar_equipos, crear_equipo, actualizar_equipo, eliminar_equipo
+from backend.src.utils.errors import bad_request, not_found 
+from backend.src.utils.validaciones import validar_curso_id, validar_padron
+from frontend.src.services.equipos import listar_equipos, crear_equipo, actualizar_equipo, eliminar_equipo
 
 equipos_bp = Blueprint('equipos', __name__)
-
 
 @equipos_bp.route('/<curso_id>/equipos', methods=['GET'])
 def get_equipos(curso_id):

@@ -39,6 +39,15 @@ export function calcularEstado(grades) {
   return { label: 'En riesgo', cls: 'badge-danger' };
 }
 
+// crear un equipo nuevo 
+export async function crearEquipo(cursoId, nombreEquipo, creadprPadron) {
+  const payload= {
+    nombre: nombreEquipo, 
+    padrones: [parseInt(creadorPadron, 10)]
+  }
+  const response = await api.post(`/${cursoId}/equipos`, payload);
+  return response;
+}
 /**
  * Unirse a equipo por código de acceso
  */

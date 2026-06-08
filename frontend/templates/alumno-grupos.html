@@ -103,7 +103,7 @@
 
 <script type="module">
 import api from '/static/js/api.js';
-import { buscarAlumno, unirseEquipo, abandonarEquipo } from '/static/js/alumno.js';
+import { buscarAlumno, unirseEquipo, abandonarEquipo, crearEquipo } from '/static/js/alumno.js';
 import { toast, randomCode, initial } from '/static/js/utils.js';
 
 let currenStudent = null;
@@ -232,17 +232,20 @@ document.getElementById('btn-join').addEventListener('click', async () => {
 
 document.getElementById('btn-create').addEventListener('click', async () => {
   const nombre = document.getElementById('create-name').value.trim();
-  if (!nombre) { toast('Ingresá un nombre', 'error'); return; }
-  const code = randomCode();
-  const t = await api.create('Team', {
-    nombre, curso_id: cursoId,
-    codigo_acceso: code, cupo_maximo: 5,
-    integrantes: [padron]
-  });
-  if (currenStudent) await api.update('Student', currenStudent.id, { equipo_id: t.id });
-  toast(`Equipo creado. Código: ${code}`, 'success');
-  document.getElementById('modal-create').classList.add('hidden');
-  buscar();
+  if (!nombre) { 
+    toast('Ingresá un nombre para el equipo', 'error'); 
+    return; 
+  }
+  try {
+    await crearEquipo(cursoId, nombre, padron);
+
+    toast(`Equipo "${nombre}" creado exitosamente`, 'success');
+    document.getElementById('modal-create').classList.add('hidden');
+    document.getElementById('create-name').value = '';
+    buscar();
+  } catch (error) {
+    toast(error.message, 'error');
+  }
 });
 
 loadCourses();
