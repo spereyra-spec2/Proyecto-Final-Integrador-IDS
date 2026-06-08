@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mis Cursos — AcademiQ</title>
- <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}" />
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}" />
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}" />
+  <title>Equipos — AcademiQ</title>
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+  <link rel="stylesheet" href="../css/layout.css" />
 </head>
 <body>
 
@@ -14,146 +14,214 @@
 <aside class="sidebar">
   <div class="sidebar-logo">
     <div class="sidebar-logo-icon">🎓</div>
-    <div>
-      <div class="sidebar-logo-text">AcademiQ</div>
-      <div class="sidebar-logo-sub">Panel Docente</div>
-    </div>
+    <div><div class="sidebar-logo-text">AcademiQ</div><div class="sidebar-logo-sub">Panel Docente</div></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section-label">General</div>
     <a class="nav-item" href="profesor-dashboard.html"><span class="nav-icon">📊</span> Dashboard</a>
-    <a class="nav-item active" href="profesor-cursos.html"><span class="nav-icon">📚</span> Mis Cursos</a>
+    <a class="nav-item" href="profesor-cursos.html"><span class="nav-icon">📚</span> Mis Cursos</a>
+    <div class="nav-section-label">Curso actual</div>
+    <a class="nav-item" id="nav-alumnos" href="#"><span class="nav-icon">👥</span> Alumnos</a>
+    <a class="nav-item active" href="#"><span class="nav-icon">🤝</span> Equipos</a>
+    <a class="nav-item" id="nav-evals" href="#"><span class="nav-icon">📝</span> Evaluaciones</a>
+    <a class="nav-item" id="nav-asist" href="#"><span class="nav-icon">✅</span> Asistencia</a>
   </nav>
   <div class="sidebar-footer">
-    <div class="sidebar-user">
-      <div class="sidebar-user-avatar" id="user-avatar">P</div>
-      <div>
-        <div class="sidebar-user-name" id="user-name">Profesor</div>
-        <div class="sidebar-user-role">Docente</div>
-      </div>
-    </div>
-    <a class="nav-item" href="login.html" style="margin-top:6px"><span class="nav-icon">🚪</span> Cerrar sesión</a>
+    <a class="nav-item" href="login.html"><span class="nav-icon">🚪</span> Cerrar sesión</a>
   </div>
 </aside>
 
 <div class="main-content">
   <div class="topbar">
     <button class="hamburger">☰</button>
-    <span class="topbar-title">Mis Cursos</span>
+    <span class="topbar-title">Equipos</span>
   </div>
 
   <div class="page-content">
     <div class="page-header">
       <div>
-        <h1 class="page-title">Mis Cursos</h1>
-        <p class="page-subtitle">Creá y administrá tus materias</p>
+        <h1 class="page-title">Equipos</h1>
+        <p class="page-subtitle" id="course-sub">Cargando...</p>
       </div>
-      <button class="btn btn-primary" onclick="openModal('modal-create')">➕ Nuevo curso</button>
+      <button class="btn btn-primary" onclick="openModal('modal-team')">➕ Nuevo equipo</button>
     </div>
 
-    <div class="grid-3" id="courses-grid">
+    <div class="grid-3" id="teams-grid">
       <div style="grid-column:1/-1;text-align:center;padding:40px;color:#9ca3af">Cargando...</div>
     </div>
   </div>
 </div>
 
-<!-- Modal crear curso -->
-<div class="modal-overlay hidden" id="modal-create">
+<!-- Modal crear equipo -->
+<div class="modal-overlay hidden" id="modal-team">
   <div class="modal">
     <div class="modal-header">
-      <span class="modal-title">Nuevo Curso</span>
-      <button class="modal-close" onclick="closeModal('modal-create')">✕</button>
+      <span class="modal-title">Nuevo equipo</span>
+      <button class="modal-close" onclick="closeModal('modal-team')">✕</button>
     </div>
     <div class="modal-body">
-      <div class="form-group">
-        <label class="form-label">Nombre del curso *</label>
-        <input class="form-input" id="f-nombre" placeholder="Ej: Algoritmos II" />
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-        <div class="form-group">
-          <label class="form-label">Código *</label>
-          <input class="form-input" id="f-codigo" placeholder="Ej: 75.41" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Cuatrimestre</label>
-          <input class="form-input" id="f-cuatri" placeholder="Ej: 1C2025" />
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Descripción</label>
-        <textarea class="form-textarea" id="f-desc" placeholder="Opcional..."></textarea>
-      </div>
+      <div class="form-group"><label class="form-label">Nombre del equipo *</label><input class="form-input" id="t-nombre" placeholder="Ej: Grupo 1" /></div>
+      <div class="form-group"><label class="form-label">Cupo máximo</label><input class="form-input" id="t-cupo" type="number" value="5" /></div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-outline" onclick="closeModal('modal-create')">Cancelar</button>
-      <button class="btn btn-primary" id="btn-crear">Crear curso</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-team')">Cancelar</button>
+      <button class="btn btn-primary" id="btn-create-team">Crear</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal agregar integrante -->
+<div class="modal-overlay hidden" id="modal-member">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="member-modal-title">Agregar integrante</span>
+      <button class="modal-close" onclick="closeModal('modal-member')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Padrón del alumno</label><input class="form-input" id="m-padron" placeholder="Ej: 108542" /></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-member')">Cancelar</button>
+      <button class="btn btn-primary" id="btn-add-member">Agregar</button>
     </div>
   </div>
 </div>
 
 <script type="module">
-import api from '/static/js/api.js';
-import { toast, openModal, closeModal, initSidebar } from '/static/js/utils.js';
+import api from '../js/api.js';
+import { toast, openModal, closeModal, randomCode, initSidebar } from '../js/utils.js';
 
 initSidebar();
 window.openModal = openModal;
 window.closeModal = closeModal;
 
-const userEmail = localStorage.getItem('profesor_email') || '';
-const name = localStorage.getItem('profesor_name') || 'Profesor';
-document.getElementById('user-name').textContent = name;
-document.getElementById('user-avatar').textContent = name.charAt(0).toUpperCase();
+const params = new URLSearchParams(window.location.search);
+const cursoId = params.get('curso') || '';
 
-async function load() {
-  const res = await api.list('Course');
-  const courses = (res.results || []).filter(c => c.profesor_email === userEmail);
-  const grid = document.getElementById('courses-grid');
+document.getElementById('nav-alumnos').href = `profesor-alumnos.html?curso=${cursoId}`;
+document.getElementById('nav-evals').href = `profesor-evaluaciones.html?curso=${cursoId}`;
+document.getElementById('nav-asist').href = `profesor-asistencia.html?curso=${cursoId}`;
 
-  if (!courses.length) {
+let teams = [];
+let students = [];
+let currentTeamId = null;
+
+async function init() {
+  const [courseData, teamsRes, studRes] = await Promise.all([
+    api.get('Course', cursoId),
+    api.filter('Team', { curso_id: cursoId }),
+    api.filter('Student', { curso_id: cursoId }),
+  ]);
+  document.getElementById('course-sub').textContent = `${courseData.nombre} · ${courseData.codigo}`;
+  teams = teamsRes.results || [];
+  students = studRes.results || [];
+  render();
+}
+
+function getStudentName(padron) {
+  const s = students.find(st => st.padron === padron);
+  return s ? s.nombre : padron;
+}
+
+function render() {
+  const grid = document.getElementById('teams-grid');
+  if (!teams.length) {
     grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:50px;color:#9ca3af">
-      <div style="font-size:40px;margin-bottom:12px">📚</div>
-      <strong>No tenés cursos</strong><br>
-      <span style="font-size:14px">Creá tu primer curso con el botón de arriba.</span>
+      <div style="font-size:40px;margin-bottom:12px">🤝</div>
+      <strong>Sin equipos</strong>
     </div>`;
     return;
   }
 
-  grid.innerHTML = courses.map(c => `
+  grid.innerHTML = teams.map(t => `
     <div class="card">
       <div class="card-header" style="display:flex;align-items:center;justify-content:space-between">
-        <span class="card-title">${c.nombre}</span>
-        <span class="badge ${c.estado === 'activo' ? 'badge-success' : 'badge-neutral'}">${c.estado}</span>
+        <span class="card-title">${t.nombre}</span>
+        <button class="btn btn-danger btn-sm" onclick="deleteTeam('${t.id}')">🗑</button>
       </div>
       <div class="card-body">
-        <p style="color:#6b7280;font-size:13px;margin-bottom:12px">${c.codigo}${c.cuatrimestre ? ' · ' + c.cuatrimestre : ''}</p>
-        ${c.descripcion ? `<p style="font-size:14px;margin-bottom:16px">${c.descripcion}</p>` : ''}
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <a href="profesor-alumnos.html?curso=${c.id}" class="btn btn-outline btn-sm">👥 Alumnos</a>
-          <a href="profesor-equipos.html?curso=${c.id}" class="btn btn-outline btn-sm">🤝 Equipos</a>
-          <a href="profesor-evaluaciones.html?curso=${c.id}" class="btn btn-primary btn-sm">📝 Evaluaciones</a>
-          <a href="profesor-asistencia.html?curso=${c.id}" class="btn btn-outline btn-sm">✅ Asistencia</a>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <span style="font-size:13px;color:#6b7280">Código: <strong style="font-family:monospace;color:var(--color-primary)">${t.codigo_acceso}</strong></span>
+          <span class="badge badge-info">${(t.integrantes||[]).length}/${t.cupo_maximo||5}</span>
         </div>
+        <div style="margin-bottom:12px">
+          ${(t.integrantes||[]).length === 0
+            ? '<p style="font-size:13px;color:#9ca3af">Sin integrantes</p>'
+            : (t.integrantes||[]).map(p => `
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:#f7f9fc;border-radius:6px;margin-bottom:5px;font-size:13px">
+                  <div>
+                    <strong>${getStudentName(p)}</strong>
+                    <span style="color:#9ca3af;margin-left:6px">(${p})</span>
+                  </div>
+                  <button class="btn btn-sm btn-danger" onclick="removeMember('${t.id}', '${p}')">✕</button>
+                </div>
+              `).join('')}
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="addMember('${t.id}', '${t.nombre.replace(/'/g, "\\'")}')">
+          ➕ Agregar integrante
+        </button>
       </div>
     </div>
   `).join('');
 }
 
-document.getElementById('btn-crear').addEventListener('click', async () => {
-  const nombre = document.getElementById('f-nombre').value.trim();
-  const codigo = document.getElementById('f-codigo').value.trim();
-  const cuatrimestre = document.getElementById('f-cuatri').value.trim();
-  const descripcion = document.getElementById('f-desc').value.trim();
+window.deleteTeam = async (id) => {
+  if (!confirm('¿Eliminar este equipo?')) return;
+  await api.delete('Team', id);
+  toast('Equipo eliminado', 'success');
+  init();
+};
 
-  if (!nombre || !codigo) { toast('Completá nombre y código', 'error'); return; }
+window.addMember = (teamId, teamName) => {
+  currentTeamId = teamId;
+  document.getElementById('member-modal-title').textContent = `Agregar a ${teamName}`;
+  document.getElementById('m-padron').value = '';
+  openModal('modal-member');
+};
 
-  await api.create('Course', { nombre, codigo, cuatrimestre, descripcion, profesor_email: userEmail, estado: 'activo' });
-  toast('Curso creado', 'success');
-  closeModal('modal-create');
-  ['f-nombre','f-codigo','f-cuatri','f-desc'].forEach(id => document.getElementById(id).value = '');
-  load();
+window.removeMember = async (teamId, padron) => {
+  const team = teams.find(t => t.id === teamId);
+  if (!team) return;
+  const integrantes = (team.integrantes || []).filter(p => p !== padron);
+  await api.update('Team', teamId, { integrantes });
+  const student = students.find(s => s.padron === padron);
+  if (student) await api.update('Student', student.id, { equipo_id: '' });
+  toast('Integrante removido', 'success');
+  init();
+};
+
+document.getElementById('btn-add-member').addEventListener('click', async () => {
+  const padron = document.getElementById('m-padron').value.trim();
+  if (!padron) { toast('Ingresá un padrón', 'error'); return; }
+  const team = teams.find(t => t.id === currentTeamId);
+  if (!team) return;
+  const integrantes = team.integrantes || [];
+  if (integrantes.includes(padron)) { toast('Ya está en el equipo', 'error'); return; }
+  if (integrantes.length >= (team.cupo_maximo || 5)) { toast('Equipo lleno', 'error'); return; }
+  await api.update('Team', currentTeamId, { integrantes: [...integrantes, padron] });
+  const student = students.find(s => s.padron === padron);
+  if (student) await api.update('Student', student.id, { equipo_id: currentTeamId });
+  toast('Integrante agregado', 'success');
+  closeModal('modal-member');
+  init();
 });
 
-load();
+document.getElementById('btn-create-team').addEventListener('click', async () => {
+  const nombre = document.getElementById('t-nombre').value.trim();
+  const cupo = parseInt(document.getElementById('t-cupo').value) || 5;
+  if (!nombre) { toast('El nombre es requerido', 'error'); return; }
+  await api.create('Team', {
+    nombre, curso_id: cursoId,
+    codigo_acceso: randomCode(),
+    cupo_maximo: cupo, integrantes: []
+  });
+  toast('Equipo creado', 'success');
+  closeModal('modal-team');
+  document.getElementById('t-nombre').value = '';
+  init();
+});
+
+init();
 </script>
 </body>
 </html>
