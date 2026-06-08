@@ -9,7 +9,7 @@ app = Flask(__name__,
             static_folder='static')
 CORS(app)
 
-app.register_blueprint(asistencia_bp, url_prefix='/api/profesor/asistencia')
+app.register_blueprint(asistencia_bp, url_prefix='/asistencia')
 
 if __name__ == '__main__':
     app.run(port=5001, debug=True)

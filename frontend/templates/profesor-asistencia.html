@@ -42,14 +42,14 @@
       <div>
         <h1 class="page-title">Asistencia</h1>
       </div>
-      <a href="{{ url_for('asistencia_profe') }}?generar=1" class="btn btn-primary">🔲 Generar QR</a>
+      <a href="{{ url_for('/asistencia.asistencia_profe') }}?generar=1" class="btn btn-primary">🔲 Generar QR</a>
     </div>
 
     {% if qr_generado %}
     <div class="card" style="margin-bottom:22px; border:2px solid var(--color-primary)">
       <div class="card-body" style="display:flex;align-items:center;gap:28px;flex-wrap:wrap">
         <div style="background:#f4f6f9;border-radius:12px;padding:20px;text-align:center;min-width:140px">
-          <img src="{{ url_for('qr_imagen') }}" alt="QR de asistencia" style="width:160px;height:160px" />
+          <img src="{{ url_for('/asistencia.qr_imagen') }}" alt="QR de asistencia" style="width:160px;height:160px" />
         </div>
         <div>
           <p style="font-size:18px;font-weight:700;margin-bottom:4px">Código activo</p>
@@ -83,7 +83,7 @@
     </div>
 
         
-          <form action="{{url_for('obtener_asistencia')}}" method="POST" class="form-group">
+          <form action="{{url_for('/asistencia.obtener_asistencia')}}" method="POST" class="form-group">
               <div class="form-group">
                 <label for="padron" class="form-label">Buscador por Padron</label>
                 <input
