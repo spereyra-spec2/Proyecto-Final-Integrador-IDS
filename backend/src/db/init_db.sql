@@ -4,6 +4,8 @@ USE ids_db;
 CREATE TABLE IF NOT EXISTS Curso (
     idCurso INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
     nombre VARCHAR(255),
+    codigo VARCHAR(255),
+    cuatrimestre varchar(255),
     descripcion VARCHAR(255),
     created_at DATETIME
 );
