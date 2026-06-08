@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_cors import CORS
-from init_db import init_db
 from src.routes.auth.auth import auth_bp
+from src.db.init_db import init_db
 from mail import mail
 app = Flask(__name__)
 
