@@ -1,6 +1,6 @@
 import requests
 import logging
-from ..contants import BACK_URL
+from ..utils.contants import BACK_URL
 
 logger = logging.getLogger(__name__)
 
