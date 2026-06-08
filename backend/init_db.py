@@ -1,6 +1,6 @@
 import os
 import mysql.connector
-from backend.config import user, password, host
+from config import user, password, host
 
 def init_db():
     current_dir = os.path.dirname(os.path.abspath(__file__))
