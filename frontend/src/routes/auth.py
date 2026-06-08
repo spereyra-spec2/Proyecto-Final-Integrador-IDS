@@ -83,7 +83,7 @@ def login():
             utils.guardar_sesion(resultado['token'], resultado['padron'], resultado['rol'])
             flash('Bienvenido', 'success')
 
-            return redirect(url_for('profesor.dashboard'))
+            return redirect(url_for('profesor.asistencia'))
     
         for mensaje in utils.extraer_mensaje_error(resultado.get('error_response')):
             flash(mensaje, 'error')
