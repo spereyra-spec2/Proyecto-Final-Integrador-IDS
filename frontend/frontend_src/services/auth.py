@@ -8,13 +8,13 @@ def respuesta_error(response):
     except Exception:
         return {'errors': [{'description': f'Error del servidor: HTTP. Código de estado: {response.status_code}'}]}
 
-
-def registro(padron, nombres, mail, contrasena):
+def registro(padron, rol, nombres, mail, contrasena):
     try:
         response = requests.post(
         f"{API_BASE_URL}/auth/registro",
         json={
             "padron": padron,
+            "rol": rol,
             "nombres": nombres,
             "mail": mail,
             "contrasena": contrasena
@@ -31,7 +31,9 @@ def registro(padron, nombres, mail, contrasena):
         return {'ok': False, 'error_response': error_conexion()}
     except Exception as e:
         return {'ok': False, 'error_response': {'errors': [{'description': str(e)}]}}
-    
+
+
+
 def error_conexion():
     return {'errors': [{'description': "No se pudo conectar con el servidor. Verificá que la API esté corriendo"}]}
 
@@ -77,10 +79,12 @@ def resetear_contrasena(token, contrasena):
     try:
         response = requests.patch(
             f'{API_BASE_URL}/auth/resetear_contrasena',
-            json={'contrasena': contrasena},
-            params={'token': token},
-            timeout= 30
-        )
+            json={
+                'token': token,
+                'contrasena': contrasena
+            },
+        timeout= 30
+    )
         if response.status_code == 200:
             return {'ok': True}
         
@@ -88,4 +92,4 @@ def resetear_contrasena(token, contrasena):
     except requests.exceptions.ConnectionError:
         return {'ok': False, 'error_response': error_conexion()}
     except Exception as e:
-        return {'ok': False, 'error_response':{'errors': [{'description': f'Error inesperado: {e}'}]}}
+        return {'ok': False, 'error_response': {'errors': [{'description': str(e)}]}}

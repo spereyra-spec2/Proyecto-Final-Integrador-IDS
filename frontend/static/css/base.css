@@ -26,3 +26,13 @@ img { max-width: 100%; display: block; }
   position: absolute; width: 1px; height: 1px;
   overflow: hidden; clip: rect(0,0,0,0);
 }
+
+
+/*h1 {
+    text-align: center;
+    font-size: 3rem;
+    margin-top: 60px;
+    color: #1a1a2e;
+
+    animation: aparecer 1.5s ease-out;
+}*/
