@@ -13,7 +13,7 @@ CORS(app)
 app.config['SECRET_KEY'] = 'clave_secreta_ids_2026'
 
 
-app.register_blueprint(auth_bp, url_prefix="/api/auth") #sigo ejemplo del repo de cátedra
+app.register_blueprint(auth_bp, url_prefix="/auth") #sigo ejemplo del repo de cátedra
 app.register_blueprint(profesor_bp, url_prefix="/api/profesor")
 app.register_blueprint(alumno_bp, url_prefix="/api/alumno")
 app.register_blueprint(notas_bp, url_prefix='/notas')
