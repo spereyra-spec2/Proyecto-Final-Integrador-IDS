@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 import mysql.connector
-from db import get_connection
+from src.db.db import get_connection
     
 from src.db.ev_notas_db import validar_id, validar_curso, validar_evaluacion, validar_equipo
 from src.utils.validar_numeros import valido_numero

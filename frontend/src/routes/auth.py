@@ -52,7 +52,7 @@ def registro():
 def login():
     #si ya tiene sesión lo manda al inicio
     if utils.usuario_actual():
-        return redirect(url_for('profesor.dashboard'))
+        return redirect(url_for('profesor.asistencia'))
     
     if request.method == 'POST':
         padron = request.form.get('padron', '').strip() #obtiene datos del json

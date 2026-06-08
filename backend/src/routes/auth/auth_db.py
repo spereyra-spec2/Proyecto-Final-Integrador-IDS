@@ -1,5 +1,5 @@
 import mysql.connector
-from db import get_connection
+from src.db.db import get_connection
 import src.utils.errors as errors
 from src.utils.seguridad import hashear_contrasena, comparar_contrasena
 from flask import jsonify
