@@ -39,6 +39,7 @@ def dashboard():
 def vista_cursos():
     usuario = utils.verificar_docente_autenticado()
     if not usuario:
+        flash("Por favor, iniciá sesión para acceder a tus cursos.", "error")
         return redirect(url_for('auth.login'))
         
     # GET /api/cursos
