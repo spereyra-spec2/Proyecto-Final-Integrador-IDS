@@ -2,6 +2,8 @@ import requests
 from src.utils.constants import API_BASE_URL
 from .auth import respuesta_error, error_conexion
 
+#---------------------------------------------------------------------------------------------------------
+
 def actualizar_alumno(token, id_curso, padron, nombres, mail, estado):
     try:
         headers = {"Authorization": f"Bearer {token}"}
@@ -24,6 +26,8 @@ def actualizar_alumno(token, id_curso, padron, nombres, mail, estado):
     except Exception as e:
         return {'ok': False, 'error_response': {'errors': [{'description': f'Error: {e}'}]}}
 
+#---------------------------------------------------------------------------------------------------------
+
 def baja_logica_alumno(token, id_curso, padron):
     try:
         headers = {"Authorization": f"Bearer {token}"}
@@ -40,6 +44,8 @@ def baja_logica_alumno(token, id_curso, padron):
     except Exception as e:
         return {'ok': False, 'error_response': {'errors': [{'description': f'Error: {e}'}]}}
     
+#---------------------------------------------------------------------------------------------------------
+
 def obtener_ficha_alumno(token, id_curso, padron):
     try:
         headers = {"Authorization": f"Bearer {token}"}
@@ -55,6 +61,8 @@ def obtener_ficha_alumno(token, id_curso, padron):
         return {'ok': False, 'error_response': error_conexion()}
     except Exception as e:
         return {'ok': False, 'error_response': {'errors': [{'description': f'Error: {e}'}]}}
+
+#---------------------------------------------------------------------------------------------------------
 
 def obtener_alumnos(token, id_curso, estado_filtro=None):
     try:
@@ -79,6 +87,8 @@ def obtener_alumnos(token, id_curso, estado_filtro=None):
     except Exception as e:
         return {'ok': False, 'error_response': {'errors': [{'description': f'Error inesperado: {e}'}]}}
 
+#---------------------------------------------------------------------------------------------------------
+
 def agregar_alumno(token, id_curso, padron, nombres, mail):
     try:
         headers = {"Authorization": f"Bearer {token}"}
@@ -96,6 +106,8 @@ def agregar_alumno(token, id_curso, padron, nombres, mail):
         return {'ok': False, 'error_response': error_conexion()}
     except Exception as e:
         return {'ok': False, 'error_response': {'errors': [{'description': f'Error: {e}'}]}}
+
+#---------------------------------------------------------------------------------------------------------
 
 def importar_csv(token, id_curso, archivo_file):
     try:
@@ -115,7 +127,7 @@ def importar_csv(token, id_curso, archivo_file):
     except Exception as e:
         return {'ok': False, 'error_response': {'errors': [{'description': f'Error: {e}'}]}}
 
-# Al final de tu archivo src/services/alumnos.py agregá esta función:
+#---------------------------------------------------------------------------------------------------------
 
 def obtener_alumno_por_padron(token, id_curso, padron):
     """

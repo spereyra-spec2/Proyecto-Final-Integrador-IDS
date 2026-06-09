@@ -1,9 +1,10 @@
 from flask import Blueprint, request, render_template, url_for, redirect
-
-
 from src.services import ev_notas_service as api
 
+
 notas_bp = Blueprint("notas", __name__)
+
+
 
 @notas_bp.route('/ver', methods=['GET'])
 def vista_ver_nota():
@@ -22,7 +23,7 @@ def vista_ver_nota():
         return render_template('ver_nota.html', nota=resultado["datos"], error=None,curso_id=curso_id, id_evaluaciones=id_ev, id_g=id_g, tipo=tipo)
     else:
         return render_template('ver_nota.html', nota=None, error=resultado["error"], curso_id=curso_id, id_evaluaciones=id_ev, id_g=id_g, tipo=tipo)
-
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 @notas_bp.route('/cargar', methods=['GET', 'POST'])
 def procesar_guardado():
@@ -45,7 +46,7 @@ def procesar_guardado():
 
     estado = request.args.get('estado')
     return render_template('cargar_nota.html', estado=estado)
-
+#---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 @notas_bp.route('/editar', methods=['GET', 'POST'])
 def procesar_actualizacion():

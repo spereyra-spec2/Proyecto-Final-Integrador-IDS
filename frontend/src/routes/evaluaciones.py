@@ -1,5 +1,6 @@
 from flask import Blueprint, app, render_template, redirect, url_for, flash, jsonify, request
 import requests
+from src.utils.constants import API_BASE_URL
 
 evaluaciones_bp = Blueprint('evaluaciones', __name__)
 
@@ -17,7 +18,7 @@ def evaluaciones():
         
         try:
             respuesta = requests.post(
-                f"{BACK_URL}/api/evaluaciones",
+                f"{API_BASE_URL}/api/evaluaciones",
                 json=datos
             )
             

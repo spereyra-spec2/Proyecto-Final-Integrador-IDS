@@ -8,6 +8,7 @@ def respuesta_error(response):
     except Exception:
         return {'errors': [{'description': f'Error del servidor: HTTP. Código de estado: {response.status_code}'}]}
 
+#---------------------------------------------------------------------------------------------------------
 
 def registro(padron, nombres, mail, contrasena):
     try:
@@ -31,9 +32,13 @@ def registro(padron, nombres, mail, contrasena):
         return {'ok': False, 'error_response': error_conexion()}
     except Exception as e:
         return {'ok': False, 'error_response': {'errors': [{'description': str(e)}]}}
-    
+
+#---------------------------------------------------------------------------------------------------------
+
 def error_conexion():
     return {'errors': [{'description': "No se pudo conectar con el servidor. Verificá que la API esté corriendo"}]}
+
+#---------------------------------------------------------------------------------------------------------
 
 def login(padron, contrasena):
     #retorna {'ok': True, 'token':..., 'padron': {..}, 'rol': {..} }
@@ -55,6 +60,7 @@ def login(padron, contrasena):
     except Exception as e:
         return {'ok': False, 'error_response':{'errors': [{'description': f'Error inesperado: {e}'}]}}
             
+#---------------------------------------------------------------------------------------------------------
 
 def contrasena_olvidada(padron):
     try:
@@ -72,6 +78,7 @@ def contrasena_olvidada(padron):
     except Exception as e:
         return {'ok': False, 'error_response':{'errors': [{'description': f'Error inesperado: {e}'}]}}
     
+#---------------------------------------------------------------------------------------------------------
 
 def resetear_contrasena(token, contrasena):
     try:

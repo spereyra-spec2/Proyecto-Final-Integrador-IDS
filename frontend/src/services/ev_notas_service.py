@@ -1,9 +1,7 @@
 import requests
 from src.utils.constants import API_BASE_URL
 
-
-
-
+#----------------------------------------------------------------------------------------------------
 
 def extraer_error(respuesta, msg_defecto):
     """Extrae el mensaje de error de forma segura, evitando crasheos."""
@@ -15,7 +13,7 @@ def extraer_error(respuesta, msg_defecto):
     except Exception:
         return f"Error crítico en el servidor (Código {respuesta.status_code})."
 
-
+#----------------------------------------------------------------------------------------------------
 
 def consultar_nota(curso_id, id_ev, id_g, tipo):
 
@@ -44,7 +42,7 @@ def consultar_nota(curso_id, id_ev, id_g, tipo):
     except requests.exceptions.ConnectionError:
         return {"exito": False, "datos": None, "error": "Error de conexión: El servidor está apagado.", "codigo": 500}
     
-
+#----------------------------------------------------------------------------------------------------
 
 def cargar_nota(curso_id, id_ev, id_g, nota, tipo):
     
@@ -74,7 +72,7 @@ def cargar_nota(curso_id, id_ev, id_g, nota, tipo):
     except requests.exceptions.ConnectionError:
         return {"exito": False, "error": "Error de conexión: No se pudo conectar al servidor.", "codigo": 500}
     
-
+#----------------------------------------------------------------------------------------------------
 
 def actualizar_nota(curso_id, id_ev, id_g, nuevo_puntaje, tipo):
     

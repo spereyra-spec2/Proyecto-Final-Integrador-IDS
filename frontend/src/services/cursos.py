@@ -2,6 +2,8 @@ import requests
 from src.utils.constants import API_BASE_URL
 from .auth import respuesta_error, error_conexion
 
+#---------------------------------------------------------------------------------------------------------
+
 def actualizar_curso(token, id_curso, nombre, codigo, cuatrimestre, descripcion):
     try:
         headers = {"Authorization": f"Bearer {token}"}
@@ -25,7 +27,8 @@ def actualizar_curso(token, id_curso, nombre, codigo, cuatrimestre, descripcion)
     except Exception as e:
         return {'ok': False, 'error_response': {'errors': [{'description': f'Error: {e}'}]}}
     
-    # En src/services/cursos.py cambia el nombre a:
+#---------------------------------------------------------------------------------------------------------
+
 def obtener_cursos(token):
     try:
         headers = {"Authorization": f"Bearer {token}"}
@@ -44,7 +47,8 @@ def obtener_cursos(token):
     except Exception as e:
         return {'ok': False, 'error_response': {'errors': [{'description': f'Error inesperado: {e}'}]}}
     
-# En src/services/cursos.py asegurate de que se llame:
+#---------------------------------------------------------------------------------------------------------
+
 def crear_curso(token, nombre, codigo, cuatrimestre, descripcion):
     try:
         headers = {"Authorization": f"Bearer {token}"}
@@ -69,6 +73,7 @@ def crear_curso(token, nombre, codigo, cuatrimestre, descripcion):
     except Exception as e:
         return {'ok': False, 'error_response': {'errors': [{'description': f'Error inesperado: {e}'}]}}  
 
+#---------------------------------------------------------------------------------------------------------
 
 def eliminar_curso(token, id_curso):
     try:

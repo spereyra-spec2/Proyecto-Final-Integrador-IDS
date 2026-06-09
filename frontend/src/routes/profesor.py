@@ -8,14 +8,14 @@ profesor_bp = Blueprint('profesor', __name__)
 
 
 
-
-
 @profesor_bp.route('/asistencia', methods = ['GET'])
 def asistencia():
     return render_template('profesor-asistencia.html')
-
+#---------------------------------------------------------------------------------------------------------
 
 # VISTA GENERAL DOCENTE
+
+#---------------------------------------------------------------------------------------------------------
 
 @profesor_bp.route('/dashboard', methods=['GET'])
 def dashboard():
@@ -29,10 +29,11 @@ def dashboard():
     cursos_lista = resultado.get('cursos', []) if resultado.get('ok') else []
     
     return render_template('profesor-dashboard.html', cursos=cursos_lista)
-
-
+#---------------------------------------------------------------------------------------------------------
 
 # MODULO DE GESTIÓN DE CURSOS (COMISIONES)
+
+#---------------------------------------------------------------------------------------------------------
 
 @profesor_bp.route('/cursos', methods=['GET'])
 def vista_cursos():
@@ -45,6 +46,7 @@ def vista_cursos():
     cursos_lista = resultado.get('cursos', []) if resultado.get('ok') else []
     
     return render_template('profesor-cursos.html', cursos=cursos_lista)
+#---------------------------------------------------------------------------------------------------------
 
 @profesor_bp.route('/cursos/crear', methods=['POST'])
 def crear_curso():
@@ -66,6 +68,7 @@ def crear_curso():
             flash(mensaje, 'error')
             
     return redirect(url_for('profesor.vista_cursos'))
+#---------------------------------------------------------------------------------------------------------
 
 @profesor_bp.route('/cursos/actualizar/<int:id_curso>', methods=['POST'])
 def actualizar_curso(id_curso):
@@ -87,6 +90,7 @@ def actualizar_curso(id_curso):
             flash(mensaje, 'error')
             
     return redirect(url_for('profesor.vista_cursos'))
+#---------------------------------------------------------------------------------------------------------
 
 @profesor_bp.route('/cursos/eliminar/<int:id_curso>', methods=['POST'])
 def eliminar_curso(id_curso):
@@ -103,13 +107,11 @@ def eliminar_curso(id_curso):
             flash(mensaje, 'error')
             
     return redirect(url_for('profesor.vista_cursos'))
+#---------------------------------------------------------------------------------------------------------
 
+# GESTIÓN DE ALUMNOS
 
-# =========================================================================
-# 👥 GESTIÓN DE ALUMNOS
-# =========================================================================
-
-
+#---------------------------------------------------------------------------------------------------------
 
 @profesor_bp.route('/cursos/<int:id_curso>/alumnos/inscribir', methods=['POST'])
 def inscribir_alumno(id_curso):
@@ -130,6 +132,7 @@ def inscribir_alumno(id_curso):
             flash(mensaje, 'error')
             
     return redirect(url_for('profesor.vista_alumnos', id_curso=id_curso))
+#---------------------------------------------------------------------------------------------------------
 
 @profesor_bp.route('/cursos/<int:id_curso>/alumnos/importar', methods=['POST'])
 def importar_csv(id_curso):
@@ -151,6 +154,7 @@ def importar_csv(id_curso):
             flash(mensaje, 'error')
             
     return redirect(url_for('profesor.vista_alumnos', id_curso=id_curso))
+#---------------------------------------------------------------------------------------------------------
 
 @profesor_bp.route('/cursos/<int:id_curso>/alumnos/baja-logica/<int:padron>', methods=['POST'])
 def baja_logica_alumno(id_curso, padron):
@@ -167,6 +171,7 @@ def baja_logica_alumno(id_curso, padron):
             flash(mensaje, 'error')
             
     return redirect(url_for('profesor.vista_alumnos', id_curso=id_curso))
+#---------------------------------------------------------------------------------------------------------
 
 @profesor_bp.route('/cursos/<int:id_curso>/alumnos/ficha/<int:padron>', methods=['GET'])
 def vista_ficha_alumno(id_curso, padron):
@@ -185,9 +190,7 @@ def vista_ficha_alumno(id_curso, padron):
     for mensaje in utils.extraer_mensaje_error(resultado.get('error_response')):
         flash(mensaje, 'error')
     return redirect(url_for('profesor.vista_alumnos', id_curso=id_curso))
-
-
-# Reemplazá únicamente la ruta @profesor_bp.route('/cursos/<int:id_curso>/alumnos') en src/routes/profesor.py:
+#---------------------------------------------------------------------------------------------------------
 
 @profesor_bp.route('/cursos/<int:id_curso>/alumnos', methods=['GET'])
 def vista_alumnos(id_curso):
@@ -221,7 +224,7 @@ def vista_alumnos(id_curso):
     
     curso_mock = {"idCurso": id_curso}
     return render_template('profesor-alumnos.html', curso=curso_mock, alumnos=alumnos_lista)
-
+#---------------------------------------------------------------------------------------------------------
 
 @profesor_bp.route('/cursos/<int:id_curso>/alumnos/actualizar/<int:padron>', methods=['POST'])
 def actualizar_alumno(id_curso, padron):

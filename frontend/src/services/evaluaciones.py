@@ -1,14 +1,15 @@
 import requests
 import logging
-from ...contants import BACK_URL
-
+from src.utils.constants import API_BASE_URL
 logger = logging.getLogger(__name__)
+
+#----------------------------------------------------------------------------------------------------
 
 def obtener_evaluaciones(idEvaluacion) -> dict:
 
     evaluaciones = {}
     try:
-        respuesta = requests.get(f"{BACK_URL}/api/evaluaciones/{idEvaluacion}")
+        respuesta = requests.get(f"{API_BASE_URL}/api/evaluaciones/{idEvaluacion}")
         evaluaciones = respuesta.json() 
         if respuesta.status_code == 200:
             evaluaciones = respuesta.json()
@@ -22,10 +23,12 @@ def obtener_evaluaciones(idEvaluacion) -> dict:
 
     return evaluaciones
 
+#------------------------------------------------------------------------------------------------------------
+
 def crear_evaluacion(tipo:str, descripcion:str, fecha:str, curso_id:int) -> dict:
     try:
         respuesta = requests.post(
-            f"{BACK_URL}/api/evaluaciones",
+            f"{API_BASE_URL}/api/evaluaciones",
             json={
                 'tipo': tipo,
                 'descripcion': descripcion,
