@@ -1,100 +1,168 @@
+from flask import Flask, Blueprint, jsonify, request
 import mysql.connector
-from db import get_connection
+import src.routes.auth.auth_db as auth_db
+import src.utils.seguridad as seguridad
 import src.utils.errors as errors
-from src.utils.seguridad import hashear_contrasena, comparar_contrasena
-from flask import jsonify
-from datetime import datetime
+from src.utils.validaciones import es_email_valido
+import jwt
 
-def login_user(padron, contrasena):
+auth_bp = Blueprint("auth",__name__)
+
+@auth_bp.route("/login", methods = ["POST"])
+def login():
+    data = request.get_json(silent=True)
+
+    if not data or "padron" not in data or "contrasena" not in data:
+        return errors.datos_incompletos()
+        
+    padron = data["padron"]
+    contrasena = data["contrasena"]
+
+    usuario, error= auth_db.login_user(padron, contrasena)
+
+    if error:
+        return error
+
+    token = seguridad.generar_token(usuario)
+    return jsonify({'success': True, 'token': token, 'padron': usuario['padron'], 'rol': usuario['rol']}), 200
+
+
+@auth_bp.route("/registro", methods = ["POST"])
+def alta_usuario():
+    data = request.get_json(silent=True)
+
+    if not data or "padron" not in data or "nombres" not in data or "mail" not in data or "contrasena" not in data:
+        return errors.datos_incompletos()
+    
+    if not isinstance(data["padron"], int):
+        return errors.datos_incorrectos("padron")
+    
+    if not isinstance(data["nombres"], str) or len(data["nombres"]) == 0:
+        return errors.datos_incorrectos("nombres")
+    
+    if not es_email_valido(data["mail"]):
+        return errors.datos_incorrectos("mail")
+    
+    if len(data["contrasena"]) < 8:
+        return errors.datos_incorrectos("contraseña")
+    
+    existe_usuario, error = auth_db.existe_usuario(data["padron"])
+
+    if existe_usuario:
+        return errors.ya_existe()
+    
+    if error:
+        return error
+    
+    resultado = auth_db.alta_usuario(data["padron"], "Docente", data["nombres"], data["mail"], data["contrasena"])
+
+    if resultado:
+        return resultado #si llega acá es porque tiró error
+    
+    return ("", 201)
+    
+'''
+Ejemplo de implementación (BORRAR LUEGO)
+@auth_bp.route("/prueba", methods = ["GET"])
+def prueba():
+    palabra = "hola"
+
+    tiene_acceso = seguridad.verificar_token(request.headers, ["Docente"])
+    
+    if tiene_acceso:
+        return jsonify({"palabra": palabra}), 200
+    else:
+        return jsonify({"error": "no autorizado"}), 401
+'''
+
+@auth_bp.route("/verificar_token", methods=["GET"])
+def verificar_token():
+    token = request.args.get("token")
+
+    if not token:
+        return errors.datos_incompletos()
+
     try:
-        conn = get_connection()
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM Usuarios where padron=%s", (padron,))
-        usuario_logueado = cursor.fetchone()
-        cursor.close()
-        conn.close()
-    except Exception as e:
-        return None, errors.server_error(e)
-
-    if not usuario_logueado:
-        return None, errors.no_registrado(padron)
-    
-    contrasena_correcta = comparar_contrasena(contrasena, usuario_logueado["contrasena_hash"])
-
-    if not contrasena_correcta:
-        return None, errors.contrasena_incorrecta()
-
-    return usuario_logueado, None
-
-
-def alta_usuario(padron, rol, nombres, mail, contrasena):
-    try:
-        conn = get_connection()
-        cursor = conn.cursor(dictionary=True)
-        contrasena_hasheada = hashear_contrasena(contrasena)
-        cursor.execute("INSERT INTO Usuarios (padron, rol, nombres, mail, contrasena_hash, created_at) VALUES (%s, %s, %s, %s, %s, %s)", (padron, rol, nombres, mail, contrasena_hasheada, datetime.now()))
-        conn.commit()
-        cursor.close()
-        conn.close()
-    except Exception as e:
-        print(e)
-        return errors.server_error(e)
-    
-    return None
-
-def existe_usuario(padron):
-    try:
-        conn = get_connection()
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM Usuarios where padron=%s", (padron,))
-        usuario= cursor.fetchone()
-        cursor.close()
-        conn.close()
-    except Exception as e:
-        return None, errors.server_error(e)
-    
-    if usuario:
-        return True, None
-    
-    return False, None
-    
-
-def actualizar_contrasena(padron, contrasena_hash):
-    try:
-        conn = get_connection()
-        cursor = conn.cursor()
-
-        cursor.execute(
-            """
-            UPDATE Usuarios
-            SET contrasena_hash = %s
-            WHERE padron = %s
-            """,
-            (contrasena_hash, padron)
+        jwt.decode(
+            token,
+            seguridad.SECRET_KEY,
+            algorithms = ["HS256"]
         )
 
-        conn.commit()
-        cursor.close()
-        conn.close()
+        return jsonify({
+            "code": "200",
+            "message": "OK",
+            "success": True,
+            "description": "Token válido"
+        }), 200
 
-    except Exception:
-        return errors.server_error()
+    except jwt.PyJWTError:
+        return errors.acceso_denegado()
 
-    return None
 
-def obtener_mail_usuario(padron):
+@auth_bp.route("/contrasena_olvidada", methods=["POST"])
+def contrasena_olvidada():
+    data = request.get_json(silent=True)
+
+    if not data or "padron" not in data:
+        return errors.datos_incompletos()
+    
+    usuario, error = auth_db.existe_usuario(data["padron"])
+
+    if error:
+        return error
+    
+    if not usuario:
+        return errors.no_registrado(data["padron"])
+    
+    if usuario:
+        mail_usuario, error_mail= auth_db.obtener_mail_usuario(data["padron"])
+
+        if error_mail:
+            return error_mail
+        
+        token_reset = seguridad.generar_token_contrasena(data["padron"])
+
+        mail_enviado, error_enviando = seguridad.enviar_mail_contrasena(mail_usuario, token_reset)
+
+        if error_enviando:
+            return error_enviando
+        
+        return jsonify({'success': True}), 200
+        
+
+@auth_bp.route("/resetear_contrasena", methods=["PATCH"])
+def resetear_contrasena():
+    data = request.get_json(silent=True)
+    token = request.args.get("token")
+
+    if not "token" or "contrasena" not in data:
+        return errors.datos_incompletos()
+
+    nueva_contrasena = data["contrasena"]
+
     try:
-        conn = get_connection()
-        cursor = conn.cursor(dictionary=True)
+        payload = jwt.decode(
+            token.encode('utf-8'),
+            seguridad.SECRET_KEY,
+            algorithms = ["HS256"]
+        )
 
-        cursor.execute("SELECT mail from Usuarios WHERE padron=%s", (padron,))
-        resultado = cursor.fetchone()
-        cursor.close()
-        conn.close()
-    except Exception as e:
-        return None, errors.server_error(e)
-    
-    if not resultado:
-        return None, errors.no_registrado(padron)
-    
-    return resultado["mail"], None
+    except jwt.PyJWTError as e:
+        return errors.acceso_denegado()
+
+    padron = payload["padron"]
+
+    contrasena_hash = seguridad.hashear_contrasena(nueva_contrasena)
+
+    resultado = auth_db.actualizar_contrasena(padron, contrasena_hash)
+
+    if resultado:
+        return resultado
+
+    return jsonify({
+        "code":"200",
+        "message":"OK",
+        "success": True,
+        "description": "Contraseña actualizada correctamente."
+    }), 200

@@ -1,6 +1,6 @@
 from flask import Flask, Blueprint, jsonify, request, url_for, Response
-from db import get_equipos, crear_equipo, delete_equipo, patch_equipo
-from src.utils.validaciones import validar_curso_id, validar_padron
+from src.db.db import get_equipos, crear_equipo, delete_equipo, patch_equipo
+from src.utils.validaciones import validar_curso_datos, validar_entero
 from typing import Any
 import mysql.connector
 from src.utils.errors import error_response, not_found, bad_request, server_error, conflict

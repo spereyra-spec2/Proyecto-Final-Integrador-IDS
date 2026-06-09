@@ -6,7 +6,7 @@ def init_db():
     current_dir = os.path.dirname(os.path.abspath(__file__))
     
     
-    sql_file_path = os.path.join(current_dir, "src", "models", "init_db.sql")
+    sql_file_path = os.path.join(current_dir, "init_db.sql")
 
     with open(sql_file_path, "r", encoding="utf-8") as f:
         sql = f.read()

@@ -1,14 +1,18 @@
-import mysql.connector
-import sys
 import os
+import sys
+import mysql.connector
 import hashlib
 import time
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-if BASE_DIR not in sys.path:
-    sys.path.insert(0, BASE_DIR)
-import config
+DB_DIR = os.path.dirname(os.path.abspath(__file__))
 
+BACKEND_DIR = os.path.abspath(os.path.join(DB_DIR, '..', '..'))
+
+if BACKEND_DIR not in sys.path:
+    sys.path.insert(0, BACKEND_DIR)
+
+
+import config
 
 def _get_connection():
     return mysql.connector.connect(
@@ -28,29 +32,27 @@ def crear_equipo(curso_id: int, nombre_equipo: str, padrones: list) -> str:
         hash_completo = hashlib.md5(semilla).hexdigest()
         codigo_acceso = hash_completo[:8].upper()  
         '''
+        
         query_equipo = """
-            INSERT INTO equipos (nombre, curso_idcurso, created_at) 
+            INSERT INTO Equipos (nombre, Curso_idCurso, created_at) 
             VALUES (%s, %s, NOW());
         """
         cursor.execute(query_equipo, (nombre_equipo, curso_id))
         
-    
         id_nuevo_equipo = cursor.lastrowid
     
+        
         query_vincular_usuarios_a_equipo = """
-            INSERT INTO usuarios_has_equipos (usuarios_padron, equipos_idequipos, activo, activo_desde)
+            INSERT INTO Usuarios_has_Equipos (Usuarios_padron, Equipos_idEquipos, activo, activo_desde)
             VALUES (%s, %s, 1, NOW());
         """
         
         for padron in padrones:
             cursor.execute(query_vincular_usuarios_a_equipo, (padron, id_nuevo_equipo))
             
-    
         conn.commit()
-        
 
     except mysql.connector.Error as err:
-
         conn.rollback()
         raise err
     finally:
@@ -61,16 +63,17 @@ def crear_equipo(curso_id: int, nombre_equipo: str, padrones: list) -> str:
 def get_equipos(curso_id: int) -> list:
     conn = _get_connection()
     cursor = conn.cursor(dictionary=True)
+    
     query = """
             SELECT 
                 e.idEquipos, 
                 e.nombre AS equipo_nombre,
                 u.padron, 
                 u.nombres AS usuario_nombre
-            FROM equipos e
-            LEFT JOIN usuarios_has_equipos uhe ON e.idEquipos = uhe.equipos_idequipos AND uhe.activo = 1
-            LEFT JOIN usuarios u ON uhe.usuarios_padron = u.padron
-            WHERE e.curso_idcurso = %s;
+            FROM Equipos e
+            LEFT JOIN Usuarios_has_Equipos uhe ON e.idEquipos = uhe.Equipos_idEquipos AND uhe.activo = 1
+            LEFT JOIN Usuarios u ON uhe.Usuarios_padron = u.padron
+            WHERE e.Curso_idCurso = %s;
         """
         
     cursor.execute(query, (curso_id,))
@@ -98,23 +101,25 @@ def get_equipos(curso_id: int) -> list:
 
     return list(equipos_dict.values())
 
+
 def patch_equipo(curso_id, usuarios_padron, data):
     conn = _get_connection()
     cursor = conn.cursor(dictionary=True)
 
     try:
+        
         cursor.execute(
             """
             SELECT
                 equipo.idEquipos AS id,
                 equipo.nombre,
                 equipo.created_at,
-                equipo.curso_idcurso AS curso_id
-            FROM equipos AS equipo
-            INNER JOIN usuarios_has_equipos AS user_has_equipo
-                ON user_has_equipo.equipos_idequipos = equipo.idEquipos
-            WHERE equipo.curso_idcurso = %s
-              AND user_has_equipo.usuarios_padron = %s
+                equipo.Curso_idCurso AS curso_id
+            FROM Equipos AS equipo
+            INNER JOIN Usuarios_has_Equipos AS user_has_equipo
+                ON user_has_equipo.Equipos_idEquipos = equipo.idEquipos
+            WHERE equipo.Curso_idCurso = %s
+              AND user_has_equipo.Usuarios_padron = %s
               AND COALESCE(user_has_equipo.activo, 1) = 1
             """,
             (curso_id, usuarios_padron),
@@ -131,29 +136,31 @@ def patch_equipo(curso_id, usuarios_padron, data):
 
         if alumno_padron is not None:
             if activo == 0:
+                
                 cursor.execute(
                     """
-                    UPDATE usuarios_has_equipos
+                    UPDATE Usuarios_has_Equipos
                     SET activo = 0,
                         activo_hasta = NOW()
-                    WHERE equipos_idequipos = %s
-                      AND usuarios_padron = %s
+                    WHERE Equipos_idEquipos = %s
+                      AND Usuarios_padron = %s
                       AND COALESCE(activo, 1) = 1
                     """,
                     (equipo_id, alumno_padron)
                 )
 
             elif activo == 1:
+                
                 cursor.execute(
                     """
-                    UPDATE usuarios_has_equipos AS user_has_equipo
-                        INNER JOIN equipos AS equipo
-                        ON equipo.idEquipos = user_has_equipo.equipos_idequipos
+                    UPDATE Usuarios_has_Equipos AS user_has_equipo
+                        INNER JOIN Equipos AS equipo
+                        ON equipo.idEquipos = user_has_equipo.Equipos_idEquipos
                     SET user_has_equipo.activo = 0,
                         user_has_equipo.activo_hasta = NOW()
-                    WHERE user_has_equipo.usuarios_padron = %s
-                      AND equipo.curso_idcurso = %s
-                      AND user_has_equipo.equipos_idequipos <> %s
+                    WHERE user_has_equipo.Usuarios_padron = %s
+                      AND equipo.Curso_idCurso = %s
+                      AND user_has_equipo.Equipos_idEquipos <> %s
                       AND COALESCE(user_has_equipo.activo, 1) = 1
                     """,
                     (alumno_padron, curso_id, equipo_id)
@@ -161,15 +168,15 @@ def patch_equipo(curso_id, usuarios_padron, data):
 
                 cursor.execute(
                     """
-                    UPDATE usuarios_has_equipos AS user_has_equipo
-                        INNER JOIN equipos AS equipo
-                        ON equipo.idEquipos = user_has_equipo.equipos_idequipos
+                    UPDATE Usuarios_has_Equipos AS user_has_equipo
+                        INNER JOIN Equipos AS equipo
+                        ON equipo.idEquipos = user_has_equipo.Equipos_idEquipos
                     SET user_has_equipo.activo       = 1,
                         user_has_equipo.activo_desde = COALESCE(user_has_equipo.activo_desde, NOW()),
                         user_has_equipo.activo_hasta = NULL
-                    WHERE user_has_equipo.equipos_idequipos = %s
-                      AND user_has_equipo.usuarios_padron = %s
-                      AND equipo.curso_idcurso = %s
+                    WHERE user_has_equipo.Equipos_idEquipos = %s
+                      AND user_has_equipo.Usuarios_padron = %s
+                      AND equipo.Curso_idCurso = %s
                     """,
                     (equipo_id, alumno_padron, curso_id)
                 )
@@ -177,9 +184,9 @@ def patch_equipo(curso_id, usuarios_padron, data):
                 if cursor.rowcount == 0:
                     cursor.execute(
                         """
-                        INSERT INTO usuarios_has_equipos (
-                            usuarios_padron,
-                            equipos_idequipos,
+                        INSERT INTO Usuarios_has_Equipos (
+                            Usuarios_padron,
+                            Equipos_idEquipos,
                             activo,
                             activo_desde,
                             activo_hasta
@@ -190,9 +197,10 @@ def patch_equipo(curso_id, usuarios_padron, data):
                     )
 
         if tp_id is not None:
+    
             cursor.execute(
                 """
-                UPDATE equipos_has_evaluaciones
+                UPDATE Equipos_has_Evaluaciones
                 SET Evaluaciones_idEvaluacion = %s
                 WHERE Equipos_idEquipos = %s
                 """,
@@ -202,7 +210,7 @@ def patch_equipo(curso_id, usuarios_padron, data):
             if cursor.rowcount == 0:
                 cursor.execute(
                     """
-                    INSERT INTO equipos_has_evaluaciones (
+                    INSERT INTO Equipos_has_Evaluaciones (
                         Equipos_idEquipos,
                         Evaluaciones_idEvaluacion
                     )
@@ -219,8 +227,8 @@ def patch_equipo(curso_id, usuarios_padron, data):
                 equipo.idEquipos AS id,
                 equipo.nombre,
                 equipo.created_at,
-                equipo.curso_idcurso AS curso_id
-            FROM equipos AS equipo
+                equipo.Curso_idCurso AS curso_id
+            FROM Equipos AS equipo
             WHERE equipo.idEquipos = %s
             """,
             (equipo_id,),
@@ -240,15 +248,16 @@ def delete_equipo(curso_id, usuarios_padron):
     conn = _get_connection()
     cursor = conn.cursor(dictionary=True)
     try:
+        
         cursor.execute(
             """
             SELECT
                 equipo.idEquipos AS id
-            FROM equipos AS equipo
-            INNER JOIN usuarios_has_equipos AS user_has_equipo
-                ON user_has_equipo.equipos_idequipos = equipo.idEquipos
-            WHERE equipo.curso_idcurso = %s
-              AND user_has_equipo.usuarios_padron = %s
+            FROM Equipos AS equipo
+            INNER JOIN Usuarios_has_Equipos AS user_has_equipo
+                ON user_has_equipo.Equipos_idEquipos = equipo.idEquipos
+            WHERE equipo.Curso_idCurso = %s
+              AND user_has_equipo.Usuarios_padron = %s
               AND COALESCE(user_has_equipo.activo, 1) = 1
             """,
             (curso_id, usuarios_padron),
@@ -261,10 +270,10 @@ def delete_equipo(curso_id, usuarios_padron):
 
         cursor.execute(
             """
-            UPDATE usuarios_has_equipos
+            UPDATE Usuarios_has_Equipos
             SET activo       = 0,
                 activo_hasta = NOW()
-            WHERE equipos_idequipos = %s
+            WHERE Equipos_idEquipos = %s
               AND COALESCE(activo, 1) = 1
             """,
             (equipo_id,)
@@ -272,9 +281,9 @@ def delete_equipo(curso_id, usuarios_padron):
 
         cursor.execute(
             """
-            DELETE FROM equipos_has_evaluaciones
+            DELETE FROM Equipos_has_Evaluaciones
             WHERE Equipos_idEquipos = %s
-            """,(equipo_id,)
+            """, (equipo_id,)
         )
 
         conn.commit()

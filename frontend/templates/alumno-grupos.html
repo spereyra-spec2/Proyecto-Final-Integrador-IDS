@@ -22,7 +22,6 @@
   </header>
 
   <div class="public-container">
-    <!-- Buscador -->
     <div class="card" style="margin-bottom:24px">
       <div class="card-body" style="display:flex;gap:12px;flex-wrap:wrap;padding:16px 20px">
         <input class="form-input" id="padron-input" placeholder="Tu padrón" style="flex:1;min-width:130px" />
@@ -34,7 +33,6 @@
     </div>
 
     <div id="result" style="display:none">
-      <!-- Mi equipo -->
       <div class="card" style="margin-bottom:20px">
         <div class="card-header" style="display:flex;align-items:center;justify-content:space-between">
           <span class="card-title">🤝 Mi equipo</span>
@@ -45,7 +43,6 @@
         </div>
       </div>
 
-      <!-- Todos los equipos del curso -->
       <div class="card">
         <div class="card-header"><span class="card-title">Equipos del curso</span></div>
         <div class="card-body" style="padding:0">
@@ -61,7 +58,6 @@
   </div>
 </div>
 
-<!-- Modal unirse -->
 <div class="modal-overlay hidden" id="modal-join">
   <div class="modal">
     <div class="modal-header">
@@ -81,7 +77,6 @@
   </div>
 </div>
 
-<!-- Modal crear equipo -->
 <div class="modal-overlay hidden" id="modal-create">
   <div class="modal">
     <div class="modal-header">
@@ -101,154 +96,52 @@
   </div>
 </div>
 
-<script type="module">
-import api from '/static/js/api.js';
-import { buscarAlumno, unirseEquipo, abandonarEquipo, crearEquipo } from '/static/js/alumno.js';
-import { toast, randomCode, initial } from '/static/js/utils.js';
-
-let currenStudent = null;
-let currentTeam = null;
-let allStudents = [];
-let allTeams = [];
-let cursoId = '';
-let padron = '';
-
-async function loadCourses() {
-  const res = await api.filter('Course', { estado: 'activo' });
-  const courses = res.results || [];
-  const sel = document.getElementById('curso-select');
-  courses.forEach(c => {
-    const opt = document.createElement('option');
-    opt.value = c.id; opt.textContent = `${c.nombre} (${c.codigo})`;
-    sel.appendChild(opt);
-  });
-  const savedCurso = localStorage.getItem('alumno_curso');
-  if (savedCurso) sel.value = savedCurso;
-  document.getElementById('padron-input').value = localStorage.getItem('alumno_padron') || '';
-  if (savedCurso) buscar();
-}
-
-window.buscar = async () => {
-  padron  = document.getElementById('padron-input').value.trim();
-  cursoId = document.getElementById('curso-select').value;
-  if (!padron || !cursoId) return;
-  localStorage.setItem('alumno_padron', padron);
-  localStorage.setItem('alumno_curso', cursoId);
-
-  const { student, team } = await buscarAlumno(cursoId, padron);
-  currenStudent = student;
-  currentTeam = team;
-
-  const studRes = await api.filter('Student', { curso_id: cursoId });
-  allStudents = studRes.results || [];
-  const teamsRes = await api.filter('Team', { curso_id: cursoId });
-  allTeams = teamsRes.results || [];
-
-  document.getElementById('result').style.display = 'block';
-  renderMyTeam();
-  renderAllTeams();
-};
-
-function getStudentName(p) {
-  const s = allStudents.find(st => st.padron === p);
-  return s ? s.nombre : p;
-}
-
-function renderMyTeam() {
-  const detail = document.getElementById('team-detail');
-  const actions = document.getElementById('team-actions');
-
-  if (!currentTeam) {
-    detail.innerHTML = '<p style="color:#9ca3af">No estás en ningún equipo.</p>';
-    actions.innerHTML = `
-      <button class="btn btn-outline btn-sm" onclick="document.getElementById('modal-join').classList.remove('hidden')">🔑 Unirse</button>
-      <button class="btn btn-primary btn-sm" onclick="document.getElementById('modal-create').classList.remove('hidden')">➕ Crear</button>
-    `;
-    return;
-  }
-
-  actions.innerHTML = `<button class="btn btn-danger btn-sm" onclick="salir()">🚪 Salir del equipo</button>`;
-  const integrantes = currentTeam.integrantes || [];
-  detail.innerHTML = `
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
-      <div style="font-size:28px">🤝</div>
-      <div>
-        <strong style="font-size:18px">${currentTeam.nombre}</strong>
-        <p style="font-size:13px;color:#6b7280">Código de acceso: <code style="background:#f3f4f6;padding:2px 8px;border-radius:4px;font-weight:700">${currentTeam.codigo_acceso}</code></p>
-      </div>
-    </div>
+<form method="GET" action="/alumno-grupos.html">
     <div>
-      ${integrantes.map(p => `
-        <div style="display:flex;align-items:center;gap:12px;padding:10px;background:${p === padron ? '#e8f0fb' : '#f7f9fc'};border-radius:8px;margin-bottom:6px">
-          <div style="width:36px;height:36px;border-radius:50%;background:${p === padron ? 'var(--color-primary)' : '#d1d5db'};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px">${initial(getStudentName(p))}</div>
-          <div>
-            <strong style="font-size:14px">${getStudentName(p)}</strong>
-            ${p === padron ? '<span class="badge badge-info" style="margin-left:6px">Vos</span>' : ''}
-            <p style="font-size:12px;color:#6b7280">Padrón: ${p}</p>
-          </div>
-        </div>
-      `).join('')}
+        <label for="padron">Ingresá tu Padrón:</label>
+        <input type="number" id="padron" name="padron" value="{{ padron or '' }}" required>
     </div>
-  `;
-}
+    
+    <div>
+        <label for="curso_id">Seleccioná el Curso:</label>
+        <select id="curso_id" name="curso_id" required>
+            <option value="">-- Elige un curso --</option>
+            {% for curso in cursos %}
+                <option value="{{ curso.idCurso }}" {% if curso_id == curso.idCurso %}selected{% endif %}>
+                    {{ curso.nombre }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+    
+    <button type="submit">Consultar</button>
+</form>
 
-function renderAllTeams() {
-  const tbody = document.getElementById('all-teams-tbody');
-  if (!allTeams.length) {
-    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:24px;color:#9ca3af">Sin equipos</td></tr>';
-    return;
-  }
-  tbody.innerHTML = allTeams.map(t => {
-    const count = (t.integrantes || []).length;
-    const cupo = t.cupo_maximo || 5;
-    const libre = cupo - count;
-    const isMine = t.id === currentTeam?.id;
-    return `
-      <tr style="${isMine ? 'background:#e8f0fb' : ''}">
-        <td><strong>${t.nombre}</strong> ${isMine ? '<span class="badge badge-info">Mi equipo</span>' : ''}</td>
-        <td style="font-size:13px">${(t.integrantes||[]).map(p => getStudentName(p)).join(', ') || '—'}</td>
-        <td><span class="badge ${libre > 0 ? 'badge-success' : 'badge-danger'}">${libre} libre${libre !== 1 ? 's' : ''}</span></td>
-      </tr>
-    `;
-  }).join('');
-}
+{% if busqueda_realizada %}
+    <hr>
+    <h3>Resultados de búsqueda:</h3>
 
-window.salir = async () => {
-  if (!confirm(`¿Salir del equipo "${currentTeam?.nombre}"?`)) return;
-  await abandonarEquipo(currentTeam, padron, currenStudent?.id);
-  currentTeam = null;
-  toast('Saliste del equipo', 'success');
-  buscar();
-};
-
-document.getElementById('btn-join').addEventListener('click', async () => {
-  const code = document.getElementById('join-code').value.trim().toUpperCase();
-  if (!code) { toast('Ingresá el código', 'error'); return; }
-  const team = await unirseEquipo(cursoId, padron, code, currenStudent?.id);
-  toast(`Te uniste a ${team.nombre}`, 'success');
-  document.getElementById('modal-join').classList.add('hidden');
-  buscar();
-});
-
-document.getElementById('btn-create').addEventListener('click', async () => {
-  const nombre = document.getElementById('create-name').value.trim();
-  if (!nombre) { 
-    toast('Ingresá un nombre para el equipo', 'error'); 
-    return; 
-  }
-  try {
-    await crearEquipo(cursoId, nombre, padron);
-
-    toast(`Equipo "${nombre}" creado exitosamente`, 'success');
-    document.getElementById('modal-create').classList.add('hidden');
-    document.getElementById('create-name').value = '';
-    buscar();
-  } catch (error) {
-    toast(error.message, 'error');
-  }
-});
-
-loadCourses();
-</script>
+    {% if equipo_del_alumno %}
+        <div style="background-color: #d4edda; color: #155724; padding: 15px; margin-bottom: 20px;">
+            ¡Ya estás registrado en el equipo: <strong>{{ equipo_del_alumno.nombre }}</strong>! (ID: {{ equipo_del_alumno.idEquipos }})
+        </div>
+    {% else %}
+        <div style="background-color: #fff3cd; color: #856404; padding: 15px; margin-bottom: 20px;">
+            No tenés un equipo asignado en este curso todavía. Podés crear uno a continuación:
+        </div>
+        
+        <form method="POST" action="/crear-equipo">
+            <input type="hidden" name="curso_id" value="{{ curso_id }}">
+            <input type="hidden" name="padron_creador" value="{{ padron }}">
+            
+            <div>
+                <label for="nombre_equipo">Nombre de tu Nuevo Equipo:</label>
+                <input type="text" id="nombre_equipo" name="nombre_equipo" placeholder="Ej: Grupo Los Simuladores" required>
+            </div>
+            
+            <button type="submit" style="margin-top: 10px;">Crear Equipo</button>
+        </form>
+    {% endif %}
+{% endif %}
 </body>
 </html>

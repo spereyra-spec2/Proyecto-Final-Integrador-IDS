@@ -2,7 +2,7 @@ from db import get_equipos, crear_equipo as db_crear_equipo, patch_equipo as db_
 from src.utils.errors import bad_request, not_found
 import requests
 
-BACKEND_URL = "http://localhost:5001/api/cursos"
+BACKEND_URL = "http://localhost:3006/api/cursos"
 
 def listar_equipos(curso_id):
     response = requests.get(f"{BACKEND_URL}/{curso_id}/equipos")

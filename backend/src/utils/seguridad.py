@@ -58,7 +58,7 @@ def generar_token_contrasena(padron):
 
 
 def enviar_mail_contrasena(destinatario, token):
-    link = f"http://localhost:3000/resetear-contrasena?token={token}" #despues cambiar cuando se integre front, solo es de prueba
+    link = f"http://localhost:5001/api/auth/resetear_contrasena?token={token}" #despues cambiar cuando se integre front, solo es de prueba
     mensaje = Message(
         subject="Recuperación de Contraseña",
         sender= current_app.config['MAIL_USERNAME'],
