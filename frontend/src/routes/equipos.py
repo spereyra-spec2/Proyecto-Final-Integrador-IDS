@@ -39,7 +39,7 @@ def post_equipo(curso_id):
     return jsonify(equipo), 201
 
 
-@equipos_bp.route('<int:curso_id>/equipos/<int:usuario_padron>', methods=['PATCH'])
+@equipos_bp.route('/<int:curso_id>/equipos/<int:usuario_padron>', methods=['PATCH'])
 def patch_equipo_route(curso_id, usuario_padron):
 
     try:
@@ -61,7 +61,7 @@ def patch_equipo_route(curso_id, usuario_padron):
     return jsonify(equipo) , 200
 
 
-@equipos_bp.route('<int:curso_id>/equipos/<int:usuario_padron>', methods=['DELETE'])
+@equipos_bp.route('/<int:curso_id>/equipos/<int:usuario_padron>', methods=['DELETE'])
 def delete_equipo_route(curso_id, usuario_padron):
 
     try:

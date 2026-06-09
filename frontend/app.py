@@ -49,42 +49,63 @@ def alumno_notas(): return render_template('alumno-notas.html')
 def alumno_grupos():
     conn = _get_connection()
     cursor = conn.cursor(dictionary=True)
-    
 
     cursor.execute("SELECT idCurso, nombre FROM Curso")
     cursos = cursor.fetchall()
-    
+
     padron = request.args.get('padron')
     curso_id = request.args.get('curso_id')
-    
+
     equipo_del_alumno = None
     busqueda_realizada = False
-    
+    equipos_del_curso = []
 
     if padron and curso_id:
         busqueda_realizada = True
-        
-        
-        query_busqueda = """
-            SELECT e.idEquipos, e.nombre 
-            FROM Equipos e
-            JOIN Usuarios_has_Equipos uhe ON e.idEquipos = uhe.Equipos_idEquipos
-            WHERE uhe.Usuarios_padron = %s AND e.Curso_idCurso = %s AND uhe.activo = 1
-        """
-        cursor.execute(query_busqueda, (padron, curso_id))
+
+        cursor.execute("""
+                       SELECT e.idEquipos, e.nombre
+                       FROM Equipos e
+                                JOIN Usuarios_has_Equipos uhe
+                                     ON e.idEquipos = uhe.Equipos_idEquipos
+                       WHERE uhe.Usuarios_padron = %s
+                         AND e.Curso_idCurso = %s
+                         AND uhe.activo = 1
+                       """, (int(padron), int(curso_id)))
+
         equipo_del_alumno = cursor.fetchone()
-        
+
+    if padron and curso_id:
+        busqueda_realizada = True
+
+        query_equipos = """
+                        SELECT e.idEquipos, \
+                               e.nombre, \
+                               COUNT(uhe.Usuarios_padron) AS integrantes
+                        FROM Equipos e
+                                 LEFT JOIN Usuarios_has_Equipos uhe
+                                           ON e.idEquipos = uhe.Equipos_idEquipos
+                                               AND uhe.activo = 1
+                        WHERE e.Curso_idCurso = %s
+                        GROUP BY e.idEquipos, e.nombre \
+                        """
+
+        cursor.execute(query_equipos, (curso_id,))
+        equipos_del_curso = cursor.fetchall()
+
     cursor.close()
     conn.close()
-    
+
     return render_template(
-        'alumno-grupos.html', 
+        'alumno-grupos.html',
         cursos=cursos,
         padron=padron,
         curso_id=int(curso_id) if curso_id else None,
         equipo_del_alumno=equipo_del_alumno,
+        equipos_del_curso=equipos_del_curso,
         busqueda_realizada=busqueda_realizada
     )
+
 
 @app.route('/alumno-asistencia.html')
 def alumno_asistencia(): return render_template('alumno-asistencia.html')

@@ -4,15 +4,40 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mi Grupo — AcademiQ</title>
+
   <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}" />
 </head>
 <body>
 
+<script>
+function buscar() {
+    const padron = document.getElementById("padron-input").value;
+    const cursoId = document.getElementById("curso-select").value;
+
+    if (!padron) {
+        alert("Ingresá tu padrón");
+        return;
+    }
+
+    if (!cursoId) {
+        alert("Seleccioná un curso");
+        return;
+    }
+
+    window.location.href =
+        `/alumno-grupos.html?padron=${padron}&curso_id=${cursoId}`;
+}
+</script>
+
 <div class="public-shell">
+
   <header class="public-topbar">
-    <div class="public-topbar-logo"><span>🎓</span> AcademiQ</div>
+    <div class="public-topbar-logo">
+      <span>🎓</span> AcademiQ
+    </div>
+
     <nav class="public-topbar-nav">
       <a href="alumno-inicio.html">Inicio</a>
       <a href="alumno-notas.html">Mis Notas</a>
@@ -22,126 +47,290 @@
   </header>
 
   <div class="public-container">
+
+
     <div class="card" style="margin-bottom:24px">
-      <div class="card-body" style="display:flex;gap:12px;flex-wrap:wrap;padding:16px 20px">
-        <input class="form-input" id="padron-input" placeholder="Tu padrón" style="flex:1;min-width:130px" />
-        <select class="form-select" id="curso-select" style="flex:2;min-width:200px">
+      <div class="card-body"
+           style="display:flex;gap:12px;flex-wrap:wrap;padding:16px 20px">
+
+        <input
+          class="form-input"
+          id="padron-input"
+          value="{{ padron or '' }}"
+          placeholder="Tu padrón"
+          style="flex:1;min-width:130px"
+        />
+
+        <select
+          class="form-select"
+          id="curso-select"
+          style="flex:2;min-width:200px"
+        >
           <option value="">Seleccioná curso</option>
+
+          {% for curso in cursos %}
+            <option
+              value="{{ curso.idCurso }}"
+              {% if curso_id == curso.idCurso %}selected{% endif %}
+            >
+              {{ curso.nombre }}
+            </option>
+          {% endfor %}
         </select>
-        <button class="btn btn-primary" onclick="buscar()">🔍 Consultar</button>
+
+        <button
+          class="btn btn-primary"
+          onclick="buscar()"
+        >
+          🔍 Consultar
+        </button>
+
       </div>
     </div>
 
-    <div id="result" style="display:none">
+    {% if busqueda_realizada %}
+
+    <div id="result">
+
+        <p>DEBUG:</p>
+<p>{{ equipo_del_alumno }}</p>
       <div class="card" style="margin-bottom:20px">
-        <div class="card-header" style="display:flex;align-items:center;justify-content:space-between">
+
+        <div class="card-header"
+             style="display:flex;align-items:center;justify-content:space-between">
+
           <span class="card-title">🤝 Mi equipo</span>
-          <div id="team-actions" style="display:flex;gap:8px"></div>
+
+          <div id="team-actions" style="display:flex;gap:8px">
+            {% if not equipo_del_alumno %}
+              <button class="btn btn-outline btn-sm"
+                      onclick="document.getElementById('modal-create').classList.remove('hidden')">
+                ➕ Crear
+              </button>
+            {% endif %}
+          </div>
+
         </div>
-        <div class="card-body" id="team-detail">
-          <p style="color:#9ca3af">No estás en ningún equipo.</p>
+
+        <div class="card-body">
+
+          {% if equipo_del_alumno %}
+
+            <div style="padding:12px">
+
+              <h3 style="margin-bottom:10px">
+                {{ equipo_del_alumno.nombre }}
+              </h3>
+
+              <p>
+                ID del equipo:
+                <strong>{{ equipo_del_alumno.idEquipos }}</strong>
+              </p>
+
+              <p style="color:#16a34a">
+                Ya estás registrado en este equipo.
+              </p>
+
+            </div>
+
+          {% else %}
+
+            <p style="color:#9ca3af">
+              No estás en ningún equipo.
+            </p>
+
+          {% endif %}
+
         </div>
+
       </div>
 
+      <!-- Equipos del curso -->
       <div class="card">
-        <div class="card-header"><span class="card-title">Equipos del curso</span></div>
-        <div class="card-body" style="padding:0">
-          <div class="table-wrapper">
-            <table class="table">
-              <thead><tr><th>Equipo</th><th>Integrantes</th><th>Lugares</th></tr></thead>
-              <tbody id="all-teams-tbody"></tbody>
-            </table>
-          </div>
+
+        <div class="card-header">
+          <span class="card-title">Equipos del curso</span>
         </div>
+
+        <div class="card-body" style="padding:0">
+
+          <div class="table-wrapper">
+
+            <table class="table">
+
+              <thead>
+                <tr>
+                  <th>Equipo</th>
+                  <th>Integrantes</th>
+                  <th>-</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                <tr>
+                  <td colspan="3"
+                      style="text-align:center;padding:20px;color:#9ca3af">
+                    <tbody>
+                        {% for equipo in equipos_del_curso %}
+                        <tr>
+                            <td>
+                                {{ equipo.nombre }}
+                            </td>
+                            <td>
+                                {{ equipo.integrantes }}
+                            </td>
+                            <td>
+                                -
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% if not equipos_del_curso %}
+                        <tr>
+                            <td colspan="3" style="text-align:center">
+                                No hay equipos en este curso.
+                            </td>
+                        </tr>
+                        {% endif %}
+
+                        </tbody>
+                  </td>
+                </tr>
+              </tbody>
+
+            </table>
+
+          </div>
+
+        </div>
+
       </div>
+
     </div>
+
+    {% endif %}
+
   </div>
+
 </div>
 
+<!-- Modal unirse -->
 <div class="modal-overlay hidden" id="modal-join">
   <div class="modal">
+
     <div class="modal-header">
       <span class="modal-title">Unirse a un equipo</span>
-      <button class="modal-close" onclick="document.getElementById('modal-join').classList.add('hidden')">✕</button>
+
+      <button class="modal-close"
+              onclick="document.getElementById('modal-join').classList.add('hidden')">
+        ✕
+      </button>
     </div>
+
     <div class="modal-body">
       <div class="form-group">
-        <label class="form-label">Código de acceso</label>
-        <input class="form-input" id="join-code" placeholder="Ej: A3B2C1" style="text-transform:uppercase;font-family:monospace;font-size:18px;letter-spacing:3px" />
+
+        <label class="form-label">
+          Código de acceso
+        </label>
+
+        <input
+          class="form-input"
+          id="join-code"
+          placeholder="Ej: A3B2C1"
+          style="text-transform:uppercase;font-family:monospace;font-size:18px;letter-spacing:3px"
+        />
+
       </div>
     </div>
+
     <div class="modal-footer">
-      <button class="btn btn-outline" onclick="document.getElementById('modal-join').classList.add('hidden')">Cancelar</button>
-      <button class="btn btn-primary" id="btn-join">Unirse</button>
+
+      <button
+        class="btn btn-outline"
+        onclick="document.getElementById('modal-join').classList.add('hidden')"
+      >
+        Cancelar
+      </button>
+
+      <button class="btn btn-primary">
+        Unirse
+      </button>
+
     </div>
+
   </div>
 </div>
 
+<!-- Modal crear -->
 <div class="modal-overlay hidden" id="modal-create">
   <div class="modal">
+
     <div class="modal-header">
       <span class="modal-title">Crear equipo</span>
-      <button class="modal-close" onclick="document.getElementById('modal-create').classList.add('hidden')">✕</button>
+
+      <button class="modal-close"
+              onclick="document.getElementById('modal-create').classList.add('hidden')">
+        ✕
+      </button>
     </div>
+
     <div class="modal-body">
-      <div class="form-group">
-        <label class="form-label">Nombre del equipo</label>
-        <input class="form-input" id="create-name" placeholder="Ej: Los Recursivos" />
-      </div>
+
+      <form method="POST" action="/crear-equipo">
+
+        <input
+          type="hidden"
+          name="curso_id"
+          value="{{ curso_id }}"
+        >
+
+        <input
+          type="hidden"
+          name="padron_creador"
+          value="{{ padron }}"
+        >
+
+        <div class="form-group">
+
+          <label class="form-label">
+            Nombre del equipo
+          </label>
+
+          <input
+            class="form-input"
+            type="text"
+            name="nombre_equipo"
+            placeholder="Ej: Los Recursivos"
+            required
+          />
+
+        </div>
+
+        <div class="modal-footer">
+
+          <button
+            type="button"
+            class="btn btn-outline"
+            onclick="document.getElementById('modal-create').classList.add('hidden')"
+          >
+            Cancelar
+          </button>
+
+          <button
+            type="submit"
+            class="btn btn-primary"
+          >
+            Crear
+          </button>
+
+        </div>
+
+      </form>
+
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-outline" onclick="document.getElementById('modal-create').classList.add('hidden')">Cancelar</button>
-      <button class="btn btn-primary" id="btn-create">Crear</button>
-    </div>
+
   </div>
 </div>
 
-<form method="GET" action="/alumno-grupos.html">
-    <div>
-        <label for="padron">Ingresá tu Padrón:</label>
-        <input type="number" id="padron" name="padron" value="{{ padron or '' }}" required>
-    </div>
-    
-    <div>
-        <label for="curso_id">Seleccioná el Curso:</label>
-        <select id="curso_id" name="curso_id" required>
-            <option value="">-- Elige un curso --</option>
-            {% for curso in cursos %}
-                <option value="{{ curso.idCurso }}" {% if curso_id == curso.idCurso %}selected{% endif %}>
-                    {{ curso.nombre }}
-                </option>
-            {% endfor %}
-        </select>
-    </div>
-    
-    <button type="submit">Consultar</button>
-</form>
-
-{% if busqueda_realizada %}
-    <hr>
-    <h3>Resultados de búsqueda:</h3>
-
-    {% if equipo_del_alumno %}
-        <div style="background-color: #d4edda; color: #155724; padding: 15px; margin-bottom: 20px;">
-            ¡Ya estás registrado en el equipo: <strong>{{ equipo_del_alumno.nombre }}</strong>! (ID: {{ equipo_del_alumno.idEquipos }})
-        </div>
-    {% else %}
-        <div style="background-color: #fff3cd; color: #856404; padding: 15px; margin-bottom: 20px;">
-            No tenés un equipo asignado en este curso todavía. Podés crear uno a continuación:
-        </div>
-        
-        <form method="POST" action="/crear-equipo">
-            <input type="hidden" name="curso_id" value="{{ curso_id }}">
-            <input type="hidden" name="padron_creador" value="{{ padron }}">
-            
-            <div>
-                <label for="nombre_equipo">Nombre de tu Nuevo Equipo:</label>
-                <input type="text" id="nombre_equipo" name="nombre_equipo" placeholder="Ej: Grupo Los Simuladores" required>
-            </div>
-            
-            <button type="submit" style="margin-top: 10px;">Crear Equipo</button>
-        </form>
-    {% endif %}
-{% endif %}
 </body>
 </html>
