@@ -1,89 +1,18 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard — AcademiQ Profesor</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}" />
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}" />
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}" />
-</head>
-<body>
+{% extends "base_profesores.html" %}
 
-<!-- ========== SIDEBAR ========== -->
-<div class="sidebar-overlay"></div>
-<aside class="sidebar">
-  <div class="sidebar-logo">
-    <div class="sidebar-logo-icon">🎓</div>
-    <div>
-      <div class="sidebar-logo-text">AcademiQ</div>
-      <div class="sidebar-logo-sub">Panel Docente</div>
-    </div>
-  </div>
+{% block title %} Dashboard — AcademiQ Profesor {% endblock %}
 
-  <nav class="sidebar-nav">
-    <div class="nav-section-label">General</div>
-    <a class="nav-item active" href="{{ url_for('profesor.dashboard') }}">
-      <span class="nav-icon">📊</span> Dashboard
-    </a>
-    <a class="nav-item" href="{{ url_for('profesor.vista_cursos') }}">
-      <span class="nav-icon">📚</span> Mis Cursos
-    </a>
+{% block topbar_titulo %} Dashboard {% endblock %}
 
-    <div class="nav-section-label" id="curso-nav-label" style="display:none">Curso Actual</div>
-    <a class="nav-item" href="#" id="nav-alumnos" style="display:none">
-      <span class="nav-icon">👥</span> Alumnos
-    </a>
-    <a class="nav-item" href="#" id="nav-equipos" style="display:none">
-      <span class="nav-icon">🤝</span> Equipos
-    </a>
-    <a class="nav-item" href="#" id="nav-evals" style="display:none">
-      <span class="nav-icon">📝</span> Evaluaciones
-    </a>
-    <a class="nav-item" href="#" id="nav-asist" style="display:none">
-      <span class="nav-icon">✅</span> Asistencia
-    </a>
-  </nav>
+{% block menu_titulo %} Bienvenido 👋 {% endblock %}
 
-  <div class="sidebar-footer">
-    <div class="sidebar-user">
-      <div class="sidebar-user-avatar" id="user-avatar">P</div>
-      <div>
-        <div class="sidebar-user-name" id="user-name">Profesor</div>
-        <div class="sidebar-user-role">Docente</div>
-      </div>
-    </div>
-    <a class="nav-item" href="{{ url_for('auth.cerrar_sesion') }}" style="margin-top:6px">
-      <span class="nav-icon">🚪</span> Cerrar sesión
-    </a>
-  </div>
-</aside>
-
-<!-- ========== MAIN ========== -->
-<div class="main-content">
-  <div class="topbar">
-    <button class="hamburger">☰</button>
-    <span class="topbar-title">Dashboard</span>
-  </div>
-
-  <div class="page-content">
-    <div class="page-header">
-      <div>
-        <h1 class="page-title">Bienvenido 👋</h1>
-        <p class="page-subtitle">Resumen general de tus cursos activos</p>
-      </div>
-      <a href="{{ url_for('profesor.vista_cursos') }}" class="btn btn-primary">
-        ➕ Nuevo curso
-      </a>
-    </div>
-
+{% block content %}
     <!-- Stats -->
     <div class="grid-4" style="margin-bottom:28px">
       <div class="stat-card">
         <div class="stat-icon blue">📚</div>
         <div>
           <div class="stat-label">Cursos activos</div>
-          <!-- Calculamos la cantidad de elementos en la lista de forma nativa -->
           <div class="stat-value" id="stat-cursos">{{ cursos|length }}</div>
         </div>
       </div>
@@ -91,21 +20,21 @@
         <div class="stat-icon gold">👥</div>
         <div>
           <div class="stat-label">Total alumnos</div>
-          <div class="stat-value" id="stat-alumnos">-</div>
+          <div class="stat-value" id="stat-alumnos">—</div>
         </div>
       </div>
       <div class="stat-card">
         <div class="stat-icon green">🤝</div>
         <div>
           <div class="stat-label">Equipos formados</div>
-          <div class="stat-value" id="stat-equipos">-</div>
+          <div class="stat-value" id="stat-equipos">—</div>
         </div>
       </div>
       <div class="stat-card">
         <div class="stat-icon red">📝</div>
         <div>
           <div class="stat-label">Evaluaciones</div>
-          <div class="stat-value" id="stat-evals">-</div>
+          <div class="stat-value" id="stat-evals">—</div>
         </div>
       </div>
     </div>
@@ -152,10 +81,7 @@
         </div>
       </div>
     </div>
-  </div>
-</div>
 
 <script src="{{ url_for('static', filename='js/utils.js') }}"></script>
 <script src="{{ url_for('static', filename='js/profesor.js') }}"></script>
-</body>
-</html>
+{% endblock %}

@@ -1,73 +1,27 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Alumnos — AcademiQ</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}" />
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}" />
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}" />
-</head>
-<body>
+{% extends "base_profesores.html" %}
 
-<div class="sidebar-overlay"></div>
-<aside class="sidebar">
-  <div class="sidebar-logo">
-    <div class="sidebar-logo-icon">🎓</div>
-    <div>
-      <div class="sidebar-logo-text">AcademiQ</div>
-      <div class="sidebar-logo-sub">Panel Docente</div>
-    </div>
-  </div>
-  <nav class="sidebar-nav">
-    <div class="nav-section-label">General</div>
-    <a class="nav-item" href="{{ url_for('profesor.dashboard') }}"><span class="nav-icon">📊</span> Dashboard</a>
-    <a class="nav-item" href="{{ url_for('profesor.vista_cursos') }}"><span class="nav-icon">📚</span> Mis Cursos</a>
-    <div class="nav-section-label">Curso actual</div>
-    <a class="nav-item active" href="#"><span class="nav-icon">👥</span> Alumnos</a>
-    <a class="nav-item" id="nav-equipos" href="#"><span class="nav-icon">🤝</span> Equipos</a>
-    <a class="nav-item" id="nav-evals" href="#"><span class="nav-icon">📝</span> Evaluaciones</a>
-    <a class="nav-item" id="nav-asist" href="#"><span class="nav-icon">✅</span> Asistencia</a>
-  </nav>
-  <div class="sidebar-footer">
-    <div class="sidebar-user">
-      <div class="sidebar-user-avatar" id="user-avatar">P</div>
-      <div>
-        <div class="sidebar-user-name" id="user-name">Profesor</div>
-        <div class="sidebar-user-role">Docente</div>
-      </div>
-    </div>
-     <a class="nav-item" href="{{ url_for('auth.logout') }}"><span class="nav-icon">🚪</span> Cerrar sesión</a>
-  </div>
-</aside>
+{% block title %} Alumnos — AcademiQ {% endblock %}
 
-<div class="main-content">
-  <div class="topbar">
-    <button class="hamburger">☰</button>
-    <span class="topbar-title">Alumnos</span>
-  </div>
+{% block topbar_titulo %} Alumnos {% endblock %}
 
-  <div class="page-content">
-    <div class="page-header">
-      <div>
-        <h1 class="page-title">Alumnos</h1>
-        <p class="page-subtitle">Comisión ID: {{ curso.idCurso }}</p>
-      </div>
-      <div class="page-actions">
-        <!-- Importar CSV Masivo -->
+{% block menu_titulo %} Alumnos {% endblock %}
+
+{% block content %}
+    <div class="page-header" style="margin-top: -20px; margin-bottom: 20px;">
+      <div class="page-actions" style="display: flex; justify-content: flex-end; width: 100%;">
+        
         <form action="{{ url_for('profesor.importar_csv', id_curso=curso.idCurso) }}" method="POST" enctype="multipart/form-data" style="display: inline-flex; gap: 8px;">
           <input type="file" name="file" accept=".csv" required style="display: none;" id="input-csv-hidden" onchange="this.form.submit()">
           <button type="button" class="btn btn-outline" id="btn-csv" onclick="document.getElementById('input-csv-hidden').click()">📥 Importar CSV</button>
         </form>
-        <button class="btn btn-primary" onclick="window.configurarModalAlta('{{ curso.idCurso }}')">➕ Agregar alumno</button>
+        <button class="btn btn-primary" onclick="window.configurarModalAlta('{{ curso.idCurso }}')" style="margin-left: 8px;">➕ Agregar alumno</button>
       </div>
     </div>
 
-    <!-- Filtros por URL nativos -->
+   
     <div class="card" style="margin-bottom:20px">
       <div class="card-body">
         <form action="{{ url_for('profesor.vista_alumnos', id_curso=curso.idCurso) }}" method="GET" style="display:flex;gap:12px;flex-wrap:wrap;padding:2px 0px">
-          <!-- Campo de búsqueda corregido numérico para padrón, guardando el valor de la url -->
           <input type="number" id="search" name="buscar" class="form-input" placeholder="🔍 Buscar por padrón..." value="{{ request.args.get('buscar', '') }}" style="flex:1;min-width:200px" />
           <select class="form-select" id="filter-estado" name="estado" style="width:160px" onchange="this.form.submit()">
             <option value="">Todos</option>
@@ -79,7 +33,6 @@
       </div>
     </div>
 
-    <!-- Mensajes de respuesta del Backend -->
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         {% for category, message in messages %}
@@ -112,13 +65,13 @@
                     {% endif %}
                   </td>
                   <td style="display: flex; gap: 6px; align-items: center;">
-                    <!-- Ver Ficha Técnica (Notas y Asistencias) -->
+                  
                     <a href="{{ url_for('profesor.vista_ficha_alumno', id_curso=curso.idCurso, padron=alumno.padron) }}" class="btn btn-sm btn-outline" title="Ver Ficha">🔍</a>
                     
-                    <!-- Editar datos mediante el modal desplegable -->
+                    
                     <button class="btn btn-sm btn-outline" onclick="window.configurarModalEditar('{{ alumno.padron }}', '{{ alumno.nombres }}', '{{ alumno.mail }}', '{{ alumno.Estado }}', '{{ curso.idCurso }}')" title="Editar">✏️</button>
                     
-                    <!-- Baja lógica directa de la comisión -->
+                 
                     <form action="{{ url_for('profesor.baja_logica_alumno', id_curso=curso.idCurso, padron=alumno.padron) }}" method="POST" style="display:inline;" onsubmit="return confirm('¿Seguro que deseas dar de baja a este alumno del curso?');">
                       <button type="submit" class="btn btn-sm btn-danger" title="Dar de baja">🗑️</button>
                     </form>
@@ -133,8 +86,6 @@
         </div>
       </div>
     </div>
-  </div>
-</div>
 
 <!-- Modal: Registro y Edición -->
 <div class="modal-overlay hidden" id="modal-student">
@@ -177,5 +128,4 @@
 
 <script src="{{ url_for('static', filename='js/utils.js') }}"></script>
 <script src="{{ url_for('static', filename='js/profesor.js') }}"></script>
-</body>
-</html>
+{% endblock %}
