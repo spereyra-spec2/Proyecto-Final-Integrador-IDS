@@ -46,7 +46,7 @@
     <div class="page-header">
       <div>
         <h1 class="page-title">{% block menu_titulo %}{% endblock %}</h1>
-        <p class="page-subtitle" id="course-sub">Cargando...</p>
+        <p class="page-subtitle" id="course-sub">{% block menu_parrafo %}{% endblock %}</p>
       </div>
         <button class="btn btn-primary" id="btn-generate-qr">{% block menu_accion_btn %}{% endblock %}</button>
     </div>
@@ -55,4 +55,4 @@
 </div>
 
 </body>
-    
+</html>

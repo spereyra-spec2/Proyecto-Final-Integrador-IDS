@@ -53,7 +53,7 @@ def registro():
 def login():
     #si ya tiene sesión lo manda al inicio
     if utils.usuario_actual():
-        return redirect(url_for('profesor.asistencia'))
+        return redirect(url_for('profesor.dashboard'))
     
     if request.method == 'POST':
         padron = request.form.get('padron', '').strip() #obtiene datos del json
@@ -84,7 +84,7 @@ def login():
             utils.guardar_sesion(resultado['token'], resultado['padron'], resultado['rol'])
             flash('Bienvenido', 'success')
 
-            return redirect(url_for('profesor.asistencia'))
+            return redirect(url_for('profesor.dashboard'))
     
         for mensaje in utils.extraer_mensaje_error(resultado.get('error_response')):
             flash(mensaje, 'error')
@@ -170,11 +170,4 @@ def resetear_contrasena():
 @auth_bp.route('/cerrar_sesion', methods=['POST'])
 def cerrar_sesion():
     utils.limpiar_sesion()
-    return redirect(url_for('auth.login'))
-
-
-@auth_bp.route('/logout', methods=['GET'])
-def logout():
-    session.clear()  # Limpia el token y datos guardados por utils.guardar_sesion
-    flash("Sesión cerrada correctamente", "success")
     return redirect(url_for('auth.login'))

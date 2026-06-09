@@ -10,9 +10,9 @@ profesor_bp = Blueprint('profesor', __name__)
 
 
 
-@profesor_bp.route('/asistencia', methods = ['GET'])
-def asistencia():
-    return render_template('profesor-asistencia.html')
+# @profesor_bp.route('/asistencia', methods = ['GET'])
+# def asistencia():
+#     return render_template('profesor-asistencia.html')
 
 
 # VISTA GENERAL DOCENTE
@@ -38,6 +38,7 @@ def dashboard():
 def vista_cursos():
     usuario = utils.verificar_docente_autenticado()
     if not usuario:
+        flash("Por favor, iniciá sesión para acceder a tus cursos.", "error")
         return redirect(url_for('auth.login'))
         
     # GET /api/cursos
