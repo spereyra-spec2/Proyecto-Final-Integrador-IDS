@@ -5,7 +5,7 @@ from src.db.db import get_connection
 
 evaluaciones_bp = Blueprint('evaluaciones', __name__)
 
-@evaluaciones_bp.route('', methods=['POST'])
+@evaluaciones_bp.route('/', methods=['POST'])
 def create_evaluacion():
     data = request.get_json()
     
@@ -51,7 +51,7 @@ def create_evaluacion():
         conn.close()
 
 
-@evaluaciones_bp.route('', methods=['GET'])
+@evaluaciones_bp.route('/', methods=['GET'])
 def get_evaluaciones():
     try:
         conn = get_connection()
