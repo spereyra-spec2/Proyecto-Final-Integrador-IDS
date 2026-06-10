@@ -61,10 +61,16 @@ def alumno_equipos():
     padron = request.args.get('padron')
     curso_id = request.args.get('curso_id')
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
 <<<<<<< HEAD
     
     equipos_del_alumno = []
+=======
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 
@@ -75,6 +81,7 @@ def alumno_equipos():
 
     if padron and curso_id:
         busqueda_realizada = True
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
 
         cursor.execute("""
@@ -112,6 +119,8 @@ def alumno_equipos():
 
     return render_template(
 =======
+=======
+>>>>>>> Stashed changes
 <<<<<<< HEAD
         try:
             from frontend.src.services.equipos import listar_equipos
@@ -321,6 +330,9 @@ def alumno_leave():
     conn.close()
 
     return render_template(
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
         'alumno-grupos.html',
         cursos=cursos,
