@@ -7,7 +7,7 @@ evaluaciones_bp = Blueprint('evaluaciones', __name__)
 @evaluaciones_bp.route('', methods=['GET', 'POST'])
 def evaluaciones():
 
-    if requests.method == 'POST':
+    if request.method == 'POST':
         # Obtener datos del formulario (sin instancia)
         datos = {
             'tipo': request.form.get('tipo'),
