@@ -60,19 +60,10 @@ def alumno_equipos():
 
     padron = request.args.get('padron')
     curso_id = request.args.get('curso_id')
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-=======
-=======
->>>>>>> Stashed changes
 <<<<<<< HEAD
     
     equipos_del_alumno = []
 =======
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 
     equipo_del_alumno = None
 >>>>>>> 39f3849041f3acfe577c4c6f931603b1b46b8511
@@ -81,46 +72,6 @@ def alumno_equipos():
 
     if padron and curso_id:
         busqueda_realizada = True
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-
-        cursor.execute("""
-                       SELECT e.idEquipos, e.nombre
-                       FROM Equipos e
-                                JOIN Usuarios_has_Equipos uhe
-                                     ON e.idEquipos = uhe.Equipos_idEquipos
-                       WHERE uhe.Usuarios_padron = %s
-                         AND e.Curso_idCurso = %s
-                         AND uhe.activo = 1
-                       """, (int(padron), int(curso_id)))
-
-        equipo_del_alumno = cursor.fetchone()
-
-    if padron and curso_id:
-        busqueda_realizada = True
-
-        query_equipos = """
-                        SELECT e.idEquipos, \
-                               e.nombre, \
-                               COUNT(uhe.Usuarios_padron) AS integrantes
-                        FROM Equipos e
-                                 LEFT JOIN Usuarios_has_Equipos uhe
-                                           ON e.idEquipos = uhe.Equipos_idEquipos
-                                               AND uhe.activo = 1
-                        WHERE e.Curso_idCurso = %s
-                        GROUP BY e.idEquipos, e.nombre \
-                        """
-
-        cursor.execute(query_equipos, (curso_id,))
-        equipos_del_curso = cursor.fetchall()
-
-    cursor.close()
-    conn.close()
-
-    return render_template(
-=======
-=======
->>>>>>> Stashed changes
 <<<<<<< HEAD
         try:
             from frontend.src.services.equipos import listar_equipos
@@ -330,10 +281,6 @@ def alumno_leave():
     conn.close()
 
     return render_template(
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
         'alumno-grupos.html',
         cursos=cursos,
         padron=padron,
