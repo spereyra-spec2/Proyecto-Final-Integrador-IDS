@@ -1,7 +1,26 @@
 from flask import Blueprint, jsonify, request
-from backend.src.utils.errors import bad_request, not_found 
-from backend.src.utils.validaciones import validar_curso_id, validar_padron
+from flask import jsonify
 from frontend.src.services.equipos import listar_equipos, crear_equipo, actualizar_equipo, eliminar_equipo
+
+
+def validar_curso_id(curso_id):
+    try:
+        cid = int(curso_id)
+        if cid <= 0:
+            raise ValueError('El curso_id debe ser un número entero positivo.')
+        return cid
+    except Exception:
+        raise ValueError('El curso_id debe ser un número entero válido.')
+
+
+def validar_padron(padron):
+    try:
+        p = int(padron)
+        if p <= 0:
+            raise ValueError('El padrón debe ser un número entero positivo.')
+        return p
+    except Exception:
+        raise ValueError('El padrón debe ser un número entero válido.')
 
 equipos_bp = Blueprint('equipos', __name__)
 

@@ -47,7 +47,11 @@
         <p class="page-subtitle" id="course-name-sub">Cargando curso...</p>
       </div>
       <div class="page-actions">
-        <button class="btn btn-outline" id="btn-csv">📥 Importar CSV</button>
+        <form id="csv-form" method="POST" action="/importar-alumnos" enctype="multipart/form-data" style="display:inline-block">
+          <input type="file" name="file" id="csv-file" accept=".csv" style="display:none" />
+          <input type="hidden" name="curso_id" value="{{ request.args.get('curso') or '' }}" />
+        </form>
+        <button class="btn btn-outline" id="btn-csv" onclick="document.getElementById('csv-file').click()">📥 Importar CSV</button>
         <button class="btn btn-primary" onclick="openModal('modal-student')">➕ Agregar alumno</button>
       </div>
     </div>

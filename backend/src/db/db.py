@@ -27,17 +27,30 @@ def crear_equipo(curso_id: int, nombre_equipo: str, padrones: list) -> str:
     conn = _get_connection()
     cursor = conn.cursor()
     try:
-        '''
-        seed = f"{nombre_equipo}-{time.time()}".encode("utf-8")
-        hash_completo = hashlib.md5(semilla).hexdigest()
-        codigo_acceso = hash_completo[:8].upper()  
-        '''
         
         query_equipo = """
-            INSERT INTO Equipos (nombre, Curso_idCurso, created_at) 
-            VALUES (%s, %s, NOW());
+            INSERT INTO Equipos (nombre, Curso_idCurso, created_at, access_code, cupo) 
+            VALUES (%s, %s, NOW(), %s, %s);
         """
-        cursor.execute(query_equipo, (nombre_equipo, curso_id))
+        access_code = None
+        cupo = None
+        if isinstance(nombre_equipo, dict):
+            access_code = nombre_equipo.get('access_code')
+            cupo = nombre_equipo.get('cupo')
+            nombre = nombre_equipo.get('nombre')
+        else:
+            nombre = nombre_equipo
+
+        # cupo default = 4
+        try:
+            cupo_val = int(cupo) if cupo is not None and cupo != '' else None
+        except Exception:
+            cupo_val = None
+
+        if cupo_val is None:
+            cupo_val = 4
+
+        cursor.execute(query_equipo, (nombre, curso_id, access_code, cupo_val))
         
         id_nuevo_equipo = cursor.lastrowid
     
@@ -68,12 +81,18 @@ def get_equipos(curso_id: int) -> list:
             SELECT 
                 e.idEquipos, 
                 e.nombre AS equipo_nombre,
+                    e.access_code AS access_code,
                 u.padron, 
-                u.nombres AS usuario_nombre
+                u.nombres AS usuario_nombre,
+                uhe.activo,
+                uhe.activo_desde,
+                uhe.activo_hasta,
+                e.cupo AS cupo
             FROM Equipos e
-            LEFT JOIN Usuarios_has_Equipos uhe ON e.idEquipos = uhe.Equipos_idEquipos AND uhe.activo = 1
+            LEFT JOIN Usuarios_has_Equipos uhe ON e.idEquipos = uhe.Equipos_idEquipos
             LEFT JOIN Usuarios u ON uhe.Usuarios_padron = u.padron
-            WHERE e.Curso_idCurso = %s;
+            WHERE e.Curso_idCurso = %s
+            ORDER BY e.idEquipos, uhe.activo DESC, uhe.activo_desde ASC;
         """
         
     cursor.execute(query, (curso_id,))
@@ -96,8 +115,20 @@ def get_equipos(curso_id: int) -> list:
         if fila["padron"] is not None:
             equipos_dict[id_equipo]["integrantes"].append({
                 "padron": fila["padron"],
-                "nombre": fila["usuario_nombre"]
+                "nombre": fila["usuario_nombre"],
+                "activo": int(fila.get("activo") or 0),
+                "activo_desde": fila.get("activo_desde"),
+                "activo_hasta": fila.get("activo_hasta"),
             })
+
+        
+        equipos_dict[id_equipo]["cupo"] = fila.get("cupo")
+        equipos_dict[id_equipo]["access_code"] = fila.get("access_code")
+
+    
+    for t in equipos_dict.values():
+        integrantes = t.get('integrantes') or []
+        t['active_count'] = sum(1 for m in integrantes if int(m.get('activo') or 0) == 1)
 
     return list(equipos_dict.values())
 

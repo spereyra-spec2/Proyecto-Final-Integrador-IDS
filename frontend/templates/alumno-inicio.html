@@ -13,6 +13,9 @@
       <input type="text" id="padron-input" placeholder="Ingresá tu padrón" />
       <select id="curso-select">
         <option value="">Seleccioná curso</option>
+        {% for c in cursos %}
+        <option value="{{ c.id }}">{{ c.nombre }} ({{ c.codigo }})</option>
+        {% endfor %}
       </select>
       <button onclick="buscar()">Consultar →</button>
     </div>
@@ -25,7 +28,7 @@
       <div class="feature-title">Mis Notas</div>
       <div class="feature-desc">Consultá tus calificaciones en parciales, parcialitos y TPs</div>
     </a>
-    <a href="alumno-grupos.html" class="feature-card">
+    <a href="alumno-equipos.html" class="feature-card">
       <div class="feature-icon">🤝</div>
       <div class="feature-title">Mi Grupo</div>
       <div class="feature-desc">Mirá tu equipo, uníte a uno o creá el tuyo con un código</div>
@@ -43,31 +46,22 @@
 <script type="module">
 import api from '/static/js/api.js';
 
-async function loadCourses() {
-  const res = await api.filter('Course', { estado: 'activo' });
-  const courses = res.results || [];
-  const sel = document.getElementById('curso-select');
-  courses.forEach(c => {
-    const opt = document.createElement('option');
-    opt.value = c.id;
-    opt.textContent = `${c.nombre} (${c.codigo})`;
-    sel.appendChild(opt);
-  });
-  // Restore from localStorage if exists
-  const saved = localStorage.getItem('alumno_curso');
-  if (saved) sel.value = saved;
-  const savedPadron = localStorage.getItem('alumno_padron');
-  if (savedPadron) document.getElementById('padron-input').value = savedPadron;
-}
-
+// Restore from localStorage if exists
 window.buscar = () => {
   const padron = document.getElementById('padron-input').value.trim();
   const curso  = document.getElementById('curso-select').value;
   if (!padron || !curso) { alert('Ingresá tu padrón y seleccioná un curso'); return; }
   localStorage.setItem('alumno_padron', padron);
   localStorage.setItem('alumno_curso', curso);
-  window.location.href = 'alumno-notas.html';
+  // Redirect to alumno-equipos view which will show the student's equipo
+  window.location.href = `alumno-equipos.html?padron=${encodeURIComponent(padron)}&curso_id=${encodeURIComponent(curso)}`;
 };
 
-loadCourses();
+// restore saved values into inputs
+document.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem('alumno_curso');
+  if (saved) document.getElementById('curso-select').value = saved;
+  const savedPadron = localStorage.getItem('alumno_padron');
+  if (savedPadron) document.getElementById('padron-input').value = savedPadron;
+});
 </script>

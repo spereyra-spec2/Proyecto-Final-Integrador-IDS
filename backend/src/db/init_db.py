@@ -36,3 +36,5 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"error al inicializar la base de datos: {e}")
         exit(1)
+
+    

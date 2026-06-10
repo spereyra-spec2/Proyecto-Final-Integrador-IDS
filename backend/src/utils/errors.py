@@ -1,11 +1,8 @@
 from flask import jsonify
 
-# errors.py
-from flask import jsonify
-
 def error_response(code, message, level="error", description=""):
     return jsonify({
-        "error": [{
+        "errors": [{
             "code": code,
             "message": message,
             "level": level,
@@ -13,188 +10,57 @@ def error_response(code, message, level="error", description=""):
         }]
     }), code
 
-
 def not_found(detail):
-    return error_response(404, "Petición inválida", "warning", detail)
+    return error_response(404, "No encontrado", "info", str(detail))
 
 def conflict(detail):
-    return error_response(409, "Conflicto", "warning", detail)
+    return error_response(409, "Conflicto", "warning", str(detail))
 
 def server_error(detail="Error interno del servidor"):
-    return error_response(500, "Error interno", "critical", detail)
+    return error_response(500, "Error interno", "critical", str(detail))
 
 def bad_request(detail):
-    return error_response(400, "Petición inválida", "warning", detail)
+    return error_response(400, "Petición inválida", "warning", str(detail))
+
+def acceso_denegado(detail="Acceso denegado"):
+    return error_response(403, "Acceso denegado", "error", str(detail))
 
 def acceso_denegado1(details):
-    return error_response(403, "Acceso denegado", "error", details)
+    return acceso_denegado(details)
 
 def ok_response(detail):
     return error_response(200, "OK", "success", detail)
 
-def well_response(detail):
+def created_response(detail):
     return error_response(201, "Creado", "success", detail)
 
-  
-def unauthorized(detail):
-    return error_response(401, "No autorizado", "error", detail)
-
-
+def unauthorized(detail="No autorizado"):
+    return error_response(401, "No autorizado", "error", str(detail))
 
 def unsupported_media_type(detail):
-    return error_response(415, "Formato del cuerpo no soportado", "error", detail)
+    return error_response(415, "Formato del cuerpo no soportado", "error", str(detail))
 
+def forbidden(detail="Prohibido"):
+    return error_response(403, "Prohibido", "error", str(detail))
 
-def forbidden(detail):
-    return error_response(403, "Prohibido", "error", detail)
-
-def unprocessable_entity(detail):
-    return error_response(422, "Entidad no procesable", "error", detail)
-
-def server_error(e):
-    return jsonify({  
-        "errors": [
-            {
-                "code": "500",
-                "message": "INTERNAL SERVER ERROR",
-                "level": "error",
-                "description": str(e)
-            }
-    ]}), 500
+def unprocessable_entity(detail="Entidad no procesable"):
+    return error_response(422, "Entidad no procesable", "error", str(detail))
 
 def no_registrado(padron):
-    return jsonify({
-        "errors": [
-            {
-                    "code": "404",
-                    "message": "NOT FOUND",
-                    "level": "error",
-                    "description": f"No se encontró registrado un usuario con el padrón {padron}."
-            }
-        ]
-    }), 404
+    return error_response(404, "NOT FOUND", "error", f"No se encontró registrado un usuario con el padrón {padron}.")
 
 def contrasena_incorrecta():
-    return jsonify({
-        "errors": [
-            {
-                    "code": "401",
-                    "message": "UNAUTHORIZED",
-                    "level": "error",
-                    "description": f"Contraseña incorrecta"
-            }
-        ]
-    }), 401
+    return error_response(401, "UNAUTHORIZED", "error", "Contraseña incorrecta")
 
 def datos_incompletos():
-    return jsonify({
-        "errors": [
-            {
-                    "code": "400",
-                    "message": "BAD REQUEST",
-                    "level": "error",
-                    "description": f"Falta ingresar datos requeridos"
-            }
-        ]
-    }), 400
+    return error_response(400, "BAD REQUEST", "error", "Falta ingresar datos requeridos")
 
 def datos_incorrectos(dato):
-    return jsonify({
-        "errors": [
-            {
-                    "code": "400",
-                    "message": "BAD REQUEST",
-                    "level": "error",
-                    "description": f"Se han introducido datos incorrectos: {dato} "
-            }
-        ]
-    }), 400
-
+    return error_response(400, "BAD REQUEST", "error", f"Se han introducido datos incorrectos: {dato}")
 
 def ya_existe():
-    return jsonify({
-        'errors': [
-            {
-                "code":"409",
-                "message":"CONFLICT",
-                "level":"error",
-                "description":f"Ya existe un usuario con ese padrón"
-                }
-            ]
-        }), 409
-
-
-def acceso_denegado():
-    return jsonify({
-        "errors": [
-            {
-                "code":"401",
-                "message": "UNAUTHORIZED",
-                "level": "error",
-                "description": f"Acesso denegado"
-            }
-        ]
-    }), 401
+    return error_response(409, "CONFLICT", "error", "Ya existe un usuario con ese padrón")
 
 def error_enviando_correo(e):
-    return jsonify({
-        "errors": [
-            {
-                    "code": "500",
-                    "message": "SERVER ERROR",
-                    "level": "error",
-                    "description": str(e)
-            }
-        ]
-    }), 401
+    return error_response(500, "SERVER ERROR", "error", str(e))
 
-
-def not_found(error):
-        error404 ={
-                "error": [
-                    {
-                        "code": 404,
-                        "message": "No encontrado",
-                        "level": "info",
-                        "description": str(error)
-                    }
-                ]
-            }
-        return error404
-
-def server_error(error):
-    error500 = {"error": [
-                    {
-                        "code": 500,
-                        "message": "Error interno en el servidor",
-                        "level": "error",
-                        "description": str(error)
-                    }
-                ]
-            }
-    return error500
-
-def bad_request(error):
-    error400 = {"error": [
-            {
-                "code": 400,
-                "message": "Petición inválida",
-                "level": "info",
-                "description": error
-            }
-        ]
-    }
-    return error400
-
-def conflict_error(error):
-    error409 = {
-        "error": [
-            {
-                "code": 409,
-                "message": "Conflicto",
-                "level": "warning",
-                "description": str(error)
-            }
-        ]
-    }
-    return error409

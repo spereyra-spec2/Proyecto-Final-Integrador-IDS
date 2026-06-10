@@ -1,5 +1,3 @@
-from db import get_equipos, crear_equipo as db_crear_equipo, patch_equipo as db_patch_equipo, delete_equipo as db_delete_equipo
-from src.utils.errors import bad_request, not_found
 import requests
 
 BACKEND_URL = "http://localhost:3006/api/cursos"
@@ -20,12 +18,30 @@ def crear_equipo(curso_id, body):
         raise ValueError("Faltan campos obligatorios ('nombre' o 'padrones')")
 
     response = requests.post(f"{BACKEND_URL}/{curso_id}/equipos", json=body)
-    
     if response.status_code == 201:
         return response.json()
     else:
-        error_msg = response.json().get("message", "Error al crear el equipo en el backend")
-        raise ValueError(error_msg)
+        try:
+            err = response.json().get('errors', [{}])[0]
+            msg = err.get('description') or err.get('message') or str(response.text)
+        except Exception:
+            msg = str(response.text)
+        raise ValueError(msg)
+
+
+def join_equipo_by_code(curso_id, access_code, padron, nombre=None):
+    payload = {"access_code": access_code, "padron": padron}
+    if nombre:
+        payload['nombre'] = nombre
+    response = requests.post(f"{BACKEND_URL}/{curso_id}/equipos/join", json=payload)
+    if response.status_code in (200,201):
+        return response.json()
+    try:
+        err = response.json().get('errors', [{}])[0]
+        msg = err.get('description') or err.get('message') or response.text
+    except Exception:
+        msg = response.text
+    raise ValueError(msg)
 
 def actualizar_equipo(curso_id, usuarios_padron, body):
     if body is None:
@@ -34,7 +50,12 @@ def actualizar_equipo(curso_id, usuarios_padron, body):
     response = requests.patch(f"{BACKEND_URL}/{curso_id}/equipos/{usuarios_padron}", json=body)
     if response.status_code == 200:
         return response.json()
-    return None
+    try:
+        err = response.json().get('errors', [{}])[0]
+        msg = err.get('description') or err.get('message') or response.text
+    except Exception:
+        msg = response.text
+    raise ValueError(msg)
 
 def eliminar_equipo(curso_id, usuarios_padron):
     response = requests.delete(f"{BACKEND_URL}/{curso_id}/equipos/{usuarios_padron}")

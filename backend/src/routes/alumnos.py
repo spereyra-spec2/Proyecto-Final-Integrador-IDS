@@ -6,7 +6,7 @@ from src.db.db import _get_connection
 from flask import request, Blueprint
 from mysql.connector import IntegrityError
 from src.utils.errors import (
-    not_found, conflict, server_error, bad_request, ok_response, well_response, acceso_denegado1, )
+    not_found, conflict, server_error, bad_request, ok_response, created_response, acceso_denegado1, )
 import src.utils.validaciones as validaciones
 import src.utils.funciones as funciones
 
@@ -72,7 +72,7 @@ def add_alumno(idCurso):
         funciones.registrar_auditoria(cursor, padron_operador, f"Agregó manualmente al alumno {padron} al curso {idCurso}")
 
         conn.commit()
-        return well_response(f"Alumno con padrón {padron} agregado correctamente al curso {idCurso}")
+        return created_response(f"Alumno con padrón {padron} agregado correctamente al curso {idCurso}")
     
     except IntegrityError:
         if conn: conn.rollback()
@@ -160,7 +160,7 @@ def importar_alumnos(idCurso):
             ))
 
         if not alumnos_a_insertar:
-            return well_response("Todos los alumnos del archivo ya se encuentran registrados en este curso. No se agregaron nuevos registros.")
+            return ok_response("Todos los alumnos del archivo ya se encuentran registrados en este curso. No se agregaron nuevos registros.")
         
         query_usuario = """
             INSERT INTO Usuarios (padron, rol, nombres, mail, cursando_actualmente, created_at) 
@@ -184,7 +184,7 @@ def importar_alumnos(idCurso):
         )
 
         conn.commit()
-        return well_response(f"Importación finalizada con éxito. Se añadieron {len(alumnos_a_insertar)} alumnos nuevos a la comisión.")
+        return created_response(f"Importación finalizada con éxito. Se añadieron {len(alumnos_a_insertar)} alumnos nuevos a la comisión.")
     
     except Exception as e:
         if conn: conn.rollback()

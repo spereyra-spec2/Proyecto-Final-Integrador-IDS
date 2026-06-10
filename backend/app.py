@@ -24,6 +24,7 @@ app.config['MAIL_PASSWORD'] = 'xdkv alji fnmx euxz'
 app.register_blueprint(auth_bp, url_prefix="/api/auth")
 app.register_blueprint(alumnos_bp, url_prefix='/api/cursos/<int:idCurso>/alumnos')
 app.register_blueprint(cursos_bp, url_prefix='/api/cursos')
+app.register_blueprint(equipos_bp, url_prefix='/api/cursos')
 mail.init_app(app)
 
 

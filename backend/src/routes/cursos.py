@@ -101,7 +101,7 @@ def create_curso():
         funciones.registrar_auditoria(cursor, padron_operador, f"Creó el curso {nombre} ({codigo})")
         conn.commit()
         
-        return errors.well_response(f"Curso '{nombre}' creado exitosamente con ID {id_curso}")
+        return errors.created_response(f"Curso '{nombre}' creado exitosamente con ID {id_curso}")
         
     except Exception as e:
         if conn: conn.rollback()

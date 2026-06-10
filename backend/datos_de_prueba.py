@@ -77,6 +77,76 @@ def cargar_datos_prueba():
         ]
         cursor.executemany(query_vinculos, vinculos_data)
 
+        # --- Additional test users ---
+        print("Insertando más usuarios de prueba...")
+        extra_usuarios = [
+            (106666, "Alumno", "Camila Torres", "camila.torres@fi.uba.ar", "hash_simulado_6", datetime.now()),
+            (107777, "Alumno", "Diego Fernández", "diego.fernandez@fi.uba.ar", "hash_simulado_7", datetime.now()),
+            (108888, "Alumno", "Sofía Herrera", "sofia.herrera@fi.uba.ar", "hash_simulado_8", datetime.now()),
+            (900001, "Docente", "Prof. Arturo Gómez", "arturo.gomez@fi.uba.ar", "hash_prof_1", datetime.now())
+        ]
+        cursor.executemany(query_usuarios, extra_usuarios)
+
+        # Link extra users to courses
+        extra_vinculos = [
+            (1, 106666),
+            (1, 107777),
+            (3, 108888),
+            (1, 900001)
+        ]
+        cursor.executemany(query_vinculos, extra_vinculos)
+
+        # --- Insert equipos (teams) and memberships ---
+        print("Insertando equipos de prueba y asignando integrantes...")
+        equipos_to_create = [
+            ("Grupo Alpha", "ALPHA1", 1),
+            ("Grupo Beta", "BETA22", 1),
+            ("DB Squad", "DB123", 2),
+            ("POO Team", None, 3),
+            ("Equipo Mixto", "MIXED99", 1)
+        ]
+
+        query_insert_equipo = """
+            INSERT INTO Equipos (nombre, access_code, Curso_idCurso, created_at)
+            VALUES (%s, %s, %s, %s)
+            ON DUPLICATE KEY UPDATE nombre=VALUES(nombre), Curso_idCurso=VALUES(Curso_idCurso);
+        """
+
+        created_ids = {}
+        for nombre, code, curso in equipos_to_create:
+            cursor.execute(query_insert_equipo, (nombre, code, curso, datetime.now()))
+            # try to find id by access_code if present, otherwise by name+curso
+            if code:
+                cursor.execute("SELECT idEquipos FROM Equipos WHERE access_code = %s", (code,))
+            else:
+                cursor.execute("SELECT idEquipos FROM Equipos WHERE nombre = %s AND Curso_idCurso = %s", (nombre, curso))
+            row = cursor.fetchone()
+            if row:
+                created_ids[nombre] = row[0]
+
+        # memberships: map equipo name to padrones
+        memberships = {
+            "Grupo Alpha": [101111, 102222, 106666],
+            "Grupo Beta": [103333, 107777],
+            "DB Squad": [104444, 105555],
+            "POO Team": [103333],
+            "Equipo Mixto": [101111, 108888]
+        }
+
+        query_upsert_members = """
+            INSERT INTO Usuarios_has_Equipos (Usuarios_padron, Equipos_idEquipos, activo, activo_desde)
+            VALUES (%s, %s, %s, %s)
+            ON DUPLICATE KEY UPDATE activo=VALUES(activo), activo_desde=VALUES(activo_desde);
+        """
+
+        for equipo_name, padrones in memberships.items():
+            equipo_id = created_ids.get(equipo_name)
+            if not equipo_id:
+                continue
+            for p in padrones:
+                cursor.execute(query_upsert_members, (p, equipo_id, 1, datetime.now()))
+
+
         
         conn.commit()
         print("\n¡Datos de prueba cargados con éxito de manera segura!")
