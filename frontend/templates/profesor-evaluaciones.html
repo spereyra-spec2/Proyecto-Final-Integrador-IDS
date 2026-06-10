@@ -31,7 +31,7 @@
       <span class="modal-title">Nueva evaluación</span>
       <button class="modal-close" onclick="closeModal('modal-eval')">✕</button>
     </div>
-    <form action="{{url_for('evaluaciones')}}" method="POST">
+    <form action="{{url_for('evaluaciones.evaluaciones')}}" method="POST">
       <div class="modal-body">
         <label for="tipo">Tipo:</label>
         <input type="text" id="tipo" name="tipo" required>
