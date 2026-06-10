@@ -117,7 +117,6 @@
       <button class="modal-close" onclick="closeModal('modal-team')">✕</button>
     </div>
     <div class="modal-body">
-<<<<<<< HEAD
       <form method="post">
         <input type="hidden" name="action" value="create">
         <input type="hidden" name="curso_id" value="{{ curso_id }}">
@@ -129,16 +128,7 @@
           <button class="btn btn-primary" type="submit">Crear</button>
         </div>
       </form>
-=======
-      <div class="form-group">
-        <label class="form-label">Nombre del equipo *</label>
-        <input class="form-input" id="t-nombre" placeholder="Ej: Grupo 1" />
-      </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-outline" onclick="closeModal('modal-team')">Cancelar</button>
-      <button class="btn btn-primary" id="btn-create-team">Crear</button>
->>>>>>> 39f3849041f3acfe577c4c6f931603b1b46b8511
     </div>
   </div>
 </div>
@@ -150,18 +140,11 @@
       <button class="modal-close" onclick="closeModal('modal-member')">✕</button>
     </div>
     <div class="modal-body">
-<<<<<<< HEAD
       <form method="post" action="/profe-add-member">
         <input type="hidden" name="curso_id" value="{{ curso_id }}" />
         <input type="hidden" name="equipo_ref" id="m-equipo-ref" value="" />
         <div class="form-group"><label class="form-label">Padrón del alumno</label><input class="form-input" id="m-padron" name="nuevo_padron" placeholder="Ej: 108542" /></div>
       </form>
-=======
-      <div class="form-group">
-        <label class="form-label">Padrón del alumno</label>
-        <input class="form-input" id="m-padron" placeholder="Ej: 108542" />
-      </div>
->>>>>>> 39f3849041f3acfe577c4c6f931603b1b46b8511
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal('modal-member')">Cancelar</button>
@@ -170,7 +153,6 @@
   </div>
 </div>
 
-<<<<<<< HEAD
 <script>
 function openModal(id){document.getElementById(id).classList.remove('hidden')}
 function closeModal(id){document.getElementById(id).classList.add('hidden')}
@@ -181,136 +163,14 @@ document.getElementById('nav-asist').href = `profesor-asistencia.html?curso={{ c
 function openMemberModal(equipoRef){
   document.getElementById('m-equipo-ref').value = equipoRef || '';
   document.getElementById('m-padron').value = '';
-=======
-<script type="module">
-import { toast, openModal, closeModal, initSidebar } from '../js/utils.js';
-
-const API_URL = "http://127.0.0.1:5001";
-
-initSidebar();
-window.openModal = openModal;
-window.closeModal = closeModal;
-
-const params = new URLSearchParams(window.location.search);
-const cursoId = params.get('curso') || '';
-
-document.getElementById('nav-alumnos').href = `profesor-alumnos.html?curso=${cursoId}`;
-
-let teams = [];
-let currentTeamId = null;
-
-async function init() {
-  try {
-    const res = await fetch(`${API_URL}/api/cursos/${cursoId}/equipos`);
-    if (!res.ok) throw new Error(res.status);
-
-    teams = await res.json();
-
-    document.getElementById('course-sub').textContent = `Curso ${cursoId}`;
-
-    render();
-  } catch (err) {
-    console.error(err);
-    document.getElementById('teams-grid').innerHTML =
-      `<div style="grid-column:1/-1;text-align:center;padding:40px;color:red">
-        Error cargando equipos
-      </div>`;
-  }
-}
-
-function render() {
-  const grid = document.getElementById('teams-grid');
-
-  if (!teams.length) {
-    grid.innerHTML = `
-      <div style="grid-column:1/-1;text-align:center;padding:50px;color:#9ca3af">
-        <div style="font-size:40px;margin-bottom:12px">🤝</div>
-        <strong>Sin equipos</strong>
-      </div>`;
-    return;
-  }
-
-  grid.innerHTML = teams.map(t => `
-    <div class="card">
-      <div class="card-header" style="display:flex;justify-content:space-between">
-        <span class="card-title">${t.nombre}</span>
-        <button class="btn btn-danger btn-sm" onclick="deleteTeam(${t.idEquipos})">🗑</button>
-      </div>
-
-      <div class="card-body">
-        <div style="display:flex;justify-content:space-between;margin-bottom:12px">
-          <span style="font-size:13px;color:#6b7280">
-            Código: <strong style="font-family:monospace">${t.codigo_acceso || ''}</strong>
-          </span>
-          <span class="badge badge-info">${(t.integrantes||[]).length}</span>
-        </div>
-
-        ${(t.integrantes||[]).length === 0
-          ? `<p style="font-size:13px;color:#9ca3af">Sin integrantes</p>`
-          : t.integrantes.map(p => `
-              <div style="display:flex;justify-content:space-between;padding:7px 10px;background:#f7f9fc;border-radius:6px;margin-bottom:5px">
-                <div>
-                  <strong>${p.nombre}</strong>
-                  <span style="color:#9ca3af">(${p.padron})</span>
-                </div>
-              </div>
-            `).join('')
-        }
-
-        <button class="btn btn-outline btn-sm"
-          onclick="addMember(${t.idEquipos}, '${t.nombre}')">
-          ➕ Agregar integrante
-        </button>
-      </div>
-    </div>
-  `).join('');
-}
-
-window.deleteTeam = async (id) => {
-  if (!confirm('¿Eliminar este equipo?')) return;
-
-  await fetch(`${API_URL}/api/cursos/${cursoId}/equipos/${id}`, {
-    method: 'DELETE'
-  });
-
-  init();
-};
-
-window.addMember = (teamId, name) => {
-  currentTeamId = teamId;
-  document.getElementById('member-modal-title').textContent = `Agregar a ${name}`;
->>>>>>> 39f3849041f3acfe577c4c6f931603b1b46b8511
   openModal('modal-member');
 }
 
-<<<<<<< HEAD
 document.getElementById('btn-add-member').addEventListener('click', function(){
   var form = document.querySelector('#modal-member form');
   if(!form) return;
   form.submit();
 });
-=======
-document.getElementById('btn-create-team').addEventListener('click', async () => {
-  const nombre = document.getElementById('t-nombre').value.trim();
-  if (!nombre) return toast('Nombre requerido', 'error');
-
-  const padrones = prompt('Padrones separados por coma')
-    ?.split(',')
-    .map(p => parseInt(p.trim()))
-    .filter(Boolean);
-
-  await fetch(`${API_URL}/api/cursos/${cursoId}/equipos`, {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({ nombre, padrones })
-  });
-
-  closeModal('modal-team');
-  init();
-});
-
-init();
->>>>>>> 39f3849041f3acfe577c4c6f931603b1b46b8511
 </script>
 
 </body>

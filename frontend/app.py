@@ -60,19 +60,13 @@ def alumno_equipos():
 
     padron = request.args.get('padron')
     curso_id = request.args.get('curso_id')
-<<<<<<< HEAD
-    
-    equipos_del_alumno = []
-=======
 
-    equipo_del_alumno = None
->>>>>>> 39f3849041f3acfe577c4c6f931603b1b46b8511
+    equipos_del_alumno = []
     busqueda_realizada = False
     equipos_del_curso = []
 
     if padron and curso_id:
         busqueda_realizada = True
-<<<<<<< HEAD
         try:
             from frontend.src.services.equipos import listar_equipos
             all_teams = listar_equipos(int(curso_id)) or []
@@ -245,55 +239,7 @@ def alumno_leave():
     return redirect(url_for('alumno_equipos', padron=padron_int, curso_id=curso_id_int))
 
 
-=======
 
-        cursor.execute("""
-                       SELECT e.idEquipos, e.nombre
-                       FROM Equipos e
-                                JOIN Usuarios_has_Equipos uhe
-                                     ON e.idEquipos = uhe.Equipos_idEquipos
-                       WHERE uhe.Usuarios_padron = %s
-                         AND e.Curso_idCurso = %s
-                         AND uhe.activo = 1
-                       """, (int(padron), int(curso_id)))
-
-        equipo_del_alumno = cursor.fetchone()
-
-    if padron and curso_id:
-        busqueda_realizada = True
-
-        query_equipos = """
-                        SELECT e.idEquipos, \
-                               e.nombre, \
-                               COUNT(uhe.Usuarios_padron) AS integrantes
-                        FROM Equipos e
-                                 LEFT JOIN Usuarios_has_Equipos uhe
-                                           ON e.idEquipos = uhe.Equipos_idEquipos
-                                               AND uhe.activo = 1
-                        WHERE e.Curso_idCurso = %s
-                        GROUP BY e.idEquipos, e.nombre \
-                        """
-
-        cursor.execute(query_equipos, (curso_id,))
-        equipos_del_curso = cursor.fetchall()
-
-    cursor.close()
-    conn.close()
-
-    return render_template(
-        'alumno-grupos.html',
-        cursos=cursos,
-        padron=padron,
-        curso_id=int(curso_id) if curso_id else None,
-        equipo_del_alumno=equipo_del_alumno,
-        equipos_del_curso=equipos_del_curso,
-        busqueda_realizada=busqueda_realizada
-    )
-
-
-@app.route('/alumno-asistencia.html')
-def alumno_asistencia(): return render_template('alumno-asistencia.html')
->>>>>>> 39f3849041f3acfe577c4c6f931603b1b46b8511
 
 @app.route('/login.html')
 def login(): return render_template('login.html')
