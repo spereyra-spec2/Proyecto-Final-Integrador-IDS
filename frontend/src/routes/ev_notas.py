@@ -1,13 +1,17 @@
 from flask import Blueprint, request, render_template, url_for, redirect
 from src.services import ev_notas_service as api
-
+from src.utils import utils as utils
 
 notas_bp = Blueprint("notas", __name__)
 
 
 
 @notas_bp.route('/ver', methods=['GET'])
-def vista_ver_nota():
+def ver_nota():
+
+    usuario = utils.verificar_docente_autenticado()
+    if not usuario: return redirect(url_for('auth.login'))
+
     curso_id = request.args.get('curso_id')
     id_ev = request.args.get('id_ev')
     tipo = request.args.get('tipo')
@@ -27,6 +31,9 @@ def vista_ver_nota():
 
 @notas_bp.route('/cargar', methods=['GET', 'POST'])
 def procesar_guardado():
+
+    usuario = utils.verificar_docente_autenticado()
+    if not usuario: return redirect(url_for('auth.login'))
 
     if request.method == 'POST':
 
@@ -51,6 +58,9 @@ def procesar_guardado():
 @notas_bp.route('/editar', methods=['GET', 'POST'])
 def procesar_actualizacion():
 
+    usuario = utils.verificar_docente_autenticado()
+    if not usuario: return redirect(url_for('auth.login'))
+
     if request.method == 'POST': 
 
         curso_id = request.form.get('curso_id')
@@ -73,3 +83,30 @@ def procesar_actualizacion():
         'tipo': request.args.get('tipo')
     }
     return render_template('editar_nota.html', **query_params)
+
+#---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+@notas_bp.route('/alumnos/ver', methods=['GET'])
+def alumno_ver_nota():
+
+    cursos_db = api.obtener_cursos_activos()
+    tipos_db = api.obtener_evaluacion()
+
+    padron = request.args.get('padron', type=int)
+    curso_id = request.args.get('curso_id')
+    id_ev = request.args.get('tipo_evaluacion')
+
+    nota_alumno = None
+
+    if padron and curso_id and id_ev:
+        resultado = api.consultar_nota(curso_id, id_ev, padron, 'padron')
+
+        if resultado["codigo"] == 200:
+            nota_alumno = resultado["datos"]
+
+    return render_template(
+        "alumno-notas.html", 
+        cursos=cursos_db, 
+        tipos_evaluacion=tipos_db,
+        nota = nota_alumno
+    )

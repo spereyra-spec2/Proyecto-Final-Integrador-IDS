@@ -238,6 +238,44 @@ def actualizar_nota():
         conn.close()
         cursor.close()
             
+@ev_notas_bp.route('/cursos', methods=['GET'])
+def get_cursos_publicos():
+
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        query = "SELECT idCurso, nombre FROM Curso"
+
+        cursor.execute(query)
+        cursos = cursor.fetchall()
+        
+        return jsonify({"cursos": cursos}), 200
+        
+    except Exception as e:
+        return server_error(str(e))
+    finally:
+        if cursor: cursor.close()
+        if conn: conn.close()
+
+@ev_notas_bp.route('/evaluaciones', methods=['GET'])
+def get_tipos_evaluacion_publicos():
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        
+        query = "SELECT idEvaluacion, descripcion FROM Evaluaciones"
+        cursor.execute(query)
+        evs = cursor.fetchall()
+        
+        return jsonify({"evaluaciones": evs}), 200
+        
+    except Exception as e:
+        return server_error(str(e))
+    finally:
+        if cursor: cursor.close()
+        if conn: conn.close()
 
 
 

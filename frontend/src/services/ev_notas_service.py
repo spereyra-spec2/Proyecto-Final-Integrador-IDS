@@ -72,7 +72,7 @@ def cargar_nota(curso_id, id_ev, id_g, nota, tipo):
     except requests.exceptions.ConnectionError:
         return {"exito": False, "error": "Error de conexión: No se pudo conectar al servidor.", "codigo": 500}
     
-#----------------------------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------------
 
 def actualizar_nota(curso_id, id_ev, id_g, nuevo_puntaje, tipo):
     
@@ -103,3 +103,64 @@ def actualizar_nota(curso_id, id_ev, id_g, nuevo_puntaje, tipo):
             
     except requests.exceptions.ConnectionError:
         return {"exito": False, "error": "Error crítico: El servidor no responde.", "codigo": 500}
+    
+#---------------------------------------------------------------------------------------------------
+
+def obtener_cursos_activos():
+    """
+    Se conecta a la API para obtener los cursos cuyo estado es 'activo'.
+     replica el filtro: api.filter('Course', { estado: 'activo' })
+    """
+
+    API = f"{API_BASE_URL}/notas/cursos"
+    
+
+    try:
+        response = requests.get(API)
+        response.raise_for_status() 
+        data = response.json()
+        
+        cursos_crudos = data.get("cursos", []) if isinstance(data, dict) else data
+
+        cursos_mapeados = []
+
+        for c in cursos_crudos:
+            cursos_mapeados.append({
+                "id": c.get("idCurso"), 
+                "nombre": c.get("nombre"),
+            })
+            
+        return cursos_mapeados
+        
+    except requests.RequestException as e:
+        print(f"[ERROR] No se pudieron obtener los cursos: {e}")
+        return []
+
+#---------------------------------------------------------------------------------------------------
+
+def obtener_evaluacion():
+    """
+    Se conecta a la API para traer los tipos de evaluación mapeados en la base de datos.
+    Asegura que el retorno sea un diccionario compatible con el método .items() de Jinja2.
+    """
+    url = f"{API_BASE_URL}/notas/evaluaciones" 
+    
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        data = response.json()
+        
+        
+        evaluaciones_crudos = data.get("evaluaciones", []) if isinstance(data, dict) else data
+        evaluaciones_mapeados = []
+
+        for e in evaluaciones_crudos:
+            evaluaciones_mapeados.append({
+                "id": e.get("idEvaluacion"),
+                "desc": e.get("descripcion")
+            })
+        return evaluaciones_mapeados
+        
+    except requests.RequestException as e:
+        print(f"[ERROR] Error al obtener evaluaciones: {e}")
+        return []
