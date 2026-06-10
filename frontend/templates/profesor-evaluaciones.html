@@ -1,48 +1,86 @@
 {% extends "base_profesores.html" %}
+
 {% block title %}Evaluaciones — AcademiQ{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/evaluacion.css') }}" />
+{% endblock %}
+
+{% block topbar_titulo %}Evaluaciones{% endblock %}
+
+{% block menu_titulo %}📝 Evaluaciones{% endblock %}
+
+{% block menu_accion_btn %}
+<button class="modal-open" onclick="abrirModal()">➕ Nueva evaluación</button>
+{% endblock %}
+
 {% block content %}
 
-<div class="main-content">
-  <div class="topbar">
-    <button class="hamburger">☰</button>
-    <span class="topbar-title" id="topbar-title">Evaluaciones</span>
-  </div>
-
-  <div class="page-content">
-    <div class="page-header">
-      <div>
-        <h1 class="page-title">Evaluaciones</h1>
-        <p class="page-subtitle" id="course-sub">Cargando...</p>
-      </div>
-      <button class="btn btn-primary" onclick="openModal('modal-eval')">➕ Nueva evaluación</button>
+<!-- Lista de evaluaciones -->
+<div id="evals-list">
+  {% if evaluaciones and evaluaciones|length > 0 %}
+    <div class="evaluaciones-grid">
+      {% for eval in evaluaciones %}
+        <div class="eval-card">
+          <div class="eval-card-header">
+            <div>
+              <div class="eval-tipo">{{ eval.tipo }}</div>
+              <div class="eval-fecha">📅 {{ eval.fecha if eval.fecha else 'Sin fecha' }}</div>
+            </div>
+          </div>
+          <div class="eval-card-body">
+            <p><strong>🔢 ID:</strong> {{ eval.idEvaluacion }}</p>
+            <div class="eval-descripcion">
+              <strong>📄 Descripción:</strong>
+              <p>{{ eval.descripcion if eval.descripcion else 'Sin descripción' }}</p>
+            </div>
+            <p><strong>🎓 Curso ID:</strong> {{ eval.Curso_idCurso }}</p>
+          </div>
+          <div class="eval-card-footer">
+            <a" class="btn btn-secondary btn-sm">
+              📝 Ver notas
+            </a>
+          </div>
+        </div>
+      {% endfor %}
     </div>
-
-    <div id="evals-list">
-      <div class="loading-spinner-container" style="text-align:center;padding:40px">
-        <div class="loading-spinner"></div>
-        <p style="margin-top:16px;color:var(--color-text-light)">Cargando evaluaciones...</p>
-      </div>
+  {% else %}
+    <div class="empty-state">
+      <div class="empty-state-icon">📝</div>
+      <h3>No hay evaluaciones</h3>
+      <p>Comienza creando tu primera evaluación</p>
     </div>
-  </div>
+  {% endif %}
 </div>
-<div class="modal-overlay hidden" id="modal-eval">
+
+<!-- Modal para nueva evaluación -->
+<div class="modal-overlay" id="modal-eval">
   <div class="modal">
     <div class="modal-header">
-      <span class="modal-title">Nueva evaluación</span>
-      <button class="modal-close" onclick="closeModal('modal-eval')">✕</button>
+      <span class="modal-title">✨ Nueva evaluación</span>
+      <button class="modal-close" onclick="cerrarModal()">✕</button>
     </div>
-    <form action="{{url_for('evaluaciones.evaluaciones')}}" method="POST">
+    <form action="{{ url_for('evaluaciones.evaluaciones') }}" method="POST">
       <div class="modal-body">
-        <label for="tipo">Tipo:</label>
-        <input type="text" id="tipo" name="tipo" required>
-        <label for="descripcion">Descripción:</label>
-        <textarea id="descripcion" name="descripcion"></textarea>
-        <label for="fecha">Fecha y hora:</label>
-        <input type="datetime-local" id="fecha" name="fecha" required>        
+        <label for="tipo">📌 Tipo *</label>
+        <input type="text" id="tipo" name="tipo" required placeholder="Ej: Parcial, TP, Examen Final, Recuperatorio">
+        
+        <label for="descripcion">📄 Descripción *</label>
+        <textarea id="descripcion" name="descripcion" rows="3" required placeholder="Describe la evaluación..."></textarea>
+        
+        <label for="fecha">📅 Fecha y hora *</label>
+        <input type="datetime-local" id="fecha" name="fecha" required>
+        
+        <label for="curso_id">🎓 ID del Curso *</label>
+        <input type="number" id="curso_id" name="curso_id" required placeholder="Ej: 1, 2, 3...">
+        <small>💡 Ingresa el ID del curso al que pertenece esta evaluación</small>
       </div>
       <div class="modal-footer">
-        <button type="submit" class="btn btn-primary">Crear evaluación</button>
+        <button type="button" class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
+        <button type="submit" class="btn btn-primary">✨ Crear evaluación</button>
       </div>
+    </form>
+  </div>
 </div>
 <script src="{{ url_for('static', filename='js/evaluaciones.js') }}"></script>
 {% endblock %}
