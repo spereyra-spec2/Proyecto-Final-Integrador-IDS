@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+    {% block extra_css %}{% endblock %}
     <title>{% block title %} AcademiQ - Profesores {% endblock %}</title>
 </head>
 
@@ -43,7 +44,6 @@
     <div class="page-header">
       <div>
         <h1 class="page-title">{% block menu_titulo %}{% endblock %}</h1>
-        <p class="page-subtitle" id="course-sub">Cargando...</p>
       </div>
         <button class="btn btn-primary" id="btn-generate-qr">{% block menu_accion_btn %}{% endblock %}</button>
     </div>
