@@ -2,8 +2,8 @@ import os
 import re
 from flask import Flask, render_template, request,redirect, url_for, flash
 import requests
-import re
 from flask_cors import CORS
+from routes.evaluaciones import evaluaciones_bp
 
 BACK_URL = "http://localhost:5000"
 FRONT_URL = "http://localhost:5001"
@@ -14,8 +14,13 @@ app = Flask(__name__,
     template_folder=os.path.join(base_path, 'templates'),
     static_folder=os.path.join(base_path, 'static')
 )
+app.json.sort_keys = False
+app.secret_key = 'supersecretkey'
 
 CORS(app)
+
+app.register_blueprint(evaluaciones_bp, url_prefix='/evaluaciones')
+
 
 @app.route('/')
 def index():
