@@ -25,7 +25,7 @@ def asistencia():
         return jsonify(asistencia),200
 
     except Error as e:
-       server_error()
+       server_error(e)
     
 @asistencia_bp.route('/<int:padron>', methods=['GET'])
 def asistencia_id(padron):

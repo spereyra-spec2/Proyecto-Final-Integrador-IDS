@@ -3,6 +3,7 @@ from flask_cors import CORS
 from src.db.init_db import init_db
 from src.routes.auth.auth import auth_bp
 from src.routes.evaluaciones import evaluaciones_bp
+from src.routes.asistencia import asistencia_bp
 import config
 from mail import mail
 
@@ -20,6 +21,7 @@ app.config["SECRET_KEY"] = config.SECRET_KEY
 
 
 app.register_blueprint(evaluaciones_bp, url_prefix='/api/evaluaciones')
+app.register_blueprint(asistencia_bp, url_prefix='/api/asistencia')
 
 mail.init_app(app)
 
