@@ -133,3 +133,25 @@ def verificar_unicidad_curso(cursor, nombre: str, codigo: str, id_curso_ignorar:
             return conflict("Ya existe un curso registrado con ese mismo código.")
             
     return None
+
+
+def validar_curso_id(curso_id: Any) -> int:
+    """Validate and return curso_id as integer; raise ValueError on invalid input."""
+    try:
+        cid = int(curso_id)
+        if cid <= 0:
+            raise ValueError("El curso_id debe ser un número entero positivo.")
+        return cid
+    except (TypeError, ValueError):
+        raise ValueError("El curso_id debe ser un número entero válido.")
+
+
+def validar_padron(padron: Any) -> int:
+    """Validate and return padron as integer; raise ValueError on invalid input."""
+    try:
+        p = int(padron)
+        if p <= 0:
+            raise ValueError("El padrón debe ser un número entero positivo.")
+        return p
+    except (TypeError, ValueError):
+        raise ValueError("El padrón debe ser un número entero válido.")

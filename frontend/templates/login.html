@@ -36,6 +36,7 @@
   <div class="login-card">
     <h2>Ingresá al panel</h2>
 
+<<<<<<< HEAD
     <form action="{{url_for('auth.login')}}" method="POST">
       <div class="form-group">
         <label for="padron" class="form-label">Padrón</label>
@@ -63,11 +64,29 @@
 
     <div id="contrasena-divider">
       <a class="alogin" href="{{url_for('auth.contrasena_olvidada')}}">¿Olvidaste tu contraseña?</a>
+=======
+    <div class="form-group">
+      <label class="form-label">Padrón</label>
+      <input class="form-input" id="padron" type="number" placeholder="Ingresá tu número de padrón institucional" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Contraseña</label>
+      <input class="form-input" id="contrasena" type="password" placeholder="Ingresá tu contraseña" />
+    </div>
+
+    <button class="btn btn-primary btn-lg" id="btn-login">
+      Ingresar al panel →
+    </button>
+
+    <div id="contrasena-divider">
+      <a id="contrasena_olvidada" href="">¿Olvidaste tu contraseña?</a>
+>>>>>>> gvillanueva-branch
     </div>
 
     <div class="divider">o</div>
 
     <p class="student-link">
+<<<<<<< HEAD
       ¿Sos alumno? <a href="{{url_for('alumno.inicio')}}">Accedé al portal de estudiantes →</a>
     </p>
 
@@ -77,4 +96,35 @@
   </div>
 </div>
 </body>
+=======
+      ¿Sos alumno? <a href="alumno-inicio.html">Accedé al portal de estudiantes →</a>
+    </p>
+  </div>
+</div>
+</body>
+
+<script>
+// Login simple: guarda datos en localStorage y redirige al dashboard
+document.getElementById('btn-login').addEventListener('click', () => {
+  const email = document.getElementById('email').value.trim();
+  const name  = document.getElementById('name').value.trim();
+  const msg   = document.getElementById('info-msg');
+
+  if (!email || !name) {
+    msg.style.display = 'block';
+    msg.textContent = 'Completá tu email y nombre para continuar.';
+    return;
+  }
+
+  localStorage.setItem('profesor_email', email);
+  localStorage.setItem('profesor_name', name);
+  window.location.href = 'profesor-dashboard.html';
+});
+
+// Si ya tiene sesión, redirigir
+const saved = localStorage.getItem('profesor_email');
+if (saved) window.location.href = 'profesor-dashboard.html';
+</script>
+</body>
+>>>>>>> gvillanueva-branch
 </html>

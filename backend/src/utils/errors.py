@@ -1,11 +1,8 @@
 from flask import jsonify
 
-# errors.py
-from flask import jsonify
-
 def error_response(code, message, level="error", description=""):
     return jsonify({
-        "error": [{
+        "errors": [{
             "code": code,
             "message": message,
             "level": level,
@@ -13,21 +10,23 @@ def error_response(code, message, level="error", description=""):
         }]
     }), code
 
-
 def not_found(detail):
-    return error_response(404, "Petición inválida", "warning", detail)
+    return error_response(404, "No encontrado", "info", str(detail))
 
 def conflict(detail):
-    return error_response(409, "Conflicto", "warning", detail)
+    return error_response(409, "Conflicto", "warning", str(detail))
 
 def server_error(detail="Error interno del servidor"):
-    return error_response(500, "Error interno", "critical", detail)
+    return error_response(500, "Error interno", "critical", str(detail))
 
 def bad_request(detail):
-    return error_response(400, "Petición inválida", "warning", detail)
+    return error_response(400, "Petición inválida", "warning", str(detail))
+
+def acceso_denegado(detail="Acceso denegado"):
+    return error_response(403, "Acceso denegado", "error", str(detail))
 
 def acceso_denegado1(details):
-    return error_response(403, "Acceso denegado", "error", details)
+    return acceso_denegado(details)
 
 def ok_response(detail):
     return error_response(200, "OK", "success", detail)

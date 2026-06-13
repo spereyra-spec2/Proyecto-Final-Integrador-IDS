@@ -41,18 +41,73 @@
     <div class="page-header">
       <div>
         <h1 class="page-title">Equipos</h1>
-        <p class="page-subtitle" id="course-sub">Cargando...</p>
+        <p class="page-subtitle">{{ 'Curso ' ~ (curso_id or '') }}</p>
       </div>
       <button class="btn btn-primary" onclick="openModal('modal-team')">➕ Nuevo equipo</button>
     </div>
 
-    <div class="grid-3" id="teams-grid">
-      <div style="grid-column:1/-1;text-align:center;padding:40px;color:#9ca3af">Cargando...</div>
+    <div class="grid-3">
+      {% if teams and teams|length > 0 %}
+        {% for t in teams %}
+        <div class="card">
+            <div class="card-header" style="display:flex;align-items:center;justify-content:space-between">
+            <span class="card-title">{{ t.nombre }}</span>
+            <div style="font-size:12px;color:#6b7280;margin-left:8px">Cupo: {{ t.active_count }} / {% if t.cupo %}{{ t.cupo }}{% else %}∞{% endif %}</div>
+            <div>
+              {% if t.cupo is not none and t.active_count >= t.cupo %}
+                <button class="btn btn-sm" disabled title="Cupo completo">➕ Integrante</button>
+              {% else %}
+                <button class="btn btn-sm" onclick="openMemberModal('{{ t.integrantes[0].padron if t.integrantes else '' }}')">➕ Integrante</button>
+              {% endif %}
+            </div>
+          </div>
+          <div class="card-body">
+            <div style="margin-bottom:12px">
+              {% if not t.integrantes %}
+                <p style="font-size:13px;color:#9ca3af">Sin integrantes</p>
+              {% else %}
+                {% for p in t.integrantes %}
+                  <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:#f7f9fc;border-radius:6px;margin-bottom:5px;font-size:13px">
+                    <div>
+                      <strong>{{ p.nombre or p.padron or p }}</strong>
+                      <span style="color:#9ca3af;margin-left:6px">({{ p.padron or p }})</span>
+                      <div style="font-size:12px;color:#6b7280;margin-top:4px">
+                        {% if p.activo_desde %}Ingresó: {{ p.activo_desde }}{% endif %}
+                        {% if p.activo_hasta %}&nbsp;•&nbsp;Salió: {{ p.activo_hasta }}{% endif %}
+                        {% if p.activo is defined and p.activo == 0 %}
+                          <span style="color:#a61b1b;margin-left:8px">(inactivo)</span>
+                        {% endif %}
+                      </div>
+                    </div>
+                    <div>
+                      {% if p.activo is not defined or p.activo == 1 %}
+                        <form method="post" action="/profe-remove-member" style="display:inline">
+                          <input type="hidden" name="curso_id" value="{{ curso_id }}" />
+                          <input type="hidden" name="equipo_ref" value="{{ t.integrantes[0].padron if t.integrantes else '' }}" />
+                          <input type="hidden" name="padron" value="{{ p.padron }}" />
+                          <button class="btn btn-outline btn-sm" type="submit">Remover</button>
+                        </form>
+                      {% else %}
+                        
+                      {% endif %}
+                    </div>
+                  </div>
+                {% endfor %}
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div style="grid-column:1/-1;text-align:center;padding:50px;color:#9ca3af">
+          <div style="font-size:40px;margin-bottom:12px">🤝</div>
+          <strong>Sin equipos</strong>
+        </div>
+      {% endif %}
     </div>
   </div>
 </div>
 
-<!-- Modal crear equipo -->
 <div class="modal-overlay hidden" id="modal-team">
   <div class="modal">
     <div class="modal-header">
@@ -60,17 +115,22 @@
       <button class="modal-close" onclick="closeModal('modal-team')">✕</button>
     </div>
     <div class="modal-body">
-      <div class="form-group"><label class="form-label">Nombre del equipo *</label><input class="form-input" id="t-nombre" placeholder="Ej: Grupo 1" /></div>
-      <div class="form-group"><label class="form-label">Cupo máximo</label><input class="form-input" id="t-cupo" type="number" value="5" /></div>
+      <form method="post">
+        <input type="hidden" name="action" value="create">
+        <input type="hidden" name="curso_id" value="{{ curso_id }}">
+        <div class="form-group"><label class="form-label">Nombre del equipo *</label><input class="form-input" name="nombre" id="t-nombre" placeholder="Ej: Grupo 1" /></div>
+        <div class="form-group"><label class="form-label">Cupo máximo (opcional)</label><input class="form-input" name="cupo" id="t-cupo" type="number" value="" placeholder="Ej: 5" /></div>
+        <div class="form-group"><label class="form-label">Padrónes iniciales (separados por coma)</label><input class="form-input" name="padrones" id="t-padrones" placeholder="Ej: 101111,102222" /></div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" type="button" onclick="closeModal('modal-team')">Cancelar</button>
+          <button class="btn btn-primary" type="submit">Crear</button>
+        </div>
+      </form>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-outline" onclick="closeModal('modal-team')">Cancelar</button>
-      <button class="btn btn-primary" id="btn-create-team">Crear</button>
     </div>
   </div>
 </div>
 
-<!-- Modal agregar integrante -->
 <div class="modal-overlay hidden" id="modal-member">
   <div class="modal">
     <div class="modal-header">
@@ -78,7 +138,11 @@
       <button class="modal-close" onclick="closeModal('modal-member')">✕</button>
     </div>
     <div class="modal-body">
-      <div class="form-group"><label class="form-label">Padrón del alumno</label><input class="form-input" id="m-padron" placeholder="Ej: 108542" /></div>
+      <form method="post" action="/profe-add-member">
+        <input type="hidden" name="curso_id" value="{{ curso_id }}" />
+        <input type="hidden" name="equipo_ref" id="m-equipo-ref" value="" />
+        <div class="form-group"><label class="form-label">Padrón del alumno</label><input class="form-input" id="m-padron" name="nuevo_padron" placeholder="Ej: 108542" /></div>
+      </form>
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal('modal-member')">Cancelar</button>
@@ -87,141 +151,25 @@
   </div>
 </div>
 
-<script type="module">
-import api from '../js/api.js';
-import { toast, openModal, closeModal, randomCode, initSidebar } from '../js/utils.js';
+<script>
+function openModal(id){document.getElementById(id).classList.remove('hidden')}
+function closeModal(id){document.getElementById(id).classList.add('hidden')}
+document.getElementById('nav-alumnos').href = `profesor-alumnos.html?curso={{ curso_id }}`;
+document.getElementById('nav-evals').href = `profesor-evaluaciones.html?curso={{ curso_id }}`;
+document.getElementById('nav-asist').href = `profesor-asistencia.html?curso={{ curso_id }}`;
 
-initSidebar();
-window.openModal = openModal;
-window.closeModal = closeModal;
-
-const params = new URLSearchParams(window.location.search);
-const cursoId = params.get('curso') || '';
-
-document.getElementById('nav-alumnos').href = `profesor-alumnos.html?curso=${cursoId}`;
-document.getElementById('nav-evals').href = `profesor-evaluaciones.html?curso=${cursoId}`;
-document.getElementById('nav-asist').href = `profesor-asistencia.html?curso=${cursoId}`;
-
-let teams = [];
-let students = [];
-let currentTeamId = null;
-
-async function init() {
-  const [courseData, teamsRes, studRes] = await Promise.all([
-    api.get('Course', cursoId),
-    api.filter('Team', { curso_id: cursoId }),
-    api.filter('Student', { curso_id: cursoId }),
-  ]);
-  document.getElementById('course-sub').textContent = `${courseData.nombre} · ${courseData.codigo}`;
-  teams = teamsRes.results || [];
-  students = studRes.results || [];
-  render();
-}
-
-function getStudentName(padron) {
-  const s = students.find(st => st.padron === padron);
-  return s ? s.nombre : padron;
-}
-
-function render() {
-  const grid = document.getElementById('teams-grid');
-  if (!teams.length) {
-    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:50px;color:#9ca3af">
-      <div style="font-size:40px;margin-bottom:12px">🤝</div>
-      <strong>Sin equipos</strong>
-    </div>`;
-    return;
-  }
-
-  grid.innerHTML = teams.map(t => `
-    <div class="card">
-      <div class="card-header" style="display:flex;align-items:center;justify-content:space-between">
-        <span class="card-title">${t.nombre}</span>
-        <button class="btn btn-danger btn-sm" onclick="deleteTeam('${t.id}')">🗑</button>
-      </div>
-      <div class="card-body">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-          <span style="font-size:13px;color:#6b7280">Código: <strong style="font-family:monospace;color:var(--color-primary)">${t.codigo_acceso}</strong></span>
-          <span class="badge badge-info">${(t.integrantes||[]).length}/${t.cupo_maximo||5}</span>
-        </div>
-        <div style="margin-bottom:12px">
-          ${(t.integrantes||[]).length === 0
-            ? '<p style="font-size:13px;color:#9ca3af">Sin integrantes</p>'
-            : (t.integrantes||[]).map(p => `
-                <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:#f7f9fc;border-radius:6px;margin-bottom:5px;font-size:13px">
-                  <div>
-                    <strong>${getStudentName(p)}</strong>
-                    <span style="color:#9ca3af;margin-left:6px">(${p})</span>
-                  </div>
-                  <button class="btn btn-sm btn-danger" onclick="removeMember('${t.id}', '${p}')">✕</button>
-                </div>
-              `).join('')}
-        </div>
-        <button class="btn btn-outline btn-sm" onclick="addMember('${t.id}', '${t.nombre.replace(/'/g, "\\'")}')">
-          ➕ Agregar integrante
-        </button>
-      </div>
-    </div>
-  `).join('');
-}
-
-window.deleteTeam = async (id) => {
-  if (!confirm('¿Eliminar este equipo?')) return;
-  await api.delete('Team', id);
-  toast('Equipo eliminado', 'success');
-  init();
-};
-
-window.addMember = (teamId, teamName) => {
-  currentTeamId = teamId;
-  document.getElementById('member-modal-title').textContent = `Agregar a ${teamName}`;
+function openMemberModal(equipoRef){
+  document.getElementById('m-equipo-ref').value = equipoRef || '';
   document.getElementById('m-padron').value = '';
   openModal('modal-member');
-};
+}
 
-window.removeMember = async (teamId, padron) => {
-  const team = teams.find(t => t.id === teamId);
-  if (!team) return;
-  const integrantes = (team.integrantes || []).filter(p => p !== padron);
-  await api.update('Team', teamId, { integrantes });
-  const student = students.find(s => s.padron === padron);
-  if (student) await api.update('Student', student.id, { equipo_id: '' });
-  toast('Integrante removido', 'success');
-  init();
-};
-
-document.getElementById('btn-add-member').addEventListener('click', async () => {
-  const padron = document.getElementById('m-padron').value.trim();
-  if (!padron) { toast('Ingresá un padrón', 'error'); return; }
-  const team = teams.find(t => t.id === currentTeamId);
-  if (!team) return;
-  const integrantes = team.integrantes || [];
-  if (integrantes.includes(padron)) { toast('Ya está en el equipo', 'error'); return; }
-  if (integrantes.length >= (team.cupo_maximo || 5)) { toast('Equipo lleno', 'error'); return; }
-  await api.update('Team', currentTeamId, { integrantes: [...integrantes, padron] });
-  const student = students.find(s => s.padron === padron);
-  if (student) await api.update('Student', student.id, { equipo_id: currentTeamId });
-  toast('Integrante agregado', 'success');
-  closeModal('modal-member');
-  init();
+document.getElementById('btn-add-member').addEventListener('click', function(){
+  var form = document.querySelector('#modal-member form');
+  if(!form) return;
+  form.submit();
 });
-
-document.getElementById('btn-create-team').addEventListener('click', async () => {
-  const nombre = document.getElementById('t-nombre').value.trim();
-  const cupo = parseInt(document.getElementById('t-cupo').value) || 5;
-  if (!nombre) { toast('El nombre es requerido', 'error'); return; }
-  await api.create('Team', {
-    nombre, curso_id: cursoId,
-    codigo_acceso: randomCode(),
-    cupo_maximo: cupo, integrantes: []
-  });
-  toast('Equipo creado', 'success');
-  closeModal('modal-team');
-  document.getElementById('t-nombre').value = '';
-  init();
-});
-
-init();
 </script>
+
 </body>
 </html>

@@ -1,3 +1,1 @@
-
-
 API_BASE_URL = 'http://localhost:3006/api'

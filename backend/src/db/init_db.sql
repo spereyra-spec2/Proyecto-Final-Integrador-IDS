@@ -27,73 +27,88 @@ CREATE TABLE IF NOT EXISTS Curso_has_Usuarios (
     FOREIGN KEY (Usuarios_padron) REFERENCES Usuarios(padron) ON DELETE CASCADE
 );
 
+
 CREATE TABLE IF NOT EXISTS Asistencias (
     idAsistencia INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
-    asistio TINYINT,
-    fecha DATETIME,
-    justificado TINYINT,
-	hash_qr VARCHAR(512),
+    asistio TINYINT DEFAULT 0,
+    fecha DATETIME NOT NULL,
+    justificado TINYINT DEFAULT 0,
+    hash_qr VARCHAR(512),
     Usuarios_padron INT NOT NULL,
-    FOREIGN KEY (Usuarios_padron) REFERENCES Usuarios(padron) ON DELETE CASCADE
+    Curso_idCurso INT NOT NULL,
+    FOREIGN KEY (Usuarios_padron) REFERENCES Usuarios(padron) ON DELETE CASCADE,
+    FOREIGN KEY (Curso_idCurso) REFERENCES Curso(idCurso) ON DELETE CASCADE
 );
+
 
 CREATE TABLE IF NOT EXISTS Equipos (
     idEquipos INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
     nombre VARCHAR(255),
-    created_at DATETIME,
+    access_code VARCHAR(255) UNIQUE,
+    cupo INT DEFAULT 4,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     Curso_idCurso INT NOT NULL,
     FOREIGN KEY (Curso_idCurso) REFERENCES Curso(idCurso) ON DELETE CASCADE
 );
 
+
 CREATE TABLE IF NOT EXISTS Usuarios_has_Equipos (
     Usuarios_padron INT NOT NULL,
     Equipos_idEquipos INT NOT NULL,
-    activo TINYINT,
+    activo TINYINT DEFAULT 1,
     activo_desde DATETIME,
     activo_hasta DATETIME,
-    FOREIGN KEY (Usuarios_padron) REFERENCES Usuarios(padron),
-    FOREIGN KEY (Equipos_idEquipos) REFERENCES Equipos(idEquipos)
+    PRIMARY KEY (Usuarios_padron, Equipos_idEquipos), 
+    FOREIGN KEY (Usuarios_padron) REFERENCES Usuarios(padron) ON DELETE CASCADE,
+    FOREIGN KEY (Equipos_idEquipos) REFERENCES Equipos(idEquipos) ON DELETE CASCADE
 );
+
 
 CREATE TABLE IF NOT EXISTS Evaluaciones (
     idEvaluacion INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
     descripcion VARCHAR(255),
-    tipo VARCHAR(255),
+    tipo VARCHAR(255), 
     fecha DATETIME,
     Curso_idCurso INT NOT NULL,
-    FOREIGN KEY (Curso_idCurso) REFERENCES Curso(idCurso)
+    FOREIGN KEY (Curso_idCurso) REFERENCES Curso(idCurso) ON DELETE CASCADE
 );
+
 
 CREATE TABLE IF NOT EXISTS Equipos_has_Evaluaciones (
     Equipos_idEquipos INT NOT NULL,
     Evaluaciones_idEvaluacion INT NOT NULL,
-    FOREIGN KEY (Equipos_idEquipos) REFERENCES Equipos(idEquipos),
-    FOREIGN KEY (Evaluaciones_idEvaluacion) REFERENCES Evaluaciones(idEvaluacion)
+    PRIMARY KEY (Equipos_idEquipos, Evaluaciones_idEvaluacion), 
+    FOREIGN KEY (Equipos_idEquipos) REFERENCES Equipos(idEquipos) ON DELETE CASCADE,
+    FOREIGN KEY (Evaluaciones_idEvaluacion) REFERENCES Evaluaciones(idEvaluacion) ON DELETE CASCADE
 );
+
 
 CREATE TABLE IF NOT EXISTS Usuarios_has_Evaluaciones (
     Usuarios_padron INT NOT NULL,
     Evaluaciones_idEvaluacion INT NOT NULL,
-    FOREIGN KEY (Usuarios_padron) REFERENCES Usuarios(padron),
-    FOREIGN KEY (Evaluaciones_idEvaluacion) REFERENCES Evaluaciones(idEvaluacion)
+    PRIMARY KEY (Usuarios_padron, Evaluaciones_idEvaluacion), 
+    FOREIGN KEY (Usuarios_padron) REFERENCES Usuarios(padron) ON DELETE CASCADE,
+    FOREIGN KEY (Evaluaciones_idEvaluacion) REFERENCES Evaluaciones(idEvaluacion) ON DELETE CASCADE
 );
+
 
 CREATE TABLE IF NOT EXISTS Notas (
     idNotas INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
     puntaje FLOAT,
-    created_at DATETIME,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     Evaluaciones_idEvaluacion INT NOT NULL,
     Equipos_idEquipos INT,
     Usuarios_padron INT,   
-    FOREIGN KEY (Usuarios_padron) REFERENCES Usuarios(padron),
-    FOREIGN KEY (Equipos_idEquipos) REFERENCES Equipos(idEquipos),
-    FOREIGN KEY (Evaluaciones_idEvaluacion) REFERENCES Evaluaciones(idEvaluacion)
+    FOREIGN KEY (Usuarios_padron) REFERENCES Usuarios(padron) ON DELETE SET NULL, 
+    FOREIGN KEY (Equipos_idEquipos) REFERENCES Equipos(idEquipos) ON DELETE CASCADE,
+    FOREIGN KEY (Evaluaciones_idEvaluacion) REFERENCES Evaluaciones(idEvaluacion) ON DELETE CASCADE
 );
+
 
 CREATE TABLE IF NOT EXISTS Logs (
     idLogs INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
-    fecha DATETIME,
+    fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
     accion VARCHAR(255),
     Usuarios_padron INT NOT NULL,
-    FOREIGN KEY (Usuarios_padron) REFERENCES Usuarios(padron)
+    FOREIGN KEY (Usuarios_padron) REFERENCES Usuarios(padron) ON DELETE CASCADE
 );
