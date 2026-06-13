@@ -6,14 +6,16 @@
 function abrirModal() {
   const modal = document.getElementById('modal-eval');
   if (modal) {
-    modal.classList.remove('hidden');
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden';
   }
 }
 
 function cerrarModal() {
   const modal = document.getElementById('modal-eval');
   if (modal) {
-    modal.classList.add('hidden');
+    modal.classList.remove('show');
+    document.body.style.overflow = '';
   }
 }
 

@@ -3,7 +3,7 @@
 {% block title %}Evaluaciones — AcademiQ{% endblock %}
 
 {% block extra_css %}
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/evaluacion.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/evaluaciones.css') }}" />
 {% endblock %}
 
 {% block topbar_titulo %}Evaluaciones{% endblock %}
@@ -11,9 +11,8 @@
 {% block menu_titulo %}📝 Evaluaciones{% endblock %}
 
 {% block menu_accion_btn %}
-<button class="modal-open" onclick="abrirModal()">➕ Nueva evaluación</button>
+<button class="btn btn-primary" onclick="abrirModal()">➕ Nueva evaluación</button>
 {% endblock %}
-
 {% block content %}
 
 <!-- Lista de evaluaciones -->
@@ -29,7 +28,6 @@
             </div>
           </div>
           <div class="eval-card-body">
-            <p><strong>🔢 ID:</strong> {{ eval.idEvaluacion }}</p>
             <div class="eval-descripcion">
               <strong>📄 Descripción:</strong>
               <p>{{ eval.descripcion if eval.descripcion else 'Sin descripción' }}</p>
