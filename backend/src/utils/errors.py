@@ -49,6 +49,11 @@ def forbidden(detail):
 
 def unprocessable_entity(detail):
     return error_response(422, "Entidad no procesable", "error", detail)
+def conflict(detail="Conflicto"):
+    return error_response(409, "Conflicto", "warning", detail)
+
+def forbidden(detail="Acceso Denegado"):
+    return error_response(403, "Usted no tiene acceso al recurso solicitado", "warning", detail)
 
 def server_error(e):
     return jsonify({  
@@ -160,18 +165,6 @@ def not_found(error):
                 ]
             }
         return error404
-
-def server_error(error):
-    error500 = {"error": [
-                    {
-                        "code": 500,
-                        "message": "Error interno en el servidor",
-                        "level": "error",
-                        "description": str(error)
-                    }
-                ]
-            }
-    return error500
 
 def bad_request(error):
     error400 = {"error": [

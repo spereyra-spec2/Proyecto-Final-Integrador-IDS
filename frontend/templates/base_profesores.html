@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+    {% block extra_css %}{% endblock %}
     <title>{% block title %} AcademiQ - Profesores {% endblock %}</title>
 </head>
 
@@ -27,7 +28,7 @@
     <a class="nav-item" id="nav-notas" href="{{ url_for('notas.ver_nota') }}"><span class="nav-icon">📋</span> Notas</a>
     <a class="nav-item" id="nav-equipos" href="#"><span class="nav-icon">🤝</span> Equipos</a>
     <a class="nav-item" id="nav-evals" href="#"><span class="nav-icon">📝</span> Evaluaciones</a>
-    <a class="nav-item active" href="#"><span class="nav-icon">✅</span> Asistencia</a>
+    <a class="nav-item" href="#"><span class="nav-icon">✅</span> Asistencia</a>
   </nav>
 
   <div class="sidebar-footer">
@@ -49,7 +50,7 @@
         <h1 class="page-title">{% block menu_titulo %}{% endblock %}</h1>
         <p class="page-subtitle" id="course-sub">{% block menu_parrafo %}{% endblock %}</p>
       </div>
-        <button class="btn btn-primary" id="btn-generate-qr">{% block menu_accion_btn %}{% endblock %}</button>
+        {% block menu_accion_btn %}{% endblock %}
     </div>
 
     {% block content %}{% endblock %}

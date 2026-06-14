@@ -1,182 +1,149 @@
-{% extends "base_profesores.html" %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Asistencia — AcademiQ</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}"/>
+</head>
+<body>
 
-{% block title %} Asistencia {% endblock %}
-{% block topbar_titulo %} Asistencia {% endblock %}
-{% block menu_titulo %} Asistencia {% endblock %} 
-{% block menu_accion_btn %} Generar QR {% endblock %}
-
-{% block content %}
-<!-- QR activo -->
-<div class="card" id="qr-card" style="margin-bottom:22px;display:none;border:2px solid var(--color-primary)">
-  <div class="card-body" style="display:flex;align-items:center;gap:28px;flex-wrap:wrap">
-    <div style="background:#f4f6f9;border-radius:12px;padding:20px;text-align:center;min-width:140px">
-      <div style="font-size:32px;margin-bottom:8px">🔲</div>
-      <div id="qr-code-display" style="font-family:monospace;font-size:22px;font-weight:800;letter-spacing:3px;color:var(--color-primary)"></div>
-    </div>
-    <div>
-      <p style="font-size:18px;font-weight:700;margin-bottom:4px">Código activo</p>
-      <p style="color:#6b7280;font-size:14px">Válido por 15 minutos. Los alumnos pueden usar el módulo de autogestión para registrarse.</p>
-      <p style="font-size:13px;margin-top:8px">Generado: <strong id="qr-time"></strong></p>
-    </div>
+<div class="sidebar-overlay"></div>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-icon">🎓</div>
+    <div><div class="sidebar-logo-text">AcademiQ</div><div class="sidebar-logo-sub">Panel Docente</div></div>
   </div>
-</div>
-
-<!-- Tabla hoy -->
-<div class="card" style="margin-bottom:22px">
-  <div class="card-header"><span class="card-title">Hoy — <span id="today-date"></span></span></div>
-  <div class="card-body" style="padding:0">
-    <div class="table-wrapper">
-      <table class="table">
-        <thead><tr><th>Alumno</th><th>Padrón</th><th>Estado</th><th>Acción</th></tr></thead>
-        <tbody id="today-tbody"><tr><td colspan="4" style="text-align:center;padding:24px;color:#9ca3af">Cargando...</td></tr></tbody>
-      </table>
-    </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">General</div>
+    <a class="nav-item" href="profesor-dashboard.html"><span class="nav-icon">📊</span> Dashboard</a>
+    <a class="nav-item" href="profesor-cursos.html"><span class="nav-icon">📚</span> Mis Cursos</a>
+    <div class="nav-section-label">Curso actual</div>
+    <a class="nav-item" href="#"><span class="nav-icon">👥</span> Alumnos</a>
+    <a class="nav-item" href="#"><span class="nav-icon">🤝</span> Equipos</a>
+    <a class="nav-item" href="#"><span class="nav-icon">📝</span> Evaluaciones</a>
+    <a class="nav-item active" href="#"><span class="nav-icon">✅</span> Asistencia</a>
+  </nav>
+  <div class="sidebar-footer">
+    <a class="nav-item" href="login.html"><span class="nav-icon">🚪</span> Cerrar sesión</a>
   </div>
-</div>
+</aside>
 
-<!-- Historial -->
-<div class="card">
-  <div class="card-header"><span class="card-title">Historial de clases</span></div>
-  <div class="card-body" style="padding:0">
-    <div id="history-list" style="padding:14px">
-      <p style="color:#9ca3af;text-align:center">Sin historial</p>
-    </div>
+<div class="main-content">
+  <div class="topbar">
+    <button class="hamburger">☰</button>
+    <span class="topbar-title">Asistencia</span>
   </div>
-</div>
-{% endblock %}
 
-<script type="module">
-import api from '../js/api.js';
-import { toast, randomCode, formatDate, initSidebar } from '../js/utils.js';
+  <div class="page-content">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Asistencia</h1>
+      </div>
+      <a href="{{ url_for('asistencia_profe') }}?generar=1" class="btn btn-primary">🔲 Generar QR</a>
+    </div>
 
-initSidebar();
-
-const params = new URLSearchParams(window.location.search);
-const cursoId = params.get('curso') || '';
-
-document.getElementById('nav-alumnos').href = `profesor-alumnos.html?curso=${cursoId}`;
-document.getElementById('nav-equipos').href = `profesor-equipos.html?curso=${cursoId}`;
-document.getElementById('nav-evals').href = `profesor-evaluaciones.html?curso=${cursoId}`;
-
-const today = new Date().toISOString().split('T')[0];
-document.getElementById('today-date').textContent = formatDate(today);
-
-let students = [];
-let attendances = [];
-let sessions = [];
-let activeSession = null;
-
-async function init() {
-  const [courseData, studRes, attRes, sessRes] = await Promise.all([
-    api.get('Course', cursoId),
-    api.filter('Student', { curso_id: cursoId, estado: 'activo' }),
-    api.filter('Attendance', { curso_id: cursoId }),
-    api.filter('AttendanceSession', { curso_id: cursoId }),
-  ]);
-
-  document.getElementById('course-sub').textContent = `${courseData.nombre} · ${courseData.codigo}`;
-  students = studRes.results || [];
-  attendances = attRes.results || [];
-  sessions = sessRes.results || [];
-
-  activeSession = sessions.find(s => s.fecha === today && s.activa);
-
-  renderToday();
-  renderHistory();
-}
-
-function renderToday() {
-  const tbody = document.getElementById('today-tbody');
-  const todayAtt = attendances.filter(a => a.fecha === today);
-
-  if (!students.length) {
-    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:24px;color:#9ca3af">No hay alumnos activos</td></tr>';
-    return;
-  }
-
-  tbody.innerHTML = students.map(s => {
-    const att = todayAtt.find(a => a.padron === s.padron);
-    const presente = att?.presente;
-    return `
-      <tr>
-        <td><strong>${s.nombre}</strong></td>
-        <td>${s.padron}</td>
-        <td>
-          ${presente
-            ? '<span class="badge badge-success">✅ Presente</span>'
-            : '<span class="badge badge-neutral">❌ Ausente</span>'}
-        </td>
-        <td>
-          ${!presente && activeSession ? `<button class="btn btn-sm btn-outline" onclick="registrar('${s.padron}', '${att?.id || ''}')">Registrar</button>` : '—'}
-        </td>
-      </tr>
-    `;
-  }).join('');
-}
-
-function renderHistory() {
-  const dateGroups = {};
-  attendances.forEach(a => {
-    if (!dateGroups[a.fecha]) dateGroups[a.fecha] = [];
-    dateGroups[a.fecha].push(a);
-  });
-
-  const dates = Object.keys(dateGroups).sort((a, b) => b.localeCompare(a)).filter(d => d !== today);
-  const container = document.getElementById('history-list');
-
-  if (!dates.length) {
-    container.innerHTML = '<p style="color:#9ca3af;text-align:center">Sin historial previo</p>';
-    return;
-  }
-
-  container.innerHTML = dates.slice(0, 15).map(date => {
-    const dayAtt = dateGroups[date];
-    const present = dayAtt.filter(a => a.presente).length;
-    const pct = students.length ? Math.round((present / students.length) * 100) : 0;
-    return `
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 4px;border-bottom:1px solid #f0f0f0">
-        <span style="font-size:14px;font-weight:500">${formatDate(date)}</span>
-        <div style="display:flex;align-items:center;gap:12px">
-          <span style="font-size:13px;color:#6b7280">${present}/${students.length} presentes</span>
-          <span class="badge ${pct >= 70 ? 'badge-success' : pct >= 40 ? 'badge-warning' : 'badge-danger'}">${pct}%</span>
+    {% if qr_generado %}
+    <div class="card" style="margin-bottom:22px; border:2px solid var(--color-primary)">
+      <div class="card-body" style="display:flex;align-items:center;gap:28px;flex-wrap:wrap">
+        <div style="background:#f4f6f9;border-radius:12px;padding:20px;text-align:center;min-width:140px">
+          <img src="{{ url_for('qr_imagen') }}" alt="QR de asistencia" style="width:160px;height:160px" />
+        </div>
+        <div>
+          <p style="font-size:18px;font-weight:700;margin-bottom:4px">Código activo</p>
+          <p style="color:#6b7280;font-size:14px">Válido por 15 minutos. Los alumnos pueden escanear este QR para registrar su asistencia.</p>
         </div>
       </div>
-    `;
-  }).join('');
-}
+    </div>
+    {% endif %}
 
-window.registrar = async (padron, existingAttId) => {
-  if (!activeSession) { toast('No hay sesión activa', 'error'); return; }
-  if (existingAttId) {
-    await api.update('Attendance', existingAttId, { presente: true });
-  } else {
-    await api.create('Attendance', {
-      curso_id: cursoId, padron, fecha: today,
-      presente: true, session_id: activeSession.id,
-    });
-  }
-  toast('Presente registrado', 'success');
-  init();
-};
+    <div class="card" style="margin-bottom:22px">
+      <div class="card-header"><span class="card-title">Asistencias de hoy</span></div>
+      <div class="card-body" style="padding:0">
+        <div class="table-wrapper">
+          <table class="table">
+            <thead><tr><th>Padrón</th><th>Fecha</th></tr></thead>
+            <tbody>
+              {% if asistencias %}
+                {% for a in asistencias %}
+                <tr>
+                  <td>{{ a.Usuarios_padron }}</td>
+                  <td>{{ a.fecha }}</td>
+                </tr>
+                {% endfor %}
+              {% else %}
+                <tr><td colspan="2" style="text-align:center;padding:24px;color:#9ca3af">Sin asistencias registradas hoy</td></tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
 
-document.getElementById('btn-generate-qr').addEventListener('click', async () => {
-  const hash = randomCode() + randomCode();
-  const expiry = new Date(Date.now() + 15 * 60000).toISOString();
+        
+          <form action="{{url_for('obtener_asistencia')}}" method="POST" class="form-group">
+              <div class="form-group">
+                <label for="padron" class="form-label">Buscador por Padron</label>
+                <input
+                    type="int"
+                    id="padron"
+                    name="padron"
+                    class="form-input"
+                    placeholder="Ingrese un Padron"
+                    required
+                    autofocus
+                >
+              </div>
+              <div class="form-actions form__actions--single">
+                <button type="submit" class="form-btn form-btn-submit">Buscar</button>
+              </div>
+          </form>
+        
 
-  const session = await api.create('AttendanceSession', {
-    curso_id: cursoId, fecha: today,
-    qr_hash: hash, expira_en: expiry, activa: true,
-  });
-
-  activeSession = session;
-  document.getElementById('qr-code-display').textContent = hash.substring(0,8).toUpperCase();
-  document.getElementById('qr-time').textContent = new Date().toLocaleTimeString('es-AR', { hour:'2-digit', minute:'2-digit' });
-  document.getElementById('qr-card').style.display = 'flex';
-  toast('QR generado', 'success');
-  renderToday();
-});
-
-init();
-</script>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Historial de clases</span></div>
+      <div class="table-wrapper" >
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Padron</th>
+              <th>fecha</th>
+              <th>asistio</th>
+              <th>justificado</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for registro in asistencias %}
+              <tr>
+                <td>  {{ registro.Usuarios_padron}} </td>
+                <td>  {{ registro.fecha }} </td>
+                {% if registro.asistio == 1 %}
+                  <td> si </td>
+                {% else %}
+                  <td> no </td>
+                {% endif %}
+                
+                {% if registro.justificado == 1 %}
+                  <td> si </td>
+                {% else %}
+                  <td> no </td>
+                {% endif %}
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="2" style="text-align: center; color: #aaa; padding: 20px;">
+                    Sin asistencias registradas 
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
+

@@ -28,22 +28,46 @@
     </nav>
   </header>
 
-  <div class="public-container">
-
-    <div class="card" style="margin-bottom:24px">
-      <div class="card-header"><span class="card-title">Registrar asistencia</span></div>
-      <div class="card-body">
-        <form action="{{ url_for('registrar_asistencia') }}" method="post">
-          <input type="hidden" name="token" value="{{ token }}" />
-          <input class="form-input" name="padron" placeholder="Tu padrón" style="margin-bottom:12px" required />
-          <button type="submit" class="btn btn-accent">Registrar presente</button>
-        </form>
-        {% if mensaje %}
-          <div class="alert alert-{{ 'success' if exito else 'danger' }}" style="margin-top:12px">{{ mensaje }}</div>
-        {% endif %}
+  <div class="card">
+      <div class="card-header"><span class="card-title">Historial de clases</span></div>
+      <div class="table-wrapper" >
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Padron</th>
+              <th>fecha</th>
+              <th>asistio</th>
+              <th>justificado</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for registro in asistencias %}
+              <tr>
+                <td>  {{ registro.Usuarios_padron}} </td>
+                <td>  {{ registro.fecha }} </td>
+                {% if registro.asistio == 1 %}
+                  <td> si </td>
+                {% else %}
+                  <td> no </td>
+                {% endif %}
+                
+                {% if registro.justificado == 1 %}
+                  <td> si </td>
+                {% else %}
+                  <td> no </td>
+                {% endif %}
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="2" style="text-align: center; color: #aaa; padding: 20px;">
+                    Sin asistencias registradas 
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
     </div>
-  </div>
 </div>
 
 </body>

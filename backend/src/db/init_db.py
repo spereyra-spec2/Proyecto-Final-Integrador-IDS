@@ -13,7 +13,6 @@ def init_db():
 
     conn = mysql.connector.connect(
         host=host,
-        port=3306,
         user=user,
         password=password,
     )
