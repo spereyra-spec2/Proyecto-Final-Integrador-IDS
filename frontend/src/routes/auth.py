@@ -82,7 +82,6 @@ def login():
 
         if resultado.get('ok'):
             utils.guardar_sesion(resultado['token'], resultado['padron'], resultado['rol'])
-            flash('Bienvenido', 'success')
 
             return redirect(url_for('profesor.dashboard'))
     

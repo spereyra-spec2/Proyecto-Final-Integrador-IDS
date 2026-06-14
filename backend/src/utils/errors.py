@@ -85,7 +85,7 @@ def contrasena_incorrecta():
                     "code": "401",
                     "message": "UNAUTHORIZED",
                     "level": "error",
-                    "description": f"Contraseña incorrecta"
+                    "description": f"Contraseña o padrón incorrecto."
             }
         ]
     }), 401

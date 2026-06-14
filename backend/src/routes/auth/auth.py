@@ -37,6 +37,9 @@ def alta_usuario():
     if not isinstance(data["padron"], int):
         return errors.datos_incorrectos("padron")
     
+    if data["padron"] < 99999:
+        return errors.datos_incorrectos("padron")
+    
     if not isinstance(data["nombres"], str) or len(data["nombres"]) == 0:
         return errors.datos_incorrectos("nombres")
     
