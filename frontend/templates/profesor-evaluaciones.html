@@ -34,10 +34,14 @@
             </div>
             <p><strong>🎓 Curso ID:</strong> {{ eval.Curso_idCurso }}</p>
           </div>
+          
           <div class="eval-card-footer">
-            <a" class="btn btn-secondary btn-sm">
+            <button class="btn btn-secondary btn-sm" onclick="abrirModalEditarPorId({{ eval.idEvaluacion }})">
+              ✏️ Editar
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="verNotas({{ eval.idEvaluacion }})">
               📝 Ver notas
-            </a>
+            </button>
           </div>
         </div>
       {% endfor %}
@@ -76,6 +80,41 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
         <button type="submit" class="btn btn-primary">✨ Crear evaluación</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal para editar evaluación - SIN FETCH, con datos embebidos -->
+<div class="modal-overlay" id="modal-editar-eval">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">✏️ Editar evaluación</span>
+      <button class="modal-close" onclick="cerrarModalEditar()">✕</button>
+    </div>
+    <form id="form-editar-evaluacion" method="POST">
+      <div class="modal-body">
+        <input type="hidden" id="edit_id" name="idEvaluacion">
+        
+        <label for="edit_tipo">📌 Tipo</label>
+        <input type="text" id="edit_tipo" name="tipo" placeholder="Ej: Parcial, TP, Examen Final, Recuperatorio">
+        <small>📌 Dejar vacío para mantener el tipo actual</small>
+        
+        <label for="edit_descripcion">📄 Descripción</label>
+        <textarea id="edit_descripcion" name="descripcion" rows="3" placeholder="Describe la evaluación..."></textarea>
+        <small>📄 Dejar vacío para mantener la descripción actual</small>
+        
+        <label for="edit_fecha">📅 Fecha y hora</label>
+        <input type="datetime-local" id="edit_fecha" name="fecha">
+        <small>📅 Dejar vacío para mantener la fecha actual</small>
+        
+        <label for="edit_curso_id">🎓 ID del Curso</label>
+        <input type="number" id="edit_curso_id" name="curso_id" placeholder="Ej: 1, 2, 3...">
+        <small>🎓 Dejar vacío para mantener el curso actual</small>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="cerrarModalEditar()">Cancelar</button>
+        <button type="submit" class="btn btn-primary">💾 Actualizar evaluación</button>
       </div>
     </form>
   </div>
