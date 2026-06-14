@@ -93,28 +93,41 @@ def get_evaluacion(idEvaluacion):
 @evaluaciones_bp.route('/<int:idEvaluacion>', methods=['PUT'])
 def update_evaluacion(idEvaluacion):
     data = request.get_json()
-    tipo = data.get('tipo')
-    descripcion = data.get('descripcion')
-    fecha = data.get('fecha')
-    curso_id = data.get('Curso_idCurso')
-
+    
     try:
         conn = get_connection()
-        cursor = conn.cursor()
-
-        # Verificar que la evaluación exista
-        cursor.execute("SELECT idEvaluacion FROM Evaluaciones WHERE idEvaluacion = %s", (idEvaluacion,))
-        if cursor.fetchone() is None:
+        cursor = conn.cursor(dictionary=True)
+        
+        # Obtener la evaluación actual
+        cursor.execute("SELECT * FROM Evaluaciones WHERE idEvaluacion = %s", (idEvaluacion,))
+        evaluacion_actual = cursor.fetchone()
+        
+        if evaluacion_actual is None:
             return jsonify({'error': 'Evaluación no encontrada'}), 404
-
+        
+        # Usar valores actuales si no se proporcionan nuevos
+        tipo = data.get('tipo', evaluacion_actual['tipo'])
+        descripcion = data.get('descripcion', evaluacion_actual['descripcion'])
+        fecha = data.get('fecha', evaluacion_actual['fecha'])
+        curso_id = data.get('Curso_idCurso', evaluacion_actual['Curso_idCurso'])
+        
         # Actualizar la evaluación
         cursor.execute(
-            "UPDATE Evaluaciones SET tipo = %s, descripcion = %s, fecha = %s, Curso_idCurso = %s WHERE idEvaluacion = %s",
+            """UPDATE Evaluaciones 
+               SET tipo = %s, descripcion = %s, fecha = %s, Curso_idCurso = %s 
+               WHERE idEvaluacion = %s""",
             (tipo, descripcion, fecha, curso_id, idEvaluacion)
         )
         conn.commit()
-
-        return jsonify({'message': 'Evaluación actualizada exitosamente'}), 200
+        
+        # Obtener la evaluación actualizada
+        cursor.execute("SELECT * FROM Evaluaciones WHERE idEvaluacion = %s", (idEvaluacion,))
+        evaluacion_actualizada = cursor.fetchone()
+        
+        return jsonify({
+            'message': 'Evaluación actualizada exitosamente',
+            'evaluacion': evaluacion_actualizada
+        }), 200
 
     except Exception as e:
         return jsonify({'error': 'Error al actualizar la evaluación: {}'.format(str(e))}), 500

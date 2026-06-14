@@ -42,4 +42,4 @@ except Exception as e:
 
 
 if __name__ == "__main__":
-    app.run(port=3006, debug=True)
+    app.run(port=5000, debug=True)
