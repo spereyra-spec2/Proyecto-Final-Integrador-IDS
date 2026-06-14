@@ -39,8 +39,10 @@
             <button class="btn btn-secondary btn-sm" onclick="abrirModalEditarPorId({{ eval.idEvaluacion }})">
               ✏️ Editar
             </button>
-            <button class="btn btn-secondary btn-sm" onclick="verNotas({{ eval.idEvaluacion }})">
-              📝 Ver notas
+            <button class="btn btn-secondary btn-sm">
+              <a href="{{ url_for('notas.ver_nota', curso_id=eval.Curso_idCurso, id_ev=eval.idEvaluacion) }}">
+                📝 Ver notas
+              </a>
             </button>
           </div>
         </div>

@@ -17,6 +17,14 @@ def ver_nota():
     tipo = request.args.get('tipo')
     id_g = request.args.get('id_g')
 
+    # Si se ingresa por el template de "profesor-evaluaciones" (con curso_id y id_ev)
+    if not all([curso_id, id_ev, id_g, tipo]):
+        return render_template('ver_nota.html', 
+                               nota=None, 
+                               error=None, 
+                               curso_id=curso_id, 
+                               id_evaluaciones=id_ev)
+
 
     if not curso_id and not id_ev and not id_g and not tipo:
         return render_template('ver_nota.html', nota=None, error=None)

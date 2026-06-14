@@ -3,6 +3,12 @@
 {% block content %}
 <div class="public-container">
     
+    <div style="margin-bottom: 20px;">
+        <a href="/evaluaciones" class="btn btn-secondary" style="text-decoration: none; display: inline-block;">
+            ⬅️ Volver a Evaluaciones
+        </a>
+    </div>
+
     <div class="card" style="margin-bottom:24px">
         <form action="/notas/ver" method="GET" class="card-body" style="display:flex;gap:12px;flex-wrap:wrap;padding:16px 20px">
             <input type="number" name="curso_id" class="form-input" placeholder="ID Curso" style="flex:1;min-width:100px" value="{{ curso_id }}" required />
