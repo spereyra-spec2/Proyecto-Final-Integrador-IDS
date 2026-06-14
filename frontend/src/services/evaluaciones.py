@@ -1,114 +1,126 @@
 import requests
-import logging
 from src.utils.constants import API_BASE_URL
+from .auth import respuesta_error, error_conexion
 
-logger = logging.getLogger(__name__)
-
-def obtener_evaluaciones(idEvaluacion=None):
+def obtener_evaluaciones(token, idEvaluacion=None):
     """Obtiene evaluaciones del backend"""
     try:
+        headers = {"Authorization": f"Bearer {token}"}
+        
         if idEvaluacion:
-            url = f"{API_BASE_URL}/evaluaciones/{idEvaluacion}"
-            respuesta = requests.get(url)
-            if respuesta.status_code == 200:
-                return respuesta.json()
-            elif respuesta.status_code == 404:
-                return None
-            else:
-                logger.error(f"Error {respuesta.status_code}: {respuesta.text}")
-                return None
+            response = requests.get(
+                f'{API_BASE_URL}/evaluaciones/{idEvaluacion}',
+                headers=headers,
+                timeout=10
+            )
         else:
-            url = f"{API_BASE_URL}/evaluaciones"
-            respuesta = requests.get(url)
-            if respuesta.status_code == 200:
-                return respuesta.json()
-            else:
-                logger.error(f"Error {respuesta.status_code}: {respuesta.text}")
-                return []
+            response = requests.get(
+                f'{API_BASE_URL}/evaluaciones',
+                headers=headers,
+                timeout=10
+            )
+        
+        if response.status_code == 200:
+            data = response.json()
+            return {'ok': True, 'evaluaciones': data}
+        elif response.status_code == 404:
+            return {'ok': False, 'error_response': {'errors': [{'description': 'Evaluación no encontrada'}]}}
+        
+        return {'ok': False, 'error_response': respuesta_error(response)}
     
     except requests.exceptions.ConnectionError:
-        logger.error(f"Error de conexión con la API {API_BASE_URL}")
-        return [] if not idEvaluacion else None
+        return {'ok': False, 'error_response': error_conexion()}
     except Exception as e:
-        logger.error(f"Error al obtener evaluaciones: {str(e)}")
-        return [] if not idEvaluacion else None
+        return {'ok': False, 'error_response': {'errors': [{'description': f'Error inesperado: {e}'}]}}
 
-def crear_evaluacion(tipo: str, descripcion: str, fecha: str, curso_id: int) -> dict:
+
+
+def crear_evaluacion(token, tipo, descripcion, fecha, curso_id):
     """Crea una nueva evaluación en el backend"""
     try:
-        # El backend espera 'Curso_idCurso' en lugar de 'curso_id'
+        headers = {"Authorization": f"Bearer {token}"}
+        
         payload = {
-            'tipo': tipo,
-            'descripcion': descripcion,
-            'fecha': fecha,
-            'Curso_idCurso': curso_id  # Importante: usar el nombre exacto que espera el backend
+            "tipo": tipo,
+            "descripcion": descripcion,
+            "fecha": fecha,
+            "Curso_idCurso": curso_id
         }
         
-        respuesta = requests.post(
-            f"{API_BASE_URL}/evaluaciones",
-            json=payload
+        response = requests.post(
+            f'{API_BASE_URL}/evaluaciones',
+            headers=headers,
+            json=payload,
+            timeout=10
         )
         
-        if respuesta.status_code == 201:
-            data = respuesta.json()
-            return {
-                'ok': True,
-                'success': True,
-                'message': data.get('message', 'Evaluación creada exitosamente'),
-                'idEvaluacion': data.get('idEvaluacion')
-            }
-        else:
-            error_data = respuesta.json()
-            error_msg = error_data.get('error', 'Error al crear evaluación')
-            return {
-                'ok': False,
-                'success': False,
-                'message': error_msg,
-                'errors': [error_msg]
-            }
-    except Exception as e:
-        return {
-            'ok': False,
-            'success': False,
-            'message': f'Error de conexión: {str(e)}',
-            'errors': [f'Error de conexión: {str(e)}']
-        }
+        if response.status_code == 201:
+            data = response.json()
+            return {'ok': True, 'message': data.get('message', 'Evaluación creada exitosamente'), 'idEvaluacion': data.get('idEvaluacion')}
+        
+        return {'ok': False, 'error_response': respuesta_error(response)}
     
-def actualizar_evaluacion(idEvaluacion: int, tipo: str, descripcion: str, fecha: str, curso_id: int) -> dict:
-    """Actualiza una evaluación existente en el backend"""
+    except requests.exceptions.ConnectionError:
+        return {'ok': False, 'error_response': error_conexion()}
+    except Exception as e:
+        return {'ok': False, 'error_response': {'errors': [{'description': f'Error inesperado: {e}'}]}}
+
+
+
+def actualizar_evaluacion(token, idEvaluacion, tipo=None, descripcion=None, fecha=None, curso_id=None):
+    """Actualiza una evaluación existente en el backend (solo campos proporcionados)"""
     try:
-        payload = {
-            'tipo': tipo,
-            'descripcion': descripcion,
-            'fecha': fecha,
-            'Curso_idCurso': curso_id
-        }
+        headers = {"Authorization": f"Bearer {token}"}
         
-        respuesta = requests.put(
-            f"{API_BASE_URL}/evaluaciones/{idEvaluacion}",
-            json=payload
+        payload = {}
+        if tipo is not None:
+            payload["tipo"] = tipo
+        if descripcion is not None:
+            payload["descripcion"] = descripcion
+        if fecha is not None:
+            payload["fecha"] = fecha
+        if curso_id is not None:
+            payload["Curso_idCurso"] = curso_id
+        
+        if not payload:
+            return {'ok': False, 'error_response': {'errors': [{'description': 'No hay campos para actualizar'}]}}
+        
+        response = requests.put(
+            f'{API_BASE_URL}/evaluaciones/{idEvaluacion}',
+            headers=headers,
+            json=payload,
+            timeout=10
         )
         
-        if respuesta.status_code == 200:
-            data = respuesta.json()
-            return {
-                'ok': True,
-                'success': True,
-                'message': data.get('message', 'Evaluación actualizada exitosamente')
-            }
-        else:
-            error_data = respuesta.json()
-            error_msg = error_data.get('error', 'Error al actualizar evaluación')
-            return {
-                'ok': False,
-                'success': False,
-                'message': error_msg,
-                'errors': [error_msg]
-            }
+        if response.status_code == 200:
+            data = response.json()
+            return {'ok': True, 'message': data.get('message', 'Evaluación actualizada exitosamente')}
+        
+        return {'ok': False, 'error_response': respuesta_error(response)}
+    
+    except requests.exceptions.ConnectionError:
+        return {'ok': False, 'error_response': error_conexion()}
     except Exception as e:
-        return {
-            'ok': False,
-            'success': False,
-            'message': f'Error de conexión: {str(e)}',
-            'errors': [f'Error de conexión: {str(e)}']
-        }
+        return {'ok': False, 'error_response': {'errors': [{'description': f'Error inesperado: {e}'}]}}
+
+
+def eliminar_evaluacion(token, idEvaluacion):
+    """Elimina una evaluación del backend"""
+    try:
+        headers = {"Authorization": f"Bearer {token}"}
+        
+        response = requests.delete(
+            f'{API_BASE_URL}/evaluaciones/{idEvaluacion}',
+            headers=headers,
+            timeout=10
+        )
+        
+        if response.status_code == 200:
+            return {'ok': True, 'message': 'Evaluación eliminada exitosamente'}
+        
+        return {'ok': False, 'error_response': respuesta_error(response)}
+    
+    except requests.exceptions.ConnectionError:
+        return {'ok': False, 'error_response': error_conexion()}
+    except Exception as e:
+        return {'ok': False, 'error_response': {'errors': [{'description': f'Error inesperado: {e}'}]}}
