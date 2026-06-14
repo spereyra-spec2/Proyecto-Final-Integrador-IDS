@@ -6,6 +6,7 @@ from src.routes.api_ev_notas import ev_notas_bp
 from src.routes.equipos import equipos_bp
 from src.routes.alumnos import alumnos_bp
 from src.routes.cursos import cursos_bp
+from src.routes.evaluaciones import evaluaciones_bp
 from src.db.init_db import init_db
 from mail import mail
 
@@ -22,7 +23,6 @@ app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USE_SSL'] = False
 app.config['MAIL_USERNAME'] = 'gestion.academica.ids@gmail.com'
 app.config['MAIL_PASSWORD'] = 'xdkv alji fnmx euxz'
-app.config["SECRET_KEY"] = config.SECRET_KEY
 
 
 app.register_blueprint(auth_bp, url_prefix="/api/auth")
@@ -31,7 +31,6 @@ app.register_blueprint(alumnos_bp, url_prefix='/api/cursos/<int:idCurso>/alumnos
 app.register_blueprint(cursos_bp, url_prefix='/api/cursos')
 app.register_blueprint(equipos_bp, url_prefix='/api/cursos')
 app.register_blueprint(evaluaciones_bp, url_prefix='/api/evaluaciones')
-app.register_blueprint(asistencia_bp, url_prefix='/api/asistencia')
 
 mail.init_app(app)
 
