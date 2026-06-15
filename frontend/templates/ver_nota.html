@@ -1,16 +1,30 @@
-{% extends "base_notas.html" %}
+{% extends 'base_profesores.html' %}
+
+{% block title %}Notas — AcademiQ{% endblock %}
+
+{% block topbar_titulo %}Notas{% endblock %}
+{% block menu_titulo %}📝 Notas{% endblock %}
+{% block menu_parrafo %}Visualiza las notas de la comisión{% endblock %}
+
+<!-- Control del menú lateral dinámico -->
+{% block active_notas %}active{% endblock %}
+
+{% block menu_acciones %}
+  {% if curso_id %}
+    <a href="/profesor/cursos/{{ curso_id }}/notas/cargar?id_ev={{ id_evaluaciones }}" 
+       class="btn btn-primary" 
+       style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+        ➕ Cargar nota
+    </a>
+  {% endif %}
+{% endblock %}
 
 {% block content %}
 <div class="public-container">
     
-    <div style="margin-bottom: 20px;">
-        <a href="/evaluaciones" class="btn btn-secondary" style="text-decoration: none; display: inline-block;">
-            ⬅️ Volver a Evaluaciones
-        </a>
-    </div>
 
     <div class="card" style="margin-bottom:24px">
-        <form action="/notas/ver" method="GET" class="card-body" style="display:flex;gap:12px;flex-wrap:wrap;padding:16px 20px">
+        <form action="/profesor/cursos/{{ curso_id }}/notas/ver" method="GET" class="card-body" style="display:flex;gap:12px;flex-wrap:wrap;padding:16px 20px">
             <input type="number" name="curso_id" class="form-input" placeholder="ID Curso" style="flex:1;min-width:100px" value="{{ curso_id }}" required />
             <input type="number" name="id_ev" class="form-input" placeholder="ID Evaluación" style="flex:1;min-width:130px" value="{{ id_evaluaciones }}" required />
              <div>
@@ -54,7 +68,7 @@
                     <p style="color:#6b7280;font-size:14px">Evaluación: <strong>ID {{ id_evaluaciones }}</strong> | Curso: <strong>{{ curso_id }}</strong></p>
                 </div>
                 <div>
-                    <a href="/notas/editar?curso_id={{ curso_id }}&id_ev={{ id_evaluaciones }}&id_g={{ id_g }}&tipo={{ tipo }}" class="badge" style="background:#e5e7eb; color:#374151; text-decoration:none;">✏️ Editar</a>
+                    <a href="/profesor/cursos/{{ curso_id }}/notas/editar?id_ev={{ id_evaluaciones }}&id_g={{ id_g }}&tipo={{ tipo }}" class="badge" style="background:#e5e7eb; color:#374151; text-decoration:none;">✏️ Editar</a>
                 </div>
             </div>
         </div>

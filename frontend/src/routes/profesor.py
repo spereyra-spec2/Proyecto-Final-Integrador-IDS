@@ -3,6 +3,7 @@ from src.utils import utils as utils
 from src.services import cursos as api_cursos
 from src.services import alumnos as api_alumnos
 from src.services import evaluaciones as api_evaluaciones
+from src.services import ev_notas_service as api_notas
 
 profesor_bp = Blueprint('profesor', __name__)
 
@@ -362,3 +363,102 @@ def actualizar_evaluacion_route(curso_id, idEvaluacion):
             flash(f'❌ Error: {e.get("description", "Error al actualizar")}', 'error')
     
     return redirect(url_for('profesor.evaluaciones', curso_id=curso_id))
+#----------------------------------------------------------------------------------------------------
+
+
+# GESTIÓN DE NOTAS
+#----------------------------------------------------------------------------------------------------
+@profesor_bp.route('/cursos/<int:curso_id>/notas/ver', methods=['GET'])
+def ver_nota(curso_id):
+
+    usuario = utils.verificar_docente_autenticado()
+    if not usuario: return redirect(url_for('auth.login'))
+
+
+    id_ev = request.args.get('id_ev')
+    tipo = request.args.get('tipo')
+    id_g = request.args.get('id_g')
+
+    curso = {"idCurso": curso_id} if curso_id else None
+    # Si se ingresa por el template de "profesor-evaluaciones" (con curso_id y id_ev)
+    if not all([curso_id, id_ev, id_g, tipo]):
+        return render_template('ver_nota.html', 
+                               nota=None, 
+                               error=None, 
+                               curso_id=curso_id, 
+                               id_evaluaciones=id_ev,
+                               curso=curso)
+
+
+    if not curso_id and not id_ev and not id_g and not tipo:
+        return render_template('ver_nota.html', nota=None, error=None)
+
+    resultado = api_notas.consultar_nota(curso_id, id_ev, id_g, tipo)
+
+    if resultado["codigo"] == 200:
+        return render_template('ver_nota.html', 
+                               nota=resultado["datos"], 
+                               error=None,
+                               curso_id=curso_id, 
+                               id_evaluaciones=id_ev, 
+                               id_g=id_g, 
+                               tipo=tipo,
+                               curso=curso)
+    else:
+        return render_template('ver_nota.html', nota=None, error=resultado["error"], curso_id=curso_id, id_evaluaciones=id_ev, id_g=id_g, tipo=tipo, curso=curso)
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+@profesor_bp.route('/cursos/<int:curso_id>/notas/cargar', methods=['GET', 'POST'])
+def procesar_guardado(curso_id):
+
+    usuario = utils.verificar_docente_autenticado()
+    if not usuario: return redirect(url_for('auth.login'))
+
+    curso = {"idCurso": curso_id} if curso_id else None
+
+    id_evaluacion = request.form.get('id_evaluacion')
+    id_g = request.form.get('id_g')
+    nota = request.form.get('nota')
+    tipo = request.form.get('tipo')
+
+    if request.method == 'POST':
+
+        resultado = api_notas.cargar_nota(curso_id, id_evaluacion, id_g, nota, tipo)
+
+        if resultado["codigo"] in [200, 201]:
+            # Determino un nuevo valor para 'estado'.
+            return redirect(url_for('profesor.procesar_guardado',curso_id=curso_id, estado='ok'))
+        else:
+            return render_template('manejo_de_error.html', error_msg=resultado['error']), resultado["codigo"]
+
+    estado = request.args.get('estado')
+    return render_template('cargar_nota.html', estado=estado, curso=curso, curso_id=curso_id, id_evaluaciones=id_evaluacion)
+#---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+@profesor_bp.route('/cursos/<int:curso_id>/notas/editar', methods=['GET', 'POST'])
+def procesar_actualizacion(curso_id):
+
+    usuario = utils.verificar_docente_autenticado()
+    if not usuario: return redirect(url_for('auth.login'))
+
+    if request.method == 'POST': 
+
+        id_ev = request.form.get('id_ev')
+        id_g = request.form.get('id_g')    
+        nota_nueva = request.form.get('nota')
+        tipo = request.form.get('tipo')
+
+        resultado = api_notas.actualizar_nota(curso_id, id_ev, id_g, nota_nueva, tipo)
+
+        if resultado["codigo"] == 200:
+            return redirect(f"/profesor/cursos/{curso_id}/notas/ver?&id_ev={id_ev}&id_g={id_g}&tipo={tipo}")
+        else:
+            return render_template('manejo_de_error.html', error_msg=resultado['error']), resultado["codigo"]
+    
+    query_params = {
+        'curso_id': curso_id, 
+        'id_ev': request.args.get('id_ev'), 
+        'id_g': request.args.get('id_g'), 
+        'tipo': request.args.get('tipo')
+    }
+    return render_template('editar_nota.html', **query_params)

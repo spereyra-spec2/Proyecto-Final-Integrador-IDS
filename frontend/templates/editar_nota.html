@@ -1,4 +1,13 @@
-{% extends "base_notas.html" %}
+{% extends 'base_profesores.html' %}
+
+{% block title %}Notas — AcademiQ{% endblock %}
+
+{% block topbar_titulo %}Notas{% endblock %}
+{% block menu_titulo %}📝 Notas{% endblock %}
+{% block menu_parrafo %}Visualiza las notas de la comisión{% endblock %}
+
+<!-- Control del menú lateral dinámico -->
+{% block active_notas %}active{% endblock %}
 
 {% block content %}
 <div class="public-container">
@@ -7,7 +16,7 @@
         <div class="card-header"><span class="card-title">Modificar Calificación</span></div>
         <div class="card-body">
             
-            <form action="/notas/editar" method="POST" style="display:flex; flex-direction:column; gap:16px;">
+            <form action="/profesor/cursos/{{ curso_id }}/notas/editar" method="POST" style="display:flex; flex-direction:column; gap:16px;">
                 
                 <input type="hidden" name="tipo" value="{{ tipo }}">
 

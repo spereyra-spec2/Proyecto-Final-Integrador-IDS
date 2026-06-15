@@ -45,25 +45,10 @@
               </button>
               
               <!-- Botón Ver Notas con tus estilos globales -->
-              <button class="btn btn-sm btn-primary" onclick="verNotas('{{ eval.idEvaluacion }}')">
-                📝 Ver notas
-              </button>
-            </div>
-<<<<<<< HEAD
-            <p><strong>🎓 Curso ID:</strong> {{ eval.Curso_idCurso }}</p>
-          </div>
-          
-          <div class="eval-card-footer">
-            <button class="btn btn-secondary btn-sm" onclick="abrirModalEditarPorId({{ eval.idEvaluacion }})">
-              ✏️ Editar
-            </button>
-            <button class="btn btn-secondary btn-sm">
-              <a href="{{ url_for('notas.ver_nota', curso_id=eval.Curso_idCurso, id_ev=eval.idEvaluacion) }}">
-                📝 Ver notas
+              <a href="{{ url_for('profesor.ver_nota', curso_id=eval.Curso_idCurso, id_ev=eval.idEvaluacion) }}" class="btn btn-primary btn-sm" style="text-decoration: none; display: inline-flex; align-items: center;">
+                📝 Ver nota
               </a>
-            </button>
-=======
->>>>>>> origin/main
+            </div>
           </div>
         </div>
       {% endfor %}
