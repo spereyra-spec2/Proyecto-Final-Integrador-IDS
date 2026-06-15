@@ -138,18 +138,22 @@ def obtener_cursos_activos():
 
 #---------------------------------------------------------------------------------------------------
 
-def obtener_evaluacion():
+def obtener_evaluacion(curso_id):
     """
     Se conecta a la API para traer los tipos de evaluación mapeados en la base de datos.
     Asegura que el retorno sea un diccionario compatible con el método .items() de Jinja2.
     """
     url = f"{API_BASE_URL}/notas/evaluaciones" 
     
+    # Si viene un curso_id, lo agregamos como parámetro de consulta
+    query_params = {}
+    if curso_id:
+        query_params['curso_id'] = curso_id
+    
     try:
-        response = requests.get(url)
+        response = requests.get(url, params=query_params, timeout=10)
         response.raise_for_status()
         data = response.json()
-        
         
         evaluaciones_crudos = data.get("evaluaciones", []) if isinstance(data, dict) else data
         evaluaciones_mapeados = []

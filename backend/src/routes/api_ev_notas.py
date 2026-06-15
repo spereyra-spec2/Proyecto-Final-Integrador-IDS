@@ -260,16 +260,21 @@ def get_cursos_publicos():
 
 @ev_notas_bp.route('/evaluaciones', methods=['GET'])
 def get_tipos_evaluacion_publicos():
+    curso_id = request.args.get('curso_id', type=int)
+
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
 
     try:
-        
-        query = "SELECT idEvaluacion, descripcion FROM Evaluaciones"
-        cursor.execute(query)
-        evs = cursor.fetchall()
-        
-        return jsonify({"evaluaciones": evs}), 200
+        if curso_id:
+            query = "SELECT idEvaluacion, descripcion FROM Evaluaciones WHERE Curso_idCurso = %s"
+            cursor.execute(query, (curso_id,))
+        else:
+            query = "SELECT idEvaluacion, descripcion FROM Evaluaciones"
+            cursor.execute(query)
+            
+        evaluacioes = cursor.fetchall()
+        return jsonify({"evaluaciones": evaluacioes}), 200
         
     except Exception as e:
         return server_error(str(e))
