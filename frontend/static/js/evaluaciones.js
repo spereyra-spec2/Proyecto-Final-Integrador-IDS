@@ -3,6 +3,25 @@
  */
 
 // Funciones para el modal
+
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Manejar los botones de editar
+    document.querySelectorAll('.edit-button').forEach(button => {
+        button.addEventListener('click', function() {
+            const id = this.dataset.id;
+            const tipo = this.dataset.tipo;
+            const descripcion = this.dataset.descripcion;
+            const fecha = this.dataset.fecha;
+            
+            abrirModalEditar(id, tipo, descripcion, fecha);
+        });
+    });
+});
+
+
+
 function abrirModal() {
   const modal = document.getElementById('modal-eval');
   if (modal) {

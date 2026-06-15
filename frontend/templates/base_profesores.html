@@ -27,7 +27,7 @@
     <a class="nav-item" id="nav-alumnos" href="#"><span class="nav-icon">👥</span> Alumnos</a>
     <a class="nav-item" id="nav-notas" href="{{ url_for('notas.ver_nota') }}"><span class="nav-icon">📋</span> Notas</a>
     <a class="nav-item" id="nav-equipos" href="#"><span class="nav-icon">🤝</span> Equipos</a>
-    <a class="nav-item" id="nav-evals" ><span class="nav-icon">📝</span> Evaluaciones</a>
+    <a class="nav-item" id="nav-evals" href="{{ url_for('profesor.evaluaciones', curso_id=session.get('curso_actual')) }}"><span class="nav-icon">📝</span> Evaluaciones</a>
     <a class="nav-item" href="#"><span class="nav-icon">✅</span> Asistencia</a>
   </nav>
 

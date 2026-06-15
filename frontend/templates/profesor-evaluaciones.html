@@ -35,14 +35,12 @@
           </div>
           
                       <!-- Pasar todos los datos de la evaluación directamente al modal -->
-            <button class="btn btn-secondary btn-sm" 
-                    onclick="abrirModalEditar(
-                      '{{ eval.idEvaluacion }}',
-                      '{{ eval.tipo|escapejs }}',
-                      '{{ eval.descripcion|escapejs }}',
-                      '{{ eval.fecha }}'
-                    )">
-              ✏️ Editar
+            <button class="btn btn-secondary btn-sm edit-button" 
+        data-id="{{ eval.idEvaluacion }}"
+        data-tipo="{{ eval.tipo|replace("'", "&apos;") }}"
+        data-descripcion="{{ eval.descripcion|replace("'", "&apos;")|replace("\n", "\\n") }}"
+        data-fecha="{{ eval.fecha }}">
+        ✏️ Editar
             </button>
             <button class="btn btn-secondary btn-sm" onclick="verNotas({{ eval.idEvaluacion }})">
               📝 Ver notas
@@ -67,7 +65,7 @@
       <span class="modal-title">✨ Nueva evaluación</span>
       <button class="modal-close" onclick="cerrarModal()">✕</button>
     </div>
-    <form action="{{ url_for('evaluaciones.evaluaciones') }}" method="POST">
+    <form action="{{ url_for('profesor.evaluaciones', curso_id=curso_id) }}" method="POST">
       <div class="modal-body">
         <label for="tipo">📌 Tipo *</label>
         <input type="text" id="tipo" name="tipo" required placeholder="Ej: Parcial, TP, Examen Final, Recuperatorio">
