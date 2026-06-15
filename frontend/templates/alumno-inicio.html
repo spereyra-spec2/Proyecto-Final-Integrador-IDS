@@ -1,5 +1,7 @@
+{% extends 'base_general.html' %}
 
-{% extends "base_general.html" %}
+{% block title %} Portal del Alumno — AcademiQ {% endblock %}
+{% block active_inicio %}active{% endblock %}
 
 {% block content %}
 <div class="public-shell">
@@ -10,11 +12,14 @@
     <p>Consultá tus notas, grupos y asistencia sin necesidad de registrarte</p>
 
     <div class="search-box">
-      <input type="text" id="padron-input" placeholder="Ingresá tu padrón" />
-      <select id="curso-select">
+      <input type="number" id="padron-input" placeholder="Ingresá tu padrón" required />
+      <select id="curso-select" required>
         <option value="">Seleccioná curso</option>
+        {% for curso in cursos %}
+          <option value="{{ curso.id }}">{{ curso.nombre }} ({{ curso.codigo }})</option>
+        {% endfor %}
       </select>
-      <button onclick="buscar()">Consultar →</button>
+      <button onclick="window.buscar()">Consultar →</button>
     </div>
   </section>
 
@@ -25,12 +30,12 @@
       <div class="feature-title">Mis Notas</div>
       <div class="feature-desc">Consultá tus calificaciones en parciales, parcialitos y TPs</div>
     </a>
-    <a href="alumno-grupos.html" class="feature-card">
+    <a href="#" class="feature-card">
       <div class="feature-icon">🤝</div>
       <div class="feature-title">Mi Grupo</div>
       <div class="feature-desc">Mirá tu equipo, uníte a uno o creá el tuyo con un código</div>
     </a>
-    <a href="alumno-asistencia.html" class="feature-card">
+    <a href="{{ url_for('asistencia.registrar_asistencia') }}" class="feature-card">
       <div class="feature-icon">✅</div>
       <div class="feature-title">Asistencia</div>
       <div class="feature-desc">Registrá tu asistencia con el código QR de tu docente</div>
@@ -40,34 +45,7 @@
 </div>
 {% endblock %}
 
-<script type="module">
-import api from '../js/api.js';
+{% block extra_js %}
 
-async function loadCourses() {
-  const res = await api.filter('Course', { estado: 'activo' });
-  const courses = res.results || [];
-  const sel = document.getElementById('curso-select');
-  courses.forEach(c => {
-    const opt = document.createElement('option');
-    opt.value = c.id;
-    opt.textContent = `${c.nombre} (${c.codigo})`;
-    sel.appendChild(opt);
-  });
-  // Restore from localStorage if exists
-  const saved = localStorage.getItem('alumno_curso');
-  if (saved) sel.value = saved;
-  const savedPadron = localStorage.getItem('alumno_padron');
-  if (savedPadron) document.getElementById('padron-input').value = savedPadron;
-}
-
-window.buscar = () => {
-  const padron = document.getElementById('padron-input').value.trim();
-  const curso  = document.getElementById('curso-select').value;
-  if (!padron || !curso) { alert('Ingresá tu padrón y seleccioná un curso'); return; }
-  localStorage.setItem('alumno_padron', padron);
-  localStorage.setItem('alumno_curso', curso);
-  window.location.href = 'alumno-notas.html';
-};
-
-loadCourses();
-</script>
+  <script src="{{ url_for('static', filename='js/alumno.js') }}"></script>
+{% endblock %}

@@ -1,21 +1,37 @@
+from xml.parsers.expat import errors
 from flask import Blueprint, request, jsonify
 from mysql.connector import IntegrityError
 from datetime import datetime
 from src.db.db import get_connection
+from src.utils.errors import (
+    not_found, conflict, server_error, bad_request, ok_response, well_response, acceso_denegado1, )
+import src.utils.validaciones as validaciones
+import src.utils.funciones as funciones
 
 evaluaciones_bp = Blueprint('evaluaciones', __name__)
 
 @evaluaciones_bp.route('', methods=['POST'])
-def create_evaluacion():
+def create_evaluacion(idCurso): # Agregado idCurso por la herencia
+    tiene_acceso = funciones.evaluar_acceso_seguro(request.headers, ["Docente"])
+    
+    if not tiene_acceso:
+        return errors.acceso_denegado1("No tiene permisos o token inválido")
+        
+    padron_operador = funciones.obtener_padron_desde_headers(request.headers)
+    
+    conn = None
+    cursor = None
+
     data = request.get_json()
     
-    # Obtener todos los campos
+
     tipo = data.get('tipo')
     descripcion = data.get('descripcion')
     fecha = data.get('fecha')
-    curso_id= data.get('Curso_idCurso')
 
-    # Validar campos requeridos
+    curso_id = idCurso if idCurso else data.get('Curso_idCurso')
+
+
     if not all([tipo, descripcion, fecha, curso_id]):
         return jsonify({'error': 'Faltan campos requeridos: tipo, descripcion, fecha, curso_id'}), 400
 
@@ -23,12 +39,10 @@ def create_evaluacion():
         conn = get_connection()
         cursor = conn.cursor()
 
-        # Verificar que el curso exista (usando curso_id como está en tu tabla)
         cursor.execute("SELECT idCurso FROM Curso WHERE idCurso = %s", (curso_id,))
         if cursor.fetchone() is None:
             return jsonify({'error': 'Curso no encontrado'}), 404
 
-        # Insertar la evaluación (usando los campos correctos)
         cursor.execute(
             "INSERT INTO Evaluaciones (tipo, descripcion, fecha, Curso_idCurso) VALUES (%s, %s, %s, %s)",
             (tipo, descripcion, fecha, curso_id)
@@ -47,17 +61,27 @@ def create_evaluacion():
     except Exception as e:
         return jsonify({'error': 'Error al crear la evaluación: {}'.format(str(e))}), 500
     finally:
-        cursor.close()
-        conn.close()
+        if cursor: cursor.close()
+        if conn: conn.close()
 
 
 @evaluaciones_bp.route('', methods=['GET'])
-def get_evaluaciones():
+def get_evaluaciones(idCurso):  # Agregado idCurso por la herencia
+    tiene_acceso = funciones.evaluar_acceso_seguro(request.headers, ["Docente"])
+    
+    if not tiene_acceso:
+        return errors.acceso_denegado1("No tiene permisos o token inválido")
+        
+    padron_operador = funciones.obtener_padron_desde_headers(request.headers)
+    
+    conn = None
+    cursor = None
+
     try:
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
 
-        cursor.execute("SELECT * FROM Evaluaciones")
+        cursor.execute("SELECT * FROM Evaluaciones WHERE Curso_idCurso = %s", (idCurso,))
         evaluaciones = cursor.fetchall()
 
         return jsonify(evaluaciones), 200
@@ -65,17 +89,27 @@ def get_evaluaciones():
     except Exception as e:
         return jsonify({'error': 'Error al obtener evaluaciones: {}'.format(str(e))}), 500
     finally:
-        cursor.close()
-        conn.close()
+        if cursor: cursor.close()
+        if conn: conn.close()
 
 
 @evaluaciones_bp.route('/<int:idEvaluacion>', methods=['GET'])
-def get_evaluacion(idEvaluacion):
+def get_evaluacion(idCurso, idEvaluacion):  # Agregado idCurso por la herencia
+    tiene_acceso = funciones.evaluar_acceso_seguro(request.headers, ["Docente"])
+    
+    if not tiene_acceso:
+        return errors.acceso_denegado1("No tiene permisos o token inválido")
+        
+    padron_operador = funciones.obtener_padron_desde_headers(request.headers)
+    
+    conn = None
+    cursor = None
+
     try:
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
 
-        cursor.execute("SELECT * FROM Evaluaciones WHERE idEvaluacion = %s", (idEvaluacion,))
+        cursor.execute("SELECT * FROM Evaluaciones WHERE idEvaluacion = %s AND Curso_idCurso = %s", (idEvaluacion, idCurso))
         evaluacion = cursor.fetchone()
 
         if evaluacion is None:
@@ -86,20 +120,29 @@ def get_evaluacion(idEvaluacion):
     except Exception as e:
         return jsonify({'error': 'Error al obtener la evaluación: {}'.format(str(e))}), 500
     finally:
-        cursor.close()
-        conn.close()
+        if cursor: cursor.close()
+        if conn: conn.close()
 
 
 @evaluaciones_bp.route('/<int:idEvaluacion>', methods=['PUT'])
-def update_evaluacion(idEvaluacion):
+def update_evaluacion(idCurso, idEvaluacion):  # Agregado idCurso por la herencia
+    tiene_acceso = funciones.evaluar_acceso_seguro(request.headers, ["Docente"])
+    
+    if not tiene_acceso:
+        return errors.acceso_denegado1("No tiene permisos o token inválido")
+        
+    padron_operador = funciones.obtener_padron_desde_headers(request.headers)
+    
+    conn = None
+    cursor = None
+
     data = request.get_json()
     
     try:
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
         
-        # Obtener la evaluación actual
-        cursor.execute("SELECT * FROM Evaluaciones WHERE idEvaluacion = %s", (idEvaluacion,))
+        cursor.execute("SELECT * FROM Evaluaciones WHERE idEvaluacion = %s AND Curso_idCurso = %s", (idEvaluacion, idCurso))
         evaluacion_actual = cursor.fetchone()
         
         if evaluacion_actual is None:
@@ -109,18 +152,16 @@ def update_evaluacion(idEvaluacion):
         tipo = data.get('tipo', evaluacion_actual['tipo'])
         descripcion = data.get('descripcion', evaluacion_actual['descripcion'])
         fecha = data.get('fecha', evaluacion_actual['fecha'])
-        curso_id = data.get('Curso_idCurso', evaluacion_actual['Curso_idCurso'])
+        curso_id = idCurso
         
-        # Actualizar la evaluación
         cursor.execute(
             """UPDATE Evaluaciones 
                SET tipo = %s, descripcion = %s, fecha = %s, Curso_idCurso = %s 
-               WHERE idEvaluacion = %s""",
-            (tipo, descripcion, fecha, curso_id, idEvaluacion)
+               WHERE idEvaluacion = %s AND Curso_idCurso = %s""",
+            (tipo, descripcion, fecha, curso_id, idEvaluacion, idCurso)
         )
         conn.commit()
         
-        # Obtener la evaluación actualizada
         cursor.execute("SELECT * FROM Evaluaciones WHERE idEvaluacion = %s", (idEvaluacion,))
         evaluacion_actualizada = cursor.fetchone()
         
@@ -132,5 +173,5 @@ def update_evaluacion(idEvaluacion):
     except Exception as e:
         return jsonify({'error': 'Error al actualizar la evaluación: {}'.format(str(e))}), 500
     finally:
-        cursor.close()
-        conn.close()
+        if cursor: cursor.close()
+        if conn: conn.close()

@@ -2,20 +2,20 @@ import requests
 from src.utils.constants import API_BASE_URL
 from .auth import respuesta_error, error_conexion
 
-def obtener_evaluaciones(token, idEvaluacion=None):
+def obtener_evaluaciones(token, idEvaluacion=None, curso_id=None):
     """Obtiene evaluaciones del backend"""
     try:
         headers = {"Authorization": f"Bearer {token}"}
         
         if idEvaluacion:
             response = requests.get(
-                f'{API_BASE_URL}/evaluaciones/{idEvaluacion}',
+                f'{API_BASE_URL}/cursos/{curso_id}/evaluaciones/{idEvaluacion}',
                 headers=headers,
                 timeout=10
             )
         else:
             response = requests.get(
-                f'{API_BASE_URL}/evaluaciones',
+                f'{API_BASE_URL}/cursos/{curso_id}/evaluaciones',
                 headers=headers,
                 timeout=10
             )
@@ -48,7 +48,7 @@ def crear_evaluacion(token, tipo, descripcion, fecha, curso_id):
         }
         
         response = requests.post(
-            f'{API_BASE_URL}/evaluaciones',
+            f'{API_BASE_URL}/cursos/{curso_id}/evaluaciones',
             headers=headers,
             json=payload,
             timeout=10
@@ -86,7 +86,7 @@ def actualizar_evaluacion(token, idEvaluacion, tipo=None, descripcion=None, fech
             return {'ok': False, 'error_response': {'errors': [{'description': 'No hay campos para actualizar'}]}}
         
         response = requests.put(
-            f'{API_BASE_URL}/evaluaciones/{idEvaluacion}',
+            f'{API_BASE_URL}/cursos/{curso_id}/evaluaciones/{idEvaluacion}',
             headers=headers,
             json=payload,
             timeout=10
@@ -104,13 +104,13 @@ def actualizar_evaluacion(token, idEvaluacion, tipo=None, descripcion=None, fech
         return {'ok': False, 'error_response': {'errors': [{'description': f'Error inesperado: {e}'}]}}
 
 
-def eliminar_evaluacion(token, idEvaluacion):
+def eliminar_evaluacion(token, idEvaluacion, curso_id):
     """Elimina una evaluación del backend"""
     try:
         headers = {"Authorization": f"Bearer {token}"}
         
         response = requests.delete(
-            f'{API_BASE_URL}/evaluaciones/{idEvaluacion}',
+            f'{API_BASE_URL}/cursos/{curso_id}/evaluaciones/{idEvaluacion}',
             headers=headers,
             timeout=10
         )

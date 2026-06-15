@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,12 +7,10 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
-    {% block extra_css %}{% endblock %}
     <title>{% block title %} AcademiQ - Profesores {% endblock %}</title>
 </head>
 
 <body>
-<!-- Barra lateral -->
 <div class="sidebar-overlay"></div>
 <aside class="sidebar">
   <div class="sidebar-logo">
@@ -21,6 +19,7 @@
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section-label">General</div>
+<<<<<<< HEAD
     <a class="nav-item" href="profesor-dashboard.html"><span class="nav-icon">📊</span> Dashboard</a>
     <a class="nav-item" href="{{ url_for('profesor.vista_cursos') }}"><span class="nav-icon">📚</span> Mis Cursos</a>
     <div class="nav-section-label">Curso actual</div>
@@ -28,6 +27,24 @@
     <a class="nav-item" id="nav-equipos" href="#"><span class="nav-icon">🤝</span> Equipos</a>
     <a class="nav-item" id="nav-evals" href="{{ url_for('evaluaciones.evaluaciones') }}"><span class="nav-icon">📝</span> Evaluaciones</a>
     <a class="nav-item" href="#"><span class="nav-icon">✅</span> Asistencia</a>
+=======
+    <a class="nav-item {% block active_dashboard %}{% endblock %}" href="{{ url_for('profesor.dashboard') }}"><span class="nav-icon">📊</span> Dashboard</a>
+    <a class="nav-item {% block active_cursos %}{% endblock %}" href="{{ url_for('profesor.vista_cursos') }}"><span class="nav-icon">📚</span> Mis Cursos</a>
+    
+    <div class="nav-section-label" id="curso-nav-label" {% block hide_curso_label %}{% endblock %}>Curso actual</div>
+    
+    <!-- Enlace dinámico a Alumnos -->
+    <a class="nav-item {% block active_alumnos %}{% endblock %}" id="nav-alumnos" href="{% if curso and curso.idCurso %}{{ url_for('profesor.vista_alumnos', id_curso=curso.idCurso) }}{% else %}#{% endif %}" {% block hide_nav_alumnos %}{% endblock %}><span class="nav-icon">👥</span> Alumnos</a>
+    
+    <!-- Enlace a Equipos (pendiente) -->
+    <a class="nav-item" id="nav-equipos" href="#" {% block hide_nav_equipos %}{% endblock %}><span class="nav-icon">🤝</span> Equipos</a>
+    
+    <!-- Enlace dinámico a Evaluaciones -->
+    <a class="nav-item {% block active_evaluaciones %}{% endblock %}" id="nav-evals" href="{% if curso and curso.idCurso %}{{ url_for('profesor.evaluaciones', curso_id=curso.idCurso) }}{% else %}#{% endif %}" {% block hide_nav_evals %}{% endblock %}><span class="nav-icon">📝</span> Evaluaciones</a>
+    
+    <!-- ENLACE CORREGIDO Y DINÁMICO A ASISTENCIA -->
+    <a class="nav-item {% block active_asistencia %}{% endblock %}" id="nav-asist" href="{{ url_for('asistencia.asistencia_profe') }}" {% block hide_nav_asist %}{% endblock %}><span class="nav-icon">✅</span> Asistencia</a>
+>>>>>>> origin/main
   </nav>
 
   <div class="sidebar-footer">
@@ -49,11 +66,28 @@
         <h1 class="page-title">{% block menu_titulo %}{% endblock %}</h1>
         <p class="page-subtitle" id="course-sub">{% block menu_parrafo %}{% endblock %}</p>
       </div>
-        {% block menu_accion_btn %}{% endblock %}
+      <div class="page-actions">
+        {% block menu_acciones %}{% endblock %}
+      </div>
     </div>
 
+    <!-- Alertas Flash globales -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ 'success' if category == 'success' else 'error' }}" style="margin-bottom: 20px;">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
     {% block content %}{% endblock %}
+  </div>
 </div>
 
+<script src="{{ url_for('static', filename='js/utils.js') }}"></script>
+<script src="{{ url_for('static', filename='js/profesor.js') }}"></script>
+{% block extra_js %}{% endblock %}
 </body>
 </html>

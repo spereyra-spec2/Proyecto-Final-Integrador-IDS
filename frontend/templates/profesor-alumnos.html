@@ -1,24 +1,22 @@
-{% extends "base_profesores.html" %}
+{% extends 'base_profesores.html' %}
 
-{% block title %} Alumnos — AcademiQ {% endblock %}
+{% block title %}Alumnos — AcademiQ{% endblock %}
+{% block topbar_titulo %}Alumnos{% endblock %}
+{% block menu_titulo %}Alumnos{% endblock %}
+{% block menu_parrafo %}Comisión ID: {{ curso.idCurso }}{% endblock %}
 
-{% block topbar_titulo %} Alumnos {% endblock %}
+{% block active_alumnos %}active{% endblock %}
 
-{% block menu_titulo %} Alumnos {% endblock %}
+{% block menu_acciones %}
+  <form action="{{ url_for('profesor.importar_csv', id_curso=curso.idCurso) }}" method="POST" enctype="multipart/form-data" style="display: inline-flex; gap: 8px;">
+    <input type="file" name="file" accept=".csv" required style="display: none;" id="input-csv-hidden" onchange="this.form.submit()">
+    <button type="button" class="btn btn-outline" id="btn-csv" onclick="document.getElementById('input-csv-hidden').click()">📥 Importar CSV</button>
+  </form>
+  <button class="btn btn-primary" onclick="window.configurarModalAlta('{{ curso.idCurso }}')">➕ Agregar alumno</button>
+{% endblock %}
 
 {% block content %}
-    <div class="page-header" style="margin-top: -20px; margin-bottom: 20px;">
-      <div class="page-actions" style="display: flex; justify-content: flex-end; width: 100%;">
-        
-        <form action="{{ url_for('profesor.importar_csv', id_curso=curso.idCurso) }}" method="POST" enctype="multipart/form-data" style="display: inline-flex; gap: 8px;">
-          <input type="file" name="file" accept=".csv" required style="display: none;" id="input-csv-hidden" onchange="this.form.submit()">
-          <button type="button" class="btn btn-outline" id="btn-csv" onclick="document.getElementById('input-csv-hidden').click()">📥 Importar CSV</button>
-        </form>
-        <button class="btn btn-primary" onclick="window.configurarModalAlta('{{ curso.idCurso }}')" style="margin-left: 8px;">➕ Agregar alumno</button>
-      </div>
-    </div>
-
-   
+    <!-- Filtros por URL nativos -->
     <div class="card" style="margin-bottom:20px">
       <div class="card-body">
         <form action="{{ url_for('profesor.vista_alumnos', id_curso=curso.idCurso) }}" method="GET" style="display:flex;gap:12px;flex-wrap:wrap;padding:2px 0px">
@@ -32,16 +30,6 @@
         </form>
       </div>
     </div>
-
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div class="alert alert-{{ 'success' if category == 'success' else 'error' }}" style="margin-bottom: 20px;">
-            {{ message }}
-          </div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
 
     <div class="card">
       <div class="card-body" style="padding:0">
@@ -65,13 +53,8 @@
                     {% endif %}
                   </td>
                   <td style="display: flex; gap: 6px; align-items: center;">
-                  
                     <a href="{{ url_for('profesor.vista_ficha_alumno', id_curso=curso.idCurso, padron=alumno.padron) }}" class="btn btn-sm btn-outline" title="Ver Ficha">🔍</a>
-                    
-                    
                     <button class="btn btn-sm btn-outline" onclick="window.configurarModalEditar('{{ alumno.padron }}', '{{ alumno.nombres }}', '{{ alumno.mail }}', '{{ alumno.Estado }}', '{{ curso.idCurso }}')" title="Editar">✏️</button>
-                    
-                 
                     <form action="{{ url_for('profesor.baja_logica_alumno', id_curso=curso.idCurso, padron=alumno.padron) }}" method="POST" style="display:inline;" onsubmit="return confirm('¿Seguro que deseas dar de baja a este alumno del curso?');">
                       <button type="submit" class="btn btn-sm btn-danger" title="Dar de baja">🗑️</button>
                     </form>
@@ -120,12 +103,9 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-outline" onclick="window.closeModal('modal-student')">Cancelar</button>
-        <button type="submit" class="btn btn-primary" id="btn-save-student">Guardar</button>
+        <button type="submit" class="btn btn-primary">Guardar</button>
       </div>
     </form>
   </div>
 </div>
-
-<script src="{{ url_for('static', filename='js/utils.js') }}"></script>
-<script src="{{ url_for('static', filename='js/profesor.js') }}"></script>
 {% endblock %}

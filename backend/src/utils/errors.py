@@ -26,7 +26,7 @@ def acceso_denegado(detail="Acceso denegado"):
     return error_response(403, "Acceso denegado", "error", str(detail))
 
 def acceso_denegado1(details):
-    return acceso_denegado(details)
+    return error_response(403, "Acceso denegado", "error", details)
 
 def ok_response(detail):
     return error_response(200, "OK", "success", detail)
@@ -154,17 +154,16 @@ def error_enviando_correo(e):
 
 
 def not_found(error):
-        error404 ={
-                "error": [
-                    {
-                        "code": 404,
-                        "message": "No encontrado",
-                        "level": "info",
-                        "description": str(error)
-                    }
-                ]
+    return jsonify({
+        "errors": [
+            {
+                "code":"404",
+                "message": "NOT_FOUND",
+                "level": "error",
+                "description": f"Recurso no encontrado"
             }
-        return error404
+        ]
+    }), 404
 
 def bad_request(error):
     error400 = {"error": [
