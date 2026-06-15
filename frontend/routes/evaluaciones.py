@@ -1,40 +1,41 @@
-from flask import Blueprint, app, render_template, redirect, url_for, flash, jsonify, request
-import requests
-
-BACK_URL = "http://localhost:5000"
-FRONT_URL = "http://localhost:5001"
-
+from flask import Blueprint, request, render_template, redirect, url_for, flash
+from services.evaluaciones import crear_evaluacion, obtener_evaluaciones
 
 evaluaciones_bp = Blueprint('evaluaciones', __name__)
 
-
-
-@evaluaciones_bp.route('', methods=['GET', 'POST'])
+@evaluaciones_bp.route('/', methods=['GET', 'POST'])
 def evaluaciones():
+    if request.method == 'POST':
 
-    if requests.method == 'POST':
-        # Obtener datos del formulario (sin instancia)
-        datos = {
-            'tipo': request.form.get('tipo'),
-            'descripcion': request.form.get('descripcion'),
-            'fecha': request.form.get('fecha'),
-            'Curso_idCurso': request.form.get('curso_id', 1)  # Nota: Curso_idCurso
-        }
+        tipo = request.form.get('tipo', '').strip()
+        descripcion = request.form.get('descripcion', '').strip()
+        fecha = request.form.get('fecha', '').strip()
+        curso_id = request.form.get('curso_id', '').strip()
         
-        try:
-            respuesta = requests.post(
-                f"{BACK_URL}/api/evaluaciones",
-                json=datos
-            )
-            
-            if respuesta.status_code in [200, 201]:
-                flash('Evaluación creada exitosamente', 'success')
-            else:
-                flash('Error al crear evaluación', 'error')
-        except Exception as e:
-            flash(f'Error de conexión: {str(e)}', 'error')
+        errores = []
+
+        if not tipo or not descripcion or not fecha or not curso_id:
+            errores.append("Todos los campos son obligatorios.")
+
+        if errores:
+            for e in errores:
+                flash(e, 'error')
+            return redirect(url_for('evaluaciones.evaluaciones'))
         
-        return redirect(url_for('evaluaciones'))
+        
+        evaluacion = crear_evaluacion(tipo, descripcion, fecha, int(curso_id))
+        
+        if evaluacion.get('ok'):
+            flash(evaluacion.get('message', 'Evaluación creada exitosamente'), 'success')
+        else:
+            for e in evaluacion.get('errors', ['Error al crear evaluación']):
+                flash(e, 'error')
+        
+        return redirect(url_for('evaluaciones.evaluaciones'))
     
+    evaluaciones_lista = obtener_evaluaciones()
 
-    return render_template('profesor-evaluaciones.html', evaluaciones=evaluaciones)
+    if evaluaciones_lista is None:
+        evaluaciones_lista = []
+    
+    return render_template('profesor-evaluaciones.html', evaluaciones=evaluaciones_lista)
