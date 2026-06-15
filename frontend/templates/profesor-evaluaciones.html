@@ -51,9 +51,9 @@ Cuatrimestre: {{ curso.cuatrimestre }}{%endblock %}
               </button>
               
               <!-- Botón Ver Notas con tus estilos globales -->
-              <button class="btn btn-sm btn-outline" onclick="verNotas('{{ eval.idEvaluacion }}')">
-                📝 Ver notas
-              </button>
+              <a href="{{ url_for('profesor.ver_nota', curso_id=eval.Curso_idCurso, id_ev=eval.idEvaluacion) }}" class="btn btn-primary btn-sm" style="text-decoration: none; display: inline-flex; align-items: center;">
+                📝 Ver nota
+              </a>
             </div>
           </div>
         </div>

@@ -22,31 +22,51 @@
   <div class="public-container">
     <div class="card" style="margin-bottom:24px">
 
-      <form method="GET" action="{{ url_for('notas.alumno_ver_nota') }}" class="card-body" style="display:flex; gap:12px; flex-wrap:wrap; padding:16px 20px">
-        
-        <input type="number" class="form-input" id="padron" name="padron" placeholder="Tu padrón" value="{{ request.args.get('padron', '') }}" style="flex:1; min-width:130px" required />
-        
-        <select class="form-select" id="curso-select" name="curso_id" style="flex:2; min-width:200px" required>
-          <option value="">Seleccioná curso</option>
-          {% for curso in cursos %}
-            <option value="{{ curso.id }}" {% if request.args.get('curso_id') == curso.id|string %} selected {% endif %}>
-              {{ curso.nombre }} ({{ curso.codigo }})
-            </option>
-          {% endfor %}
-        </select>
+      <form action="/alumno/notas/ver" method="GET" class="form-container">
 
-        <select class="form-select" id="tipo-evaluacion-select" name="tipo_evaluacion" style="flex:1.5; min-width:180px" required>
-          <option value="">Seleccioná Evaluación</option>
-          {% for evs in tipos_evaluacion %}
-            <option value="{{ evs.id }}" {% if request.args.get('tipo_evaluacion') == evs.id|string %} selected {% endif %}>
-              {{ evs.desc }}
-            </option>
-          {% endfor %}
-        </select>
-        
-        <button class="btn btn-primary" type="submit">🔍 Consultar</button>
-      </form>
+    <div class="form-group">
+        <label class="form-label" for="padron">🔢 Tu Padrón:</label>
+        <input type="number" id="padron" name="padron" class="form-input" value="{{ padron if padron else '' }}" required>
     </div>
+
+    <div class="form-group">
+        <label class="form-label" for="curso_id">📚 Seleccioná el Curso:</label>
+        <select id="curso_id" name="curso_id" class="form-input" onchange="recargarEvaluaciones()" required>
+            <option value="">-- Seleccionar Curso --</option>
+            {% for curso in cursos_db %}
+                <option value="{{ curso.id }}" {% if curso.id|string == curso_id|string %}selected{% endif %}>
+                    {{ curso.nombre }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label class="form-label" for="tipo_evaluacion">📝 Evaluación:</label>
+        <select id="tipo_evaluacion" name="tipo_evaluacion" class="form-input" required>
+            <option value="">-- Seleccionar Evaluación --</option>
+            {% for ev in tipos_db %}
+                <option value="{{ ev.id }}" {% if ev.id|string == id_ev|string %}selected{% endif %}>
+                    {{ ev.desc }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">🔍 Consultar Nota</button>
+</form>
+
+<script>
+function recargarEvaluaciones() {
+    const curso_id = document.getElementById('curso_id').value;
+    const padron = document.getElementById('padron').value;
+    
+    // Si seleccionó un curso válido, refrescamos la vista trayendo las evaluaciones de ese curso
+    if (cursoId) {
+        window.location.href = `/alumnos/ver?curso_id=${cursoId}&padron=${padron}`;
+    }
+}
+</script>
 
     {% if request.args.get('padron') %}
       {% if nota %}
