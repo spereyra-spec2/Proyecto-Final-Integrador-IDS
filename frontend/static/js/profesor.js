@@ -1,6 +1,5 @@
 // GESTIÓN DEL DISEÑO, MENÚ LATERAL Y USUARIO (LOCALSTORAGE)
 
-
 document.addEventListener('DOMContentLoaded', () => {
     const hamburgerBtn = document.querySelector('.hamburger');
     const sidebar = document.querySelector('.sidebar');
@@ -30,7 +29,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // CONTROLES DE VENTANAS MODALES GLOBALES
 
-
 window.openModal = function(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
@@ -53,17 +51,14 @@ window.closeModal = function(modalId) {
     }
 };
 
-
 // GESTIÓN DE CURSOS (Para profesor-cursos.html)
-
 
 window.abrirModalActualizar = function(idCurso, nombre, codigo, cuatrimestre, descripcion) {
     const formulario = document.getElementById('form-actualizar-modal');
     if (formulario) {
+        // CORRECCIÓN: Apuntar a la ruta de Flask del Frontend en lugar de la API directa del puerto 5000
+        formulario.action = "/profesor/cursos/actualizar/" + idCurso;
         
-        formulario.action = "/api/profesor/cursos/actualizar/" + idCurso;
-        
-       
         document.getElementById('u-nombre').value = nombre;
         document.getElementById('u-codigo').value = codigo;
         document.getElementById('u-cuatri').value = cuatrimestre;
@@ -73,18 +68,20 @@ window.abrirModalActualizar = function(idCurso, nombre, codigo, cuatrimestre, de
     }
 };
 
-
 // GESTIÓN DE ALUMNOS (Para profesor-alumnos.html)
-
 
 window.configurarModalAlta = function(idCurso) {
     const formulario = document.getElementById('form-alumno-modal');
     if (formulario) {
-        formulario.action = "/api/profesor/cursos/" + idCurso + "/alumnos/inscribir";
+        // CORRECCIÓN: Quitado el prefijo "/api" para que viaje al controlador de Flask
+        formulario.action = "/profesor/cursos/" + idCurso + "/alumnos/inscribir";
         formulario.reset();
         
         document.getElementById('s-padron').disabled = false;
-        document.getElementById('s-estado-group').style.display = 'none';
+        
+        const estadoGroup = document.getElementById('s-estado-group');
+        if (estadoGroup) estadoGroup.style.display = 'none';
+        
         document.getElementById('modal-student-title').innerText = "Nuevo alumno";
         
         window.openModal('modal-student');
@@ -94,16 +91,19 @@ window.configurarModalAlta = function(idCurso) {
 window.configurarModalEditar = function(padron, nombres, mail, Estado, idCurso) {
     const formulario = document.getElementById('form-alumno-modal');
     if (formulario) {
-        formulario.action = "/api/profesor/cursos/" + idCurso + "/alumnos/actualizar/" + padron;
+        // CORRECCIÓN: Quitado el prefijo "/api" para que viaje al controlador de Flask
+        formulario.action = "/profesor/cursos/" + idCurso + "/alumnos/actualizar/" + padron;
         
         document.getElementById('s-nombre').value = nombres;
         document.getElementById('s-padron').value = padron;
         document.getElementById('s-padron').disabled = true; 
-        document.getElementById('s-email').value = mail;
-        document.getElementById('s-estado').disabled = true
-        // Deshabilitamos el select de estado para evitar cambios accidentales
         
-        document.getElementById('s-estado-group').disabled = true;
+        const selectEstado = document.getElementById('s-estado');
+        if (selectEstado) selectEstado.disabled = true;
+        
+        const estadoGroup = document.getElementById('s-estado-group');
+        if (estadoGroup) estadoGroup.style.display = 'none';
+        
         document.getElementById('modal-student-title').innerText = "✏️ Editar Alumno";
         
         window.openModal('modal-student');
