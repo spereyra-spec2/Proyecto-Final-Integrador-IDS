@@ -26,7 +26,7 @@ def acceso_denegado(detail="Acceso denegado"):
     return error_response(403, "Acceso denegado", "error", str(detail))
 
 def acceso_denegado1(details):
-    return acceso_denegado(details)
+    return error_response(403, "Acceso denegado", "error", details)
 
 def ok_response(detail):
     return error_response(200, "OK", "success", detail)

@@ -2,10 +2,6 @@
  * evaluaciones.js - Lógica para la página de evaluaciones
  */
 
-// Funciones para el modal
-
-
-
 document.addEventListener('DOMContentLoaded', function() {
     // Manejar los botones de editar
     document.querySelectorAll('.edit-button').forEach(button => {
@@ -20,12 +16,10 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-
-
 function abrirModal() {
   const modal = document.getElementById('modal-eval');
   if (modal) {
-    modal.classList.add('show');
+    modal.classList.remove('hidden'); // Adaptado a tus clases comunes
     document.body.style.overflow = 'hidden';
   }
 }
@@ -33,7 +27,7 @@ function abrirModal() {
 function cerrarModal() {
   const modal = document.getElementById('modal-eval');
   if (modal) {
-    modal.classList.remove('show');
+    modal.classList.add('hidden'); // Adaptado a tus clases comunes
     document.body.style.overflow = '';
   }
 }
@@ -50,7 +44,8 @@ function mostrarMensaje(mensaje, tipo) {
     }, 5000);
   }
 }
-  function abrirModalEditar(id, tipo, descripcion, fecha) {
+
+function abrirModalEditar(id, tipo, descripcion, fecha) {
     // Limpiar campos primero
     document.getElementById('edit_id').value = '';
     document.getElementById('edit_tipo').value = '';
@@ -71,32 +66,43 @@ function mostrarMensaje(mensaje, tipo) {
       }
     }
     
-    // Configurar la acción del formulario
-    const cursoId = {{ curso_id }};
+    // SOLUCIÓN EXTRA: Extraer el cursoId de forma segura directamente desde la URL actual
+    // Ejemplo de URL: /cursos/12/evaluaciones -> extrae el número 12
+    const pathParts = window.location.pathname.split('/');
+    const cursosIndex = pathParts.indexOf('cursos');
+    const cursoId = (cursosIndex !== -1 && pathParts[cursosIndex + 1]) ? pathParts[cursosIndex + 1] : '0';
+    
+    // Configurar la acción del formulario dinámicamente con la ruta correcta
     document.getElementById('form-editar-evaluacion').action = `/profesor/cursos/${cursoId}/evaluaciones/actualizar/${id}`;
     
-    // Abrir el modal
+    // Abrir el modal usando tu clase hidden
     const modal = document.getElementById('modal-editar-eval');
     if (modal) {
-      modal.classList.add('show');
+      modal.classList.remove('hidden');
       document.body.style.overflow = 'hidden';
     }
-  }
+}
 
 function cerrarModalEditar() {
     const modal = document.getElementById('modal-editar-eval');
     if (modal) {
-      modal.classList.remove('show');
+      modal.classList.add('hidden');
       document.body.style.overflow = '';
-      // Limpiar formulario
+      
+      // Limpiar formulario de forma segura evitando romper si no existe edit_curso_id
       document.getElementById('edit_id').value = '';
       document.getElementById('edit_tipo').value = '';
       document.getElementById('edit_descripcion').value = '';
       document.getElementById('edit_fecha').value = '';
-      document.getElementById('edit_curso_id').value = '';
+      
+      const cursoIdInput = document.getElementById('edit_curso_id');
+      if (cursoIdInput) {
+        cursoIdInput.value = '';
+      }
     }
 }
 
-// Exportar funciones para uso global
+// Exportar funciones para uso global en los botones inline del HTML
 window.abrirModal = abrirModal;
 window.cerrarModal = cerrarModal;
+window.cerrarModalEditar = cerrarModalEditar;

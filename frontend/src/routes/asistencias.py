@@ -1,9 +1,8 @@
-import os
 import re
 from flask import Flask, render_template, request,redirect, url_for, flash, Blueprint
 import requests
 import re
-from flask_cors import CORS
+
 from datetime import date
 import time
 
@@ -30,7 +29,7 @@ def formulario_asistencia():
     token = request.args.get('token','')
     return render_template('alumno-asistencia.html', token=token)
 
-@asistencias_bp.route('/registrar', methods=['POST'])
+@asistencias_bp.route('/registrar', methods=['GET', 'POST'])
 def registrar_asistencia():
     padron = request.form.get('padron')
     token = request.form.get('token')

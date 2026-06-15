@@ -1,10 +1,20 @@
-{% extends "base_profesores.html" %}
+{% extends 'base_profesores.html' %}
 
-{% block title %} Dashboard — AcademiQ Profesor {% endblock %}
+{% block title %}Dashboard — AcademiQ Profesor{% endblock %}
+{% block topbar_titulo %}Dashboard{% endblock %}
+{% block menu_titulo %}Bienvenido 👋{% endblock %}
+{% block menu_parrafo %}Resumen general de tus cursos activos{% endblock %}
 
-{% block topbar_titulo %} Dashboard {% endblock %}
+{% block active_dashboard %}active{% endblock %}
+{% block hide_curso_label %}style="display:none"{% endblock %}
+{% block hide_nav_alumnos %}style="display:none"{% endblock %}
+{% block hide_nav_equipos %}style="display:none"{% endblock %}
+{% block hide_nav_evals %}style="display:none"{% endblock %}
+{% block hide_nav_asist %}style="display:none"{% endblock %}
 
-{% block menu_titulo %} Bienvenido 👋 {% endblock %}
+{% block menu_acciones %}
+  <a href="{{ url_for('profesor.vista_cursos') }}" class="btn btn-primary">➕ Nuevo curso</a>
+{% endblock %}
 
 {% block content %}
     <!-- Stats -->
@@ -66,8 +76,10 @@
                     <td>{{ curso.cuatrimestre or '—' }}</td>
                     <td><span class="badge badge-success">Activo</span></td>
                     <td>
-                      <a href="{{ url_for('profesor.vista_alumnos', id_curso=curso.idCurso) }}" class="btn btn-sm btn-outline">👥 Alumnos</a>
-                      <a href="#" class="btn btn-sm btn-primary" style="margin-left:6px">📝 Notas</a>
+                      <a href="{{ url_for('profesor.vista_alumnos', id_curso=curso.idCurso) }}" class="btn btn-sm btn-outline">Alumnos</a>
+                      <a href="#" class="btn btn-outline btn-sm">Equipos</a>
+                      <a href="{{ url_for('profesor.evaluaciones', curso_id=curso.idCurso) }}" class="btn btn-primary btn-sm">Evaluaciones</a>
+                      <a href="{{url_for('asistencia.asistencia_profe')}}" class="btn btn-outline btn-sm">Asistencia</a>
                     </td>
                   </tr>
                 {% endfor %}
@@ -81,7 +93,4 @@
         </div>
       </div>
     </div>
-
-<script src="{{ url_for('static', filename='js/utils.js') }}"></script>
-<script src="{{ url_for('static', filename='js/profesor.js') }}"></script>
 {% endblock %}

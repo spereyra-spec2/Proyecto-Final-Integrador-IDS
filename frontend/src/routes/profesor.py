@@ -251,7 +251,6 @@ def actualizar_alumno(id_curso, padron):
 
 
 # GESTIÓN DE EVALUACIONES
-
 #---------------------------------------------------------------------------------------------------------
 
 @profesor_bp.route('/cursos/<int:curso_id>/evaluaciones', methods=['GET', 'POST'])
@@ -300,16 +299,15 @@ def evaluaciones(curso_id):
     cursos = cursos_resultado.get('cursos', []) if cursos_resultado.get('ok') else []
     curso_actual = next((c for c in cursos if c.get('idCurso') == curso_id), {'idCurso': curso_id, 'nombre': f'Curso {curso_id}'})
     
-    # IMPORTANTE: Pasar curso_id al template
     return render_template('profesor-evaluaciones.html', 
                          evaluaciones=evaluaciones_lista,
                          cursos=cursos,
-                         curso_actual=curso_actual,
+                         curso=curso_actual, 
                          curso_id=curso_id)
 
-
+#-----------------------------------------------------------------------------------------------------
 @profesor_bp.route('/cursos/<int:curso_id>/evaluaciones/<int:id>', methods=['GET'])
-def api_get_evaluacion(id):
+def api_get_evaluacion(curso_id, id): 
     """API para obtener una evaluación específica (para editar)"""
     usuario = utils.verificar_docente_autenticado()
     if not usuario:
@@ -320,7 +318,6 @@ def api_get_evaluacion(id):
     
     if resultado.get('ok'):
         evaluaciones = resultado.get('evaluaciones', [])
-        # Si es una lista, tomamos el primer elemento
         if isinstance(evaluaciones, list) and len(evaluaciones) > 0:
             evaluacion = evaluaciones[0]
         elif isinstance(evaluaciones, dict):
@@ -333,10 +330,10 @@ def api_get_evaluacion(id):
     
     return jsonify({'error': 'Evaluación no encontrada'}), 404
 
-
+#----------------------------------------------------------------------------------------------------
 @profesor_bp.route('/cursos/<int:curso_id>/evaluaciones/actualizar/<int:idEvaluacion>', methods=['POST'])
-def actualizar_evaluacion_route(curso_id,idEvaluacion):
-    """Actualiza una evaluación usando formulario POST"""
+def actualizar_evaluacion_route(curso_id, idEvaluacion):
+
     usuario = utils.verificar_docente_autenticado()
     if not usuario:
         flash("Por favor, iniciá sesión para acceder al panel.", "error")
@@ -344,12 +341,10 @@ def actualizar_evaluacion_route(curso_id,idEvaluacion):
     
     token = usuario.get('token')
     
-    # Obtener valores del formulario (solo los que vienen)
     tipo = request.form.get('tipo', '').strip()
     descripcion = request.form.get('descripcion', '').strip()
     fecha = request.form.get('fecha', '').strip()
     
-    # Solo pasar los campos que tienen valor
     resultado = api_evaluaciones.actualizar_evaluacion(
         token, 
         idEvaluacion,
@@ -366,4 +361,4 @@ def actualizar_evaluacion_route(curso_id,idEvaluacion):
         for e in errores_lista:
             flash(f'❌ Error: {e.get("description", "Error al actualizar")}', 'error')
     
-    return redirect(url_for('evaluaciones.evaluaciones', curso_id=curso_id))
+    return redirect(url_for('profesor.evaluaciones', curso_id=curso_id))

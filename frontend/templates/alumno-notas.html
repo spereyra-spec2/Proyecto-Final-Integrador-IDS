@@ -1,12 +1,9 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mis Notas — AcademiQ</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}" />
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}" />
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}" />
+{% extends 'base_general.html' %}
+
+{% block title %}Mis Notas — AcademiQ{% endblock %}
+{% block active_notas %}active{% endblock %}
+
+{% block extra_css %}
   <style>
     .grade-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid #f0f0f0; }
     .grade-row:last-child { border-bottom: none; }
@@ -19,36 +16,26 @@
     .nota-regular  { background: #fff8e1; color: #e65100; }
     .nota-bajo     { background: #ffebee; color: #c62828; }
   </style>
-</head>
-<body>
+{% endblock %}
 
-<div class="public-shell">
-  <header class="public-topbar">
-    <div class="public-topbar-logo"><span>🎓</span> AcademiQ</div>
-    <nav class="public-topbar-nav">
-      <a href="alumno-inicio.html">Inicio</a>
-      <a href="alumno-notas.html" class="active">Mis Notas</a>
-      <a href="alumno-grupos.html">Mi Grupo</a>
-      <a href="alumno-asistencia.html">Asistencia</a>
-    </nav>
-  </header>
-
+{% block content %}
   <div class="public-container">
     <div class="card" style="margin-bottom:24px">
-      <form method="GET" action="/notas/alumnos/ver" class="card-body" style="display:flex;gap:12px;flex-wrap:wrap;padding:16px 20px">
+
+      <form method="GET" action="{{ url_for('notas.alumno_ver_nota') }}" class="card-body" style="display:flex; gap:12px; flex-wrap:wrap; padding:16px 20px">
         
-        <input class="form-input" id="padron" name="padron" placeholder="Tu padrón" value="{{ request.args.get('padron', '') }}" style="flex:1;min-width:130px" required />
+        <input type="number" class="form-input" id="padron" name="padron" placeholder="Tu padrón" value="{{ request.args.get('padron', '') }}" style="flex:1; min-width:130px" required />
         
-        <select class="form-select" id="curso-select" name="curso_id" style="flex:2;min-width:200px" required>
+        <select class="form-select" id="curso-select" name="curso_id" style="flex:2; min-width:200px" required>
           <option value="">Seleccioná curso</option>
           {% for curso in cursos %}
             <option value="{{ curso.id }}" {% if request.args.get('curso_id') == curso.id|string %} selected {% endif %}>
-              {{ curso.nombre }}
+              {{ curso.nombre }} ({{ curso.codigo }})
             </option>
           {% endfor %}
         </select>
 
-        <select class="form-select" id="tipo-evaluacion-select" name="tipo_evaluacion" style="flex:1.5;min-width:180px" required>
+        <select class="form-select" id="tipo-evaluacion-select" name="tipo_evaluacion" style="flex:1.5; min-width:180px" required>
           <option value="">Seleccioná Evaluación</option>
           {% for evs in tipos_evaluacion %}
             <option value="{{ evs.id }}" {% if request.args.get('tipo_evaluacion') == evs.id|string %} selected {% endif %}>
@@ -62,15 +49,14 @@
     </div>
 
     {% if request.args.get('padron') %}
-      
       {% if nota %}
         <div id="result">
           <div class="card" style="margin-bottom:20px">
-            <div class="card-body" style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
-              <div style="width:56px;height:56px;border-radius:50%;background:var(--color-primary);display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;font-weight:800">👤</div>
+            <div class="card-body" style="display:flex; align-items:center; gap:20px; flex-wrap:wrap">
+              <div style="width:56px; height:56px; border-radius:50%; background:var(--color-primary); display:flex; align-items:center; justify-content:center; color:#fff; font-size:22px; font-weight:800">👤</div>
               <div style="flex:1">
-                <h2 style="font-size:20px;font-weight:800">Estudiante</h2>
-                <p style="color:#6b7280;font-size:14px">Padrón: <strong>{{ request.args.get('padron') }}</strong></p>
+                <h2 style="font-size:20px; font-weight:800">Estudiante</h2>
+                <p style="color:#6b7280; font-size:14px">Padrón: <strong>{{ request.args.get('padron') }}</strong></p>
               </div>
             </div>
           </div>
@@ -95,21 +81,15 @@
             </div>
           </div>
         </div>
-
       {% else %}
         <div id="not-found" class="card">
-          <div class="card-body" style="text-align:center;padding:40px">
-            <div style="font-size:40px;margin-bottom:12px">🔍</div>
+          <div class="card-body" style="text-align:center; padding:40px">
+            <div style="font-size:40px; margin-bottom:12px">🔍</div>
             <strong>No se encontró la calificación</strong>
-            <p style="color:#6b7280;margin-top:8px;font-size:14px">Verificá que el padrón ingresado pertenezca a la evaluación y el curso seleccionados.</p>
+            <p style="color:#6b7280; margin-top:8px; font-size:14px">Verificá que el padrón ingresado pertenezca a la evaluación y el curso seleccionados.</p>
           </div>
         </div>
       {% endif %}
-
     {% endif %}
-
   </div>
-</div>
-
-</body>
-</html>
+{% endblock %}

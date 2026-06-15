@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,30 +7,38 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+    {% block extra_css %}{% endblock %}
     <title>{% block title %} Portal AcademiQ {% endblock %}</title>
 </head>
 <body>
-<!-- Topbar -->
+
 <header class="public-topbar">
     <div class="public-topbar-logo">
       <span>🎓</span> AcademiQ
     </div>
     <nav class="public-topbar-nav">
-      <a href="alumno-inicio.html" class="active">Inicio</a>
-      <a href="alumno-notas.html">Mis Notas</a>
-      <a href="alumno-grupos.html">Mi Grupo</a>
-      <a href="alumno-asistencia.html">Asistencia</a>
-      <a href="{{url_for('auth.login')}}" id="boton_rol">Soy Docente</a>
+
+      <a href="{{ url_for('alumno.inicio') }}" class="{% block active_inicio %}{% endblock %}">Inicio</a>
+      <a href="{{ url_for('notas.alumno_ver_nota') }}" class="{% block active_notas %}{% endblock %}">Mis Notas</a>
+      <a href="#" class="{% block active_grupos %}{% endblock %}">Mi Grupo</a>
+      <a href="{{ url_for('asistencia.registrar_asistencia') }}" class="{% block active_asistencia %}{% endblock %}">Asistencia</a>
+      <a href="{{ url_for('auth.login') }}" id="boton_rol">Soy Docente</a>
     </nav>
 </header>
     
-{% block content %}{% endblock %}
+
+<div class="public-shell">
+  {% block content %}{% endblock %}
+</div>
+
 
 <footer>
     <p id="footer">
-    ¿Sos docente? <a href="{{url_for('auth.login')}}" id="a_footer">Accedé al panel de administración →</a>
-    ¿Todavía no te registraste? <a href="{{ url_for('auth.registro') }}" class="a_registro" method="POST">Accedé al panel de Registro →</a>
+    ¿Sos docente? <a href="{{ url_for('auth.login') }}" id="a_footer">Accedé al panel de administración →</a>
+    ¿Todavía no te registraste? <a href="{{ url_for('auth.registro') }}" class="a_registro">Accedé al panel de Registro →</a>
     </p>
 </footer>
+
+{% block extra_js %}{% endblock %}
 </body>
 </html>

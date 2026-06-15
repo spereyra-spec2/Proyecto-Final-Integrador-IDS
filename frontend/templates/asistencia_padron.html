@@ -1,78 +1,54 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Asistencia — AcademiQ</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}"/>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}"/>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}"/>
-  <style>
-    .att-row { display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #f0f0f0; }
-    .att-row:last-child { border-bottom:none; }
-    .att-dot { width:12px;height:12px;border-radius:50%;flex-shrink:0; }
-    .att-present { background:#2e7d32; }
-    .att-absent  { background:#c62828; }
-  </style>
-</head>
-<body>
+{% extends 'base_profesores.html' %}
 
-<div class="public-shell">
-  <header class="public-topbar">
-    <div class="public-topbar-logo"><span>🎓</span> AcademiQ</div>
-    <nav class="public-topbar-nav">
-      <a href="alumno-inicio.html">Inicio</a>
-      <a href="alumno-notas.html">Mis Notas</a>
-      <a href="alumno-grupos.html">Mi Grupo</a>
-      <a href="alumno-asistencia.html" class="active">Asistencia</a>
-    </nav>
-  </header>
+{% block title %}Historial de Asistencia — AcademiQ{% endblock %}
+{% block topbar_titulo %}Historial Alumno{% endblock %}
+{% block menu_titulo %}Historial de Clases{% endblock %}
 
+{% block active_asistencia %}active{% endblock %}
+
+{% block content %}
   <div class="card">
-      <div class="card-header"><span class="card-title">Historial de clases</span></div>
-      <div class="table-wrapper" >
-        <table class="table">
-          <thead>
+    <div class="card-header"><span class="card-title">Asistencias Registradas</span></div>
+    <div class="table-wrapper">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Padron</th>
+            <th>fecha</th>
+            <th>asistio</th>
+            <th>justificado</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for registro in asistencias %}
             <tr>
-              <th>Padron</th>
-              <th>fecha</th>
-              <th>asistio</th>
-              <th>justificado</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for registro in asistencias %}
-              <tr>
-                <td>  {{ registro.Usuarios_padron}} </td>
-                <td>  {{ registro.fecha }} </td>
-                {% if registro.asistio == 1 %}
-                  <td> si </td>
-                {% else %}
-                  <td> no </td>
-                {% endif %}
+              <td> {{ registro.Usuarios_padron }} </td>
+              <td> {{ registro.fecha }} </td>
+              {% if registro.asistio == 1 %}
+                <td> si </td>
+              {% else %}
+                <td> no </td>
+              {% endif %}
 
-                {% if registro.asistio == 1 %}
-                  <td> </td>
-                {% else %}
+              {% if registro.asistio == 1 %}
+                <td> </td>
+              {% else %}
                 {% if registro.justificado == 1 %}
                   <td> si </td>
                 {% else %}
                   <td> no </td>
                 {% endif %}
-                {% endif %}
-              </tr>
-            {% else %}
-              <tr>
-                <td colspan="4" style="text-align: center; color: #aaa; padding: 20px;">
-                    Sin asistencias registradas 
-                </td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
+              {% endif %}
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="4" style="text-align: center; color: #aaa; padding: 20px;">
+                  Sin asistencias registradas 
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
-</div>
-
-</body>
-</html>
+  </div>
+{% endblock %}

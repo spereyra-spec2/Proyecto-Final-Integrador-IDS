@@ -1,12 +1,9 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Asistencia — AcademiQ</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}"/>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}"/>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}"/>
+{% extends 'base_general.html' %}
+
+{% block title %}Asistencia — AcademiQ{% endblock %}
+{% block active_asistencia %}active{% endblock %}
+
+{% block extra_css %}
   <style>
     .att-row { display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #f0f0f0; }
     .att-row:last-child { border-bottom:none; }
@@ -14,37 +11,27 @@
     .att-present { background:#2e7d32; }
     .att-absent  { background:#c62828; }
   </style>
-</head>
-<body>
+{% endblock %}
 
-<div class="public-shell">
-  <header class="public-topbar">
-    <div class="public-topbar-logo"><span>🎓</span> AcademiQ</div>
-    <nav class="public-topbar-nav">
-      <a href="alumno-inicio.html">Inicio</a>
-      <a href="alumno-notas.html">Mis Notas</a>
-      <a href="alumno-grupos.html">Mi Grupo</a>
-      <a href="alumno-asistencia.html" class="active">Asistencia</a>
-    </nav>
-  </header>
-
+{% block content %}
   <div class="public-container">
-
     <div class="card" style="margin-bottom:24px">
       <div class="card-header"><span class="card-title">Registrar asistencia</span></div>
       <div class="card-body">
+        
         <form action="{{ url_for('asistencia.registrar_asistencia') }}" method="post">
           <input type="hidden" name="token" value="{{ token }}" />
-          <input class="form-input" name="padron" placeholder="Tu padrón" style="margin-bottom:12px" required />
+          <input type="number" class="form-input" name="padron" placeholder="Tu padrón" style="margin-bottom:12px" required />
           <button type="submit" class="btn btn-accent">Registrar presente</button>
         </form>
+
         {% if mensaje %}
-          <div class="alert alert-{{ 'success' if exito else 'danger' }}" style="margin-top:12px">{{ mensaje }}</div>
+          <div class="alert alert-{{ 'success' if exito else 'danger' }}" style="margin-top:12px">
+            {{ mensaje }}
+          </div>
         {% endif %}
+
       </div>
     </div>
   </div>
-</div>
-
-</body>
-</html>
+{% endblock %}

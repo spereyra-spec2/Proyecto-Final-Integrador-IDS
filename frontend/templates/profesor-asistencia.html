@@ -1,50 +1,18 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Asistencia — AcademiQ</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}"/>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}"/>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}"/>
-</head>
-<body>
+{% extends 'base_profesores.html' %}
 
-<div class="sidebar-overlay"></div>
-<aside class="sidebar">
-  <div class="sidebar-logo">
-    <div class="sidebar-logo-icon">🎓</div>
-    <div><div class="sidebar-logo-text">AcademiQ</div><div class="sidebar-logo-sub">Panel Docente</div></div>
-  </div>
-  <nav class="sidebar-nav">
-    <div class="nav-section-label">General</div>
-    <a class="nav-item" href="profesor-dashboard.html"><span class="nav-icon">📊</span> Dashboard</a>
-    <a class="nav-item" href="profesor-cursos.html"><span class="nav-icon">📚</span> Mis Cursos</a>
-    <div class="nav-section-label">Curso actual</div>
-    <a class="nav-item" href="#"><span class="nav-icon">👥</span> Alumnos</a>
-    <a class="nav-item" href="#"><span class="nav-icon">🤝</span> Equipos</a>
-    <a class="nav-item" href="#"><span class="nav-icon">📝</span> Evaluaciones</a>
-    <a class="nav-item active" href="#"><span class="nav-icon">✅</span> Asistencia</a>
-  </nav>
-  <div class="sidebar-footer">
-    <a class="nav-item" href="login.html"><span class="nav-icon">🚪</span> Cerrar sesión</a>
-  </div>
-</aside>
+{% block title %}Asistencia — AcademiQ{% endblock %}
 
-<div class="main-content">
-  <div class="topbar">
-    <button class="hamburger">☰</button>
-    <span class="topbar-title">Asistencia</span>
-  </div>
+{% block topbar_titulo %}Asistencia{% endblock %}
+{% block menu_titulo %}Asistencia{% endblock %}
 
-  <div class="page-content">
-    <div class="page-header">
-      <div>
-        <h1 class="page-title">Asistencia</h1>
-      </div>
-      <a href="{{ url_for('asistencia.asistencia_profe') }}?generar=1" class="btn btn-primary">🔲 Generar QR</a>
-    </div>
 
+{% block active_asistencia %}active{% endblock %}
+
+{% block menu_acciones %}
+  <a href="{{ url_for('asistencia.asistencia_profe') }}?generar=1" class="btn btn-primary">🔲 Generar QR</a>
+{% endblock %}
+
+{% block content %}
     {% if qr_generado %}
     <div class="card" style="margin-bottom:22px; border:2px solid var(--color-primary)">
       <div class="card-body" style="display:flex;align-items:center;gap:28px;flex-wrap:wrap">
@@ -96,26 +64,25 @@
       </div>
     </div>
 
+   
+    <form action="{{ url_for('asistencia.obtener_asistencia') }}" method="POST" class="form-group">
+        <div class="form-group">
+          <label for="padron" class="form-label">Buscador por Padron</label>
+          <input
+              type="number"
+              id="padron"
+              name="padron"
+              class="form-input"
+              placeholder="Ingrese un Padron"
+              required
+              autofocus
+          >
+        </div>
+        <div class="form-actions form__actions--single">
+          <button type="submit" class="form-btn form-btn-submit">Buscar</button>
+        </div>
+    </form>
         
-          <form action="{{url_for('asistencia.obtener_asistencia')}}" method="POST" class="form-group">
-              <div class="form-group">
-                <label for="padron" class="form-label">Buscador por Padron</label>
-                <input
-                    type="int"
-                    id="padron"
-                    name="padron"
-                    class="form-input"
-                    placeholder="Ingrese un Padron"
-                    required
-                    autofocus
-                >
-              </div>
-              <div class="form-actions form__actions--single">
-                <button type="submit" class="form-btn form-btn-submit">Buscar</button>
-              </div>
-          </form>
-        
-
     <div class="card">
       <div class="card-header"><span class="card-title">Historial de clases</span></div>
       <div class="table-wrapper" >
@@ -139,14 +106,14 @@
                   <td> no </td>
                 {% endif %}
                 
-                {% if registro.asistio ==1 %}
+                {% if registro.asistio == 1 %}
                   <td> </td> 
                 {% else %}
-                {% if registro.justificado == 1 %}
-                  <td> si </td>
-                {% else %}
-                  <td> no </td>
-                {% endif %}
+                  {% if registro.justificado == 1 %}
+                    <td> si </td>
+                  {% else %}
+                    <td> no </td>
+                  {% endif %}
                 {% endif %}
               </tr>
             {% else %}
@@ -160,8 +127,4 @@
         </table>
       </div>
     </div>
-  </div>
-</div>
-</body>
-</html>
-
+{% endblock %}
