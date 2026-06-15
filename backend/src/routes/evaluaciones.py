@@ -1,12 +1,31 @@
+from xml.parsers.expat import errors
+
 from flask import Blueprint, request, jsonify
 from mysql.connector import IntegrityError
 from datetime import datetime
 from src.db.db import get_connection
+from src.utils.errors import (
+    not_found, conflict, server_error, bad_request, ok_response, well_response, acceso_denegado1, )
+import src.utils.validaciones as validaciones
+import src.utils.funciones as funciones
 
 evaluaciones_bp = Blueprint('evaluaciones', __name__)
 
 @evaluaciones_bp.route('', methods=['POST'])
 def create_evaluacion():
+
+    tiene_acceso = funciones.evaluar_acceso_seguro(request.headers, ["Docente"])
+    
+    if not tiene_acceso:
+        return errors.acceso_denegado1("No tiene permisos o token inválido")
+        
+    padron_operador = funciones.obtener_padron_desde_headers(request.headers)
+    
+    conn = None
+    cursor = None
+
+
+
     data = request.get_json()
     
     # Obtener todos los campos
@@ -53,6 +72,19 @@ def create_evaluacion():
 
 @evaluaciones_bp.route('', methods=['GET'])
 def get_evaluaciones():
+
+    tiene_acceso = funciones.evaluar_acceso_seguro(request.headers, ["Docente"])
+    
+    if not tiene_acceso:
+        return errors.acceso_denegado1("No tiene permisos o token inválido")
+        
+    padron_operador = funciones.obtener_padron_desde_headers(request.headers)
+    
+    conn = None
+    cursor = None
+
+
+
     try:
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
@@ -71,6 +103,20 @@ def get_evaluaciones():
 
 @evaluaciones_bp.route('/<int:idEvaluacion>', methods=['GET'])
 def get_evaluacion(idEvaluacion):
+
+    tiene_acceso = funciones.evaluar_acceso_seguro(request.headers, ["Docente"])
+    
+    if not tiene_acceso:
+        return errors.acceso_denegado1("No tiene permisos o token inválido")
+        
+    padron_operador = funciones.obtener_padron_desde_headers(request.headers)
+    
+    conn = None
+    cursor = None
+
+
+
+
     try:
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
@@ -92,6 +138,17 @@ def get_evaluacion(idEvaluacion):
 
 @evaluaciones_bp.route('/<int:idEvaluacion>', methods=['PUT'])
 def update_evaluacion(idEvaluacion):
+
+    tiene_acceso = funciones.evaluar_acceso_seguro(request.headers, ["Docente"])
+    
+    if not tiene_acceso:
+        return errors.acceso_denegado1("No tiene permisos o token inválido")
+        
+    padron_operador = funciones.obtener_padron_desde_headers(request.headers)
+    
+    conn = None
+    cursor = None
+
     data = request.get_json()
     
     try:
