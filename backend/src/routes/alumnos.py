@@ -64,8 +64,8 @@ def add_alumno(idCurso):
         cursor.execute(query_usuario, (padron, rol, nombres, mail))
 
         query_relacion = """
-            INSERT IGNORE INTO Curso_has_Usuarios (Curso_idCurso, Usuarios_padron, Estado)
-            VALUES (%s, %s, 1)
+            INSERT IGNORE INTO Curso_has_Usuarios (Curso_idCurso, Usuarios_padron)
+            VALUES (%s, %s)
         """
         cursor.execute(query_relacion, (idCurso, padron))
 
