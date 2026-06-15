@@ -31,37 +31,38 @@ function mostrarMensaje(mensaje, tipo) {
     }, 5000);
   }
 }
-function abrirModalEditarPorId(id) {
-  // Usar fetch para obtener los datos
-  fetch(`/evaluaciones/api/evaluaciones/${id}`)
-    .then(response => response.json())
-    .then(evaluacion => {
-      document.getElementById('edit_id').value = evaluacion.idEvaluacion;
-      document.getElementById('edit_tipo').value = evaluacion.tipo || '';
-      document.getElementById('edit_descripcion').value = evaluacion.descripcion || '';
-      
-      if (evaluacion.fecha) {
-        let date = new Date(evaluacion.fecha);
-        if (!isNaN(date.getTime())) {
-          let formattedDate = date.toISOString().slice(0, 16);
-          document.getElementById('edit_fecha').value = formattedDate;
-        }
+  function abrirModalEditar(id, tipo, descripcion, fecha) {
+    // Limpiar campos primero
+    document.getElementById('edit_id').value = '';
+    document.getElementById('edit_tipo').value = '';
+    document.getElementById('edit_descripcion').value = '';
+    document.getElementById('edit_fecha').value = '';
+    
+    // Llenar el formulario con los datos actuales
+    document.getElementById('edit_id').value = id;
+    document.getElementById('edit_tipo').value = tipo || '';
+    document.getElementById('edit_descripcion').value = descripcion || '';
+    
+    // Formatear fecha para datetime-local
+    if (fecha) {
+      let date = new Date(fecha);
+      if (!isNaN(date.getTime())) {
+        let formattedDate = date.toISOString().slice(0, 16);
+        document.getElementById('edit_fecha').value = formattedDate;
       }
-      
-      document.getElementById('edit_curso_id').value = evaluacion.Curso_idCurso || '';
-      document.getElementById('form-editar-evaluacion').action = `/evaluaciones/actualizar/${id}`;
-      
-      const modal = document.getElementById('modal-editar-eval');
-      if (modal) {
-        modal.classList.add('show');
-        document.body.style.overflow = 'hidden';
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      alert('Error al cargar los datos de la evaluación');
-    });
-}
+    }
+    
+    // Configurar la acción del formulario
+    const cursoId = {{ curso_id }};
+    document.getElementById('form-editar-evaluacion').action = `/profesor/cursos/${cursoId}/evaluaciones/actualizar/${id}`;
+    
+    // Abrir el modal
+    const modal = document.getElementById('modal-editar-eval');
+    if (modal) {
+      modal.classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+  }
 
 function cerrarModalEditar() {
     const modal = document.getElementById('modal-editar-eval');

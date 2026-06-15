@@ -1,11 +1,10 @@
 from flask import Blueprint, jsonify, request, render_template, redirect, url_for, flash
 from src.services.evaluaciones import obtener_evaluaciones, crear_evaluacion, actualizar_evaluacion
 from src.utils import utils
+from src.routes.profesor import profesor_bp
 
-evaluaciones_bp = Blueprint('evaluaciones', __name__)
-
-@evaluaciones_bp.route('/', methods=['GET', 'POST'])
-def evaluaciones():
+@profesor_bp.route('/cursos/<int:curso_id>/evaluaciones', methods=['GET', 'POST'])
+def evaluaciones(curso_id):
     usuario = utils.verificar_docente_autenticado()
     if not usuario:
         flash("Por favor, iniciá sesión para acceder al panel.", "error")
@@ -17,17 +16,16 @@ def evaluaciones():
         tipo = request.form.get('tipo', '').strip()
         descripcion = request.form.get('descripcion', '').strip()
         fecha = request.form.get('fecha', '').strip()
-        curso_id = request.form.get('curso_id', '').strip()
         
         errores = []
 
-        if not tipo or not descripcion or not fecha or not curso_id:
+        if not tipo or not descripcion or not fecha:
             errores.append("Todos los campos son obligatorios.")
 
         if errores:
             for e in errores:
                 flash(e, 'error')
-            return redirect(url_for('evaluaciones.evaluaciones'))
+            return redirect(url_for('evaluaciones.evaluaciones', curso_id=curso_id))
         
         resultado = crear_evaluacion(token, tipo, descripcion, fecha, int(curso_id))
         
@@ -38,10 +36,10 @@ def evaluaciones():
             for e in errores_lista:
                 flash(e.get('description', 'Error al crear evaluación'), 'error')
         
-        return redirect(url_for('evaluaciones.evaluaciones'))
+        return redirect(url_for('evaluaciones.evaluaciones', curso_id=curso_id))
     
     # GET: obtener evaluaciones - PASAR EL TOKEN
-    resultado = obtener_evaluaciones(token)  # ← Aquí estaba el error, faltaba pasar token
+    resultado = obtener_evaluaciones(token, curso_id=int(curso_id))
     
     evaluaciones_lista = []
     if resultado.get('ok'):
@@ -54,7 +52,7 @@ def evaluaciones():
     return render_template('profesor-evaluaciones.html', evaluaciones=evaluaciones_lista)
 
 
-@evaluaciones_bp.route('/api/evaluaciones/<int:id>', methods=['GET'])
+@profesor_bp.route('/cursos/<int:curso_id>/evaluaciones/<int:id>', methods=['GET'])
 def api_get_evaluacion(id):
     """API para obtener una evaluación específica (para editar)"""
     usuario = utils.verificar_docente_autenticado()
@@ -80,8 +78,8 @@ def api_get_evaluacion(id):
     return jsonify({'error': 'Evaluación no encontrada'}), 404
 
 
-@evaluaciones_bp.route('/actualizar/<int:idEvaluacion>', methods=['POST'])
-def actualizar_evaluacion_route(idEvaluacion):
+@profesor_bp.route('/cursos/<int:curso_id>/evaluaciones/actualizar/<int:idEvaluacion>', methods=['POST'])
+def actualizar_evaluacion_route(curso_id,idEvaluacion):
     """Actualiza una evaluación usando formulario POST"""
     usuario = utils.verificar_docente_autenticado()
     if not usuario:
@@ -94,7 +92,6 @@ def actualizar_evaluacion_route(idEvaluacion):
     tipo = request.form.get('tipo', '').strip()
     descripcion = request.form.get('descripcion', '').strip()
     fecha = request.form.get('fecha', '').strip()
-    curso_id = request.form.get('curso_id', '').strip()
     
     # Solo pasar los campos que tienen valor
     resultado = actualizar_evaluacion(
@@ -103,7 +100,7 @@ def actualizar_evaluacion_route(idEvaluacion):
         tipo=tipo if tipo else None,
         descripcion=descripcion if descripcion else None,
         fecha=fecha if fecha else None,
-        curso_id=int(curso_id) if curso_id else None
+        curso_id=int(curso_id)
     )
     
     if resultado.get('ok'):
@@ -113,4 +110,4 @@ def actualizar_evaluacion_route(idEvaluacion):
         for e in errores_lista:
             flash(f'❌ Error: {e.get("description", "Error al actualizar")}', 'error')
     
-    return redirect(url_for('evaluaciones.evaluaciones'))
+    return redirect(url_for('evaluaciones.evaluaciones', curso_id=curso_id))
