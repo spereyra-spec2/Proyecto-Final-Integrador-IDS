@@ -172,8 +172,8 @@ def importar_alumnos(idCurso):
         relaciones = [(idCurso, alumno[0]) for alumno in alumnos_a_insertar]    
 
         query_relacion = """
-            INSERT IGNORE INTO Curso_has_Usuarios (Curso_idCurso, Usuarios_padron, Estado)
-            VALUES (%s, %s, 1)
+            INSERT IGNORE INTO Curso_has_Usuarios (Curso_idCurso, Usuarios_padron)
+            VALUES (%s, %s)
         """
         cursor.executemany(query_relacion, relaciones)
 
@@ -275,7 +275,6 @@ def get_alumnos(idCurso):
         params = [idCurso]
         
         if estado_filtro is not None:
-            query += " AND chu.Estado = %s"
             params.append(int(estado_filtro))
             
         cursor.execute(query, params)
