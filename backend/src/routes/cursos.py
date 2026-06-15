@@ -94,8 +94,8 @@ def create_curso():
         
 
         query_relacion = """
-            INSERT INTO Curso_has_Usuarios (Curso_idCurso, Usuarios_padron, Estado)
-            VALUES (%s, %s, 1)
+            INSERT INTO Curso_has_Usuarios (Curso_idCurso, Usuarios_padron)
+            VALUES (%s, %s)
         """
         cursor.execute(query_relacion, (id_curso, padron_operador))
         
