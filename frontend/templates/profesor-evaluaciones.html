@@ -4,7 +4,13 @@
 
 {% block topbar_titulo %}Evaluaciones{% endblock %}
 {% block menu_titulo %}📝 Evaluaciones{% endblock %}
-{% block menu_parrafo %}Gestioná los exámenes y trabajos prácticos de la comisión{% endblock %}
+{% block menu_parrafo %}Gestión de exámenes y trabajos prácticos.
+<br>
+Materia: {{ curso.nombre }} 
+<br>
+Codigo: {{ curso.codigo }} 
+<br>  
+Cuatrimestre: {{ curso.cuatrimestre }}{%endblock %}
 
 <!-- Control del menú lateral dinámico -->
 {% block active_evaluaciones %}active{% endblock %}
@@ -45,7 +51,7 @@
               </button>
               
               <!-- Botón Ver Notas con tus estilos globales -->
-              <button class="btn btn-sm btn-primary" onclick="verNotas('{{ eval.idEvaluacion }}')">
+              <button class="btn btn-sm btn-outline" onclick="verNotas('{{ eval.idEvaluacion }}')">
                 📝 Ver notas
               </button>
             </div>
