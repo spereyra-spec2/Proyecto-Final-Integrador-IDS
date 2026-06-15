@@ -15,7 +15,7 @@
     <div class="card">
         <div class="card-header"><span class="card-title">Cargar Nueva Nota</span></div>
         <div class="card-body">
-            <form action="/profesor/cursos/{{ curso_id }}/notas/cargar" method="POST" style="display:flex; flex-direction:column; gap:16px;">
+            <form action="/profesor/cursos/{{ curso_id }}/evaluaciones/notas/cargar" method="POST" style="display:flex; flex-direction:column; gap:16px;">
             
                 {% if estado == 'ok' %}
                 <div style="background:#e8f5e9; color:#2e7d32; padding:12px; border-radius:6px; margin-bottom:20px; font-weight:600;">
@@ -23,7 +23,6 @@
                 </div>
                 {% endif %}
 
-                
                 <div>
                     <label style="font-weight:600; font-size:14px; color:#374151; display:block; margin-bottom:6px;">ID del Curso:</label>
                     <input type="number" name="curso_id" class="form-input" value="{{ curso_id }}" style="width:100%" required>
@@ -31,7 +30,7 @@
 
                 <div>
                     <label style="font-weight:600; font-size:14px; color:#374151; display:block; margin-bottom:6px;">ID de la Evaluación:</label>
-                    <input type="number" name="id_evaluacion" class="form-input" value="{{ id_evaluacioes }}" style="width:100%" required>
+                    <input type="number" name="id_evaluacion" class="form-input" value="{{ id_evaluacion }}" style="width:100%" required>
                 </div>
 
                 <div>
