@@ -115,17 +115,16 @@ def error_enviando_correo(e):
 
 
 def not_found(error):
-        error404 ={
-                "error": [
-                    {
-                        "code": 404,
-                        "message": "No encontrado",
-                        "level": "info",
-                        "description": str(error)
-                    }
-                ]
+    return jsonify({
+        "errors": [
+            {
+                "code":"404",
+                "message": "NOT_FOUND",
+                "level": "error",
+                "description": f"Recurso no encontrado"
             }
-        return error404
+        ]
+    }), 404
 
 def bad_request(error):
     error400 = {"error": [

@@ -2,10 +2,10 @@ from flask import Blueprint, jsonify, request, send_file
 from mysql.connector import Error
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 from src.db.db import obtener_alumno_por_padron, get_asistencia_padron, get_asistencia
-from src.utils.asistencia_utils import verificar_token, alumno_asistio, registrar_asistencia, hacer_y_guardar_qr, validar_padron
+from src.utils.asistencia_utils import existe_padron, verificar_token, alumno_asistio, registrar_asistencia, hacer_y_guardar_qr, validar_padron
 from src.utils.errors import forbidden, error_response, bad_request, not_found, server_error, conflict
 import config
-from datetime import date
+from datetime import date,datetime
 import os
 
 serializer = URLSafeTimedSerializer(config.SECRET_KEY)
@@ -35,25 +35,21 @@ def asistencia_id(padron):
          #      return forbidden()
 
         if not(validar_padron(padron)):
-            return bad_request()
-
+            return bad_request("Padron invalido")
         asistencia = get_asistencia_padron(padron)
         if len(asistencia) == 0:
-            return not_found("recurso")
+            return "",204
         
-
         return jsonify(asistencia),200
 
     except Error as e:
-        return server_error()
+        return server_error(e)
     
-
-
-
 # accedido por el boton de "generar qr en /asistencia/profe
 @asistencia_bp.route("/generar-qr", methods=["GET"])
 def generar_qr():
     try:
+
         payload = {"tipo": "asistencia", "timestamp": date.today().isoformat()}
         token = serializer.dumps(payload, salt="asistencia-qr")
 
@@ -82,7 +78,7 @@ def confirmar_asistencia():
         return bad_request("El padron es requerido")
     elif not token:
         return bad_request("No se incluyo el token")
-
+    
     try:
         serializer.loads(token, salt="asistencia-qr", max_age=config.QR_EXPIRATION_SECONDS)
     except SignatureExpired:
@@ -107,7 +103,4 @@ def confirmar_asistencia():
 
 @asistencia_bp.route('/qr-imagen', methods=['GET'])
 def servir_qr():
-    ruta = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'qr_asistencia.png')
-    ruta = os.path.normpath(ruta)
-    print("Buscando QR en:", ruta)
-    return send_file(ruta, mimetype='image/png')
+    return send_file(config.QR_PATH, mimetype='image/png')

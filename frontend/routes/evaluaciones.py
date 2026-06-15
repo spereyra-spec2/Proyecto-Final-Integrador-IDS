@@ -1,6 +1,8 @@
 from flask import Blueprint, app, render_template, redirect, url_for, flash, jsonify, request
 import requests
 
+BACK_URL = "http://localhost:5000"
+FRONT_URL = "http://localhost:5001"
 
 
 evaluaciones_bp = Blueprint('evaluaciones', __name__)

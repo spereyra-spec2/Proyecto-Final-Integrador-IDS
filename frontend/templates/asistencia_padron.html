@@ -50,16 +50,20 @@
                 {% else %}
                   <td> no </td>
                 {% endif %}
-                
+
+                {% if registro.asistio == 1 %}
+                  <td> </td>
+                {% else %}
                 {% if registro.justificado == 1 %}
                   <td> si </td>
                 {% else %}
                   <td> no </td>
                 {% endif %}
+                {% endif %}
               </tr>
             {% else %}
               <tr>
-                <td colspan="2" style="text-align: center; color: #aaa; padding: 20px;">
+                <td colspan="4" style="text-align: center; color: #aaa; padding: 20px;">
                     Sin asistencias registradas 
                 </td>
               </tr>

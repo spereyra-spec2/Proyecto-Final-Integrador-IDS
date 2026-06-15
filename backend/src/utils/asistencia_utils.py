@@ -3,7 +3,7 @@ import os
 import qrcode
 import re
 import jwt
-from config import  SECRET_KEY
+from config import  SECRET_KEY, QR_PATH
 
 def alumno_asistio(padron):
     conn = get_connection()
@@ -28,15 +28,23 @@ def registrar_asistencia(padron):
 
 def hacer_y_guardar_qr(url):
     img = qrcode.make(url)
-
-    os.makedirs("static", exist_ok=True)
-    filepath = os.path.join(".","qr_asistencia.png")
-    img.save(filepath)
-    print(f"QR generado y guardado en {filepath}")
+    img.save(QR_PATH)
+    print(f"QR generado y guardado en {QR_PATH}")
 
 def validar_padron(padron):
     regular_expresion = re.compile(r"^[1-9][0-9]{5}$")
     return bool(regular_expresion.match(str(padron)))
+
+def existe_padron(padron):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SELECT * FROM Asistencias WHERE Usuarios_padron = %s""", (padron,))
+        return cursor.rowcount() > 0
+    finally:
+        cursor.close()
+        conn.close()
+    
 
 def verificar_token(headers, roles_permitidos):
     if "Authorization" not in headers:
