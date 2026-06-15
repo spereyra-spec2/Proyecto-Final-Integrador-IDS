@@ -1,15 +1,54 @@
 from flask import jsonify
 
 def error_response(code, message, level="error", description=""):
-    return {
-        "error": [{
+    return jsonify({
+        "errors": [{
             "code": code,
             "message": message,
             "level": level,
             "description": description
         }]
-    }, code
+    }), code
 
+def not_found(detail):
+    return error_response(404, "No encontrado", "info", str(detail))
+
+def conflict(detail):
+    return error_response(409, "Conflicto", "warning", str(detail))
+
+def server_error(detail="Error interno del servidor"):
+    return error_response(500, "Error interno", "critical", str(detail))
+
+def bad_request(detail):
+    return error_response(400, "Petición inválida", "warning", str(detail))
+
+def acceso_denegado(detail="Acceso denegado"):
+    return error_response(403, "Acceso denegado", "error", str(detail))
+
+def acceso_denegado1(details):
+    return acceso_denegado(details)
+
+def ok_response(detail):
+    return error_response(200, "OK", "success", detail)
+
+def well_response(detail):
+    return error_response(201, "Creado", "success", detail)
+
+  
+def unauthorized(detail):
+    return error_response(401, "No autorizado", "error", detail)
+
+
+
+def unsupported_media_type(detail):
+    return error_response(415, "Formato del cuerpo no soportado", "error", detail)
+
+
+def forbidden(detail):
+    return error_response(403, "Prohibido", "error", detail)
+
+def unprocessable_entity(detail):
+    return error_response(422, "Entidad no procesable", "error", detail)
 def conflict(detail="Conflicto"):
     return error_response(409, "Conflicto", "warning", detail)
 
@@ -46,7 +85,7 @@ def contrasena_incorrecta():
                     "code": "401",
                     "message": "UNAUTHORIZED",
                     "level": "error",
-                    "description": f"Contraseña incorrecta"
+                    "description": f"Contraseña o padrón incorrecto."
             }
         ]
     }), 401
@@ -76,7 +115,7 @@ def datos_incorrectos(dato):
     }), 400
 
 
-def ya_existe_alumno():
+def ya_existe():
     return jsonify({
         'errors': [
             {

@@ -1,159 +1,144 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mis Cursos — AcademiQ</title>
-  <link rel="stylesheet" href="../css/base.css" />
-  <link rel="stylesheet" href="../css/components.css" />
-  <link rel="stylesheet" href="../css/layout.css" />
-</head>
-<body>
+{% extends "base_profesores.html" %}
 
-<div class="sidebar-overlay"></div>
-<aside class="sidebar">
-  <div class="sidebar-logo">
-    <div class="sidebar-logo-icon">🎓</div>
-    <div>
-      <div class="sidebar-logo-text">AcademiQ</div>
-      <div class="sidebar-logo-sub">Panel Docente</div>
-    </div>
-  </div>
-  <nav class="sidebar-nav">
-    <div class="nav-section-label">General</div>
-    <a class="nav-item" href="profesor-dashboard.html"><span class="nav-icon">📊</span> Dashboard</a>
-    <a class="nav-item active" href="profesor-cursos.html"><span class="nav-icon">📚</span> Mis Cursos</a>
-  </nav>
-  <div class="sidebar-footer">
-    <div class="sidebar-user">
-      <div class="sidebar-user-avatar" id="user-avatar">P</div>
-      <div>
-        <div class="sidebar-user-name" id="user-name">Profesor</div>
-        <div class="sidebar-user-role">Docente</div>
-      </div>
-    </div>
-    <a class="nav-item" href="login.html" style="margin-top:6px"><span class="nav-icon">🚪</span> Cerrar sesión</a>
-  </div>
-</aside>
+{% block title %} Mis Cursos — AcademiQ {% endblock %}
 
-<div class="main-content">
-  <div class="topbar">
-    <button class="hamburger">☰</button>
-    <span class="topbar-title">Mis Cursos</span>
-  </div>
+{% block topbar_titulo %} Mis Cursos {% endblock %}
 
-  <div class="page-content">
-    <div class="page-header">
-      <div>
-        <h1 class="page-title">Mis Cursos</h1>
-        <p class="page-subtitle">Creá y administrá tus materias</p>
-      </div>
-      <button class="btn btn-primary" onclick="openModal('modal-create')">➕ Nuevo curso</button>
-    </div>
+{% block menu_titulo %} Mis Cursos {% endblock %}
+
+{% block content %}
+    <!-- Mensajes de respuesta del Backend -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ 'success' if category == 'success' else 'error' }}" style="margin-bottom: 20px;">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
 
     <div class="grid-3" id="courses-grid">
-      <div style="grid-column:1/-1;text-align:center;padding:40px;color:#9ca3af">Cargando...</div>
-    </div>
-  </div>
-</div>
+      {% if cursos %}
+        {% for curso in cursos %}
+          <div class="card">
+            <div class="card-header" style="display:flex;align-items:center;justify-content:space-between">
+              <span class="card-title" style="font-weight: 700; color: var(--color-primary);">{{ curso.nombre }}</span>
+              <span class="badge badge-success">Activo</span>
+            </div>
+            <div class="card-body">
+              <p style="color:#6b7280;font-size:13px;margin-bottom:12px">
+                {{ curso.codigo }}{% if curso.cuatrimestre %} · {{ curso.cuatrimestre }}{% endif %}
+              </p>
+              {% if curso.descripcion %}
+                <p style="font-size:14px;margin-bottom:16px">{{ curso.descripcion }}</p>
+              {% endif %}
+              
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+                <a href="{{ url_for('profesor.vista_alumnos', id_curso=curso.idCurso) }}" class="btn btn-outline btn-sm">👥 Alumnos</a>
+                <a href="#" class="btn btn-outline btn-sm">🤝 Equipos</a>
+                <a href="#" class="btn btn-primary btn-sm">📝 Evaluaciones</a>
+                <a href="#" class="btn btn-outline btn-sm">✅ Asistencia</a>
+              </div>
 
-<!-- Modal crear curso -->
+              <div style="display: flex; justify-content: flex-end; gap: 6px; border-top: 1px solid #f0f0f0; padding-top: 12px;">
+                <!-- Botón de actualización parcial decorado -->
+                <button type="button" class="btn btn-sm btn-outline" 
+                        onclick="window.abrirModalActualizar('{{ curso.idCurso }}', '{{ curso.nombre }}', '{{ curso.codigo }}', '{{ curso.cuatrimestre }}', '{{ curso.descripcion }}')">
+                  ✏️ Modificar
+                </button>
+                
+                <!-- Botón de eliminación directa en la tarjeta decorado -->
+                <form action="{{ url_for('profesor.eliminar_curso', id_curso=curso.idCurso) }}" method="POST" style="display:inline;">
+                  <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Seguro que deseas eliminar permanentemente esta comisión?');">
+                    🗑️ Eliminar
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div style="grid-column:1/-1;text-align:center;padding:50px;color:#9ca3af">
+          <div style="font-size:40px;margin-bottom:12px">📚</div>
+          <strong>No tenés cursos</strong><br>
+          <span style="font-size:14px">Creá tu primer curso con el botón de arriba.</span>
+        </div>
+      {% endif %}
+    </div>
+
+<!-- Modal: Crear curso -->
 <div class="modal-overlay hidden" id="modal-create">
   <div class="modal">
     <div class="modal-header">
       <span class="modal-title">Nuevo Curso</span>
-      <button class="modal-close" onclick="closeModal('modal-create')">✕</button>
+      <button class="modal-close" onclick="window.closeModal('modal-create')">✕</button>
     </div>
-    <div class="modal-body">
-      <div class="form-group">
-        <label class="form-label">Nombre del curso *</label>
-        <input class="form-input" id="f-nombre" placeholder="Ej: Algoritmos II" />
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+    <form action="{{ url_for('profesor.crear_curso') }}" method="POST">
+      <div class="modal-body">
         <div class="form-group">
-          <label class="form-label">Código *</label>
-          <input class="form-input" id="f-codigo" placeholder="Ej: 75.41" />
+          <label class="form-label">Nombre del curso *</label>
+          <input class="form-input" name="nombre" placeholder="Ej: Algoritmos II" required />
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div class="form-group">
+            <label class="form-label">Código *</label>
+            <input class="form-input" name="codigo" placeholder="Ej: 75.41" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Cuatrimestre</label>
+            <input class="form-input" name="cuatrimestre" placeholder="Ej: 1C2025" />
+          </div>
         </div>
         <div class="form-group">
-          <label class="form-label">Cuatrimestre</label>
-          <input class="form-input" id="f-cuatri" placeholder="Ej: 1C2025" />
+          <label class="form-label">Descripción</label>
+          <textarea class="form-textarea" name="descripcion" placeholder="Opcional..."></textarea>
         </div>
       </div>
-      <div class="form-group">
-        <label class="form-label">Descripción</label>
-        <textarea class="form-textarea" id="f-desc" placeholder="Opcional..."></textarea>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="window.closeModal('modal-create')">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Crear curso</button>
       </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-outline" onclick="closeModal('modal-create')">Cancelar</button>
-      <button class="btn btn-primary" id="btn-crear">Crear curso</button>
-    </div>
+    </form>
   </div>
 </div>
 
-<script type="module">
-import api from '../js/api.js';
-import { toast, openModal, closeModal, initSidebar } from '../js/utils.js';
-
-initSidebar();
-window.openModal = openModal;
-window.closeModal = closeModal;
-
-const userEmail = localStorage.getItem('profesor_email') || '';
-const name = localStorage.getItem('profesor_name') || 'Profesor';
-document.getElementById('user-name').textContent = name;
-document.getElementById('user-avatar').textContent = name.charAt(0).toUpperCase();
-
-async function load() {
-  const res = await api.list('Course');
-  const courses = (res.results || []).filter(c => c.profesor_email === userEmail);
-  const grid = document.getElementById('courses-grid');
-
-  if (!courses.length) {
-    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:50px;color:#9ca3af">
-      <div style="font-size:40px;margin-bottom:12px">📚</div>
-      <strong>No tenés cursos</strong><br>
-      <span style="font-size:14px">Creá tu primer curso con el botón de arriba.</span>
-    </div>`;
-    return;
-  }
-
-  grid.innerHTML = courses.map(c => `
-    <div class="card">
-      <div class="card-header" style="display:flex;align-items:center;justify-content:space-between">
-        <span class="card-title">${c.nombre}</span>
-        <span class="badge ${c.estado === 'activo' ? 'badge-success' : 'badge-neutral'}">${c.estado}</span>
-      </div>
-      <div class="card-body">
-        <p style="color:#6b7280;font-size:13px;margin-bottom:12px">${c.codigo}${c.cuatrimestre ? ' · ' + c.cuatrimestre : ''}</p>
-        ${c.descripcion ? `<p style="font-size:14px;margin-bottom:16px">${c.descripcion}</p>` : ''}
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <a href="profesor-alumnos.html?curso=${c.id}" class="btn btn-outline btn-sm">👥 Alumnos</a>
-          <a href="profesor-equipos.html?curso=${c.id}" class="btn btn-outline btn-sm">🤝 Equipos</a>
-          <a href="profesor-evaluaciones.html?curso=${c.id}" class="btn btn-primary btn-sm">📝 Evaluaciones</a>
-          <a href="profesor-asistencia.html?curso=${c.id}" class="btn btn-outline btn-sm">✅ Asistencia</a>
+<!-- Modal: Actualizar curso -->
+<div class="modal-overlay hidden" id="modal-update">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">✏️ Modificar Comisión</span>
+      <button class="modal-close" onclick="window.closeModal('modal-update')">✕</button>
+    </div>
+    <form action="" method="POST" id="form-actualizar-modal">
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Nombre del curso *</label>
+          <input class="form-input" name="nombre" id="u-nombre" required />
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div class="form-group">
+            <label class="form-label">Código *</label>
+            <input class="form-input" name="codigo" id="u-codigo" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Cuatrimestre</label>
+            <input class="form-input" name="cuatrimestre" id="u-cuatri" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Descripción</label>
+          <textarea class="form-textarea" name="descripcion" id="u-desc"></textarea>
         </div>
       </div>
-    </div>
-  `).join('');
-}
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="window.closeModal('modal-update')">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+      </div>
+    </form>
+  </div>
+</div>
 
-document.getElementById('btn-crear').addEventListener('click', async () => {
-  const nombre = document.getElementById('f-nombre').value.trim();
-  const codigo = document.getElementById('f-codigo').value.trim();
-  const cuatrimestre = document.getElementById('f-cuatri').value.trim();
-  const descripcion = document.getElementById('f-desc').value.trim();
-
-  if (!nombre || !codigo) { toast('Completá nombre y código', 'error'); return; }
-
-  await api.create('Course', { nombre, codigo, cuatrimestre, descripcion, profesor_email: userEmail, estado: 'activo' });
-  toast('Curso creado', 'success');
-  closeModal('modal-create');
-  ['f-nombre','f-codigo','f-cuatri','f-desc'].forEach(id => document.getElementById(id).value = '');
-  load();
-});
-
-load();
-</script>
-</body>
-</html>
+<script src="{{ url_for('static', filename='js/utils.js') }}"></script>
+<script src="{{ url_for('static', filename='js/profesor.js') }}"></script>
+{% endblock %}

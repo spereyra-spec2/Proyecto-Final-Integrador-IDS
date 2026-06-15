@@ -1,12 +1,14 @@
 import os
-from config import user, password, host
 import mysql.connector
+from config import user, password, host
 
 def init_db():
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    sql_path = os.path.join(base_dir, "init_db.sql")
+    current_dir = os.path.dirname(os.path.abspath(__file__))
     
-    with open(sql_path) as f:
+    
+    sql_file_path = os.path.join(current_dir, "init_db.sql")
+
+    with open(sql_file_path, "r", encoding="utf-8") as f:
         sql = f.read()
 
     conn = mysql.connector.connect(
@@ -25,3 +27,13 @@ def init_db():
 
     cursor.close()
     conn.close()
+
+
+if __name__ == "__main__":
+    try:
+        init_db()
+    except Exception as e:
+        print(f"error al inicializar la base de datos: {e}")
+        exit(1)
+
+    

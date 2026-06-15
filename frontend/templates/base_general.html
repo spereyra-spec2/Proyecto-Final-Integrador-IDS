@@ -20,7 +20,7 @@
       <a href="alumno-notas.html">Mis Notas</a>
       <a href="alumno-grupos.html">Mi Grupo</a>
       <a href="alumno-asistencia.html">Asistencia</a>
-      <a href="login.html" id="boton_rol">Soy Docente</a>
+      <a href="{{url_for('auth.login')}}" id="boton_rol">Soy Docente</a>
     </nav>
 </header>
     
@@ -28,7 +28,8 @@
 
 <footer>
     <p id="footer">
-    ¿Sos docente? <a href="login.html" id="a_footer">Accedé al panel de administración →</a>
+    ¿Sos docente? <a href="{{url_for('auth.login')}}" id="a_footer">Accedé al panel de administración →</a>
+    ¿Todavía no te registraste? <a href="{{ url_for('auth.registro') }}" class="a_registro" method="POST">Accedé al panel de Registro →</a>
     </p>
 </footer>
 </body>

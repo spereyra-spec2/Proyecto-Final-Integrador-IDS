@@ -1,3 +1,4 @@
+/* Archhivo: frontend/static/css/components.css */
 /* ===== COMPONENTES REUTILIZABLES ===== */
 @import 'variables.css';
 
@@ -230,4 +231,63 @@
 }
 @media (max-width: 600px) {
   .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+}
+
+.flash-container {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+   
+    color: #d06469;
+    align-items: center;
+}
+.flash {
+    border-radius: 8px;
+    font-weight: 500;
+}
+.flash--success {
+    background: var(--color-success-bg);
+    color: var(--color-success);
+}
+.flash--error {
+    background: var(--color-danger-bg);
+    color: var(--color-danger);
+    border: 1px solid var(--color-danger);
+}
+
+.alert {
+  padding: 5px;
+  border-left: none;
+  margin-bottom: 8px;
+}
+
+/* ===== AGREGADOS PARA INTEGRACIÓN SÍNCRONA ===== */
+
+/* Estilos para las alertas de Flask en el tope de la página */
+.alert {
+  padding: 13px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+.alert-success { 
+  background: #e8f5e9; 
+  color: var(--color-success); 
+  border-left: 4px solid var(--color-success); 
+}
+.alert-danger { 
+  background: #ffebee; 
+  color: var(--color-danger); 
+  border-left: 4px solid var(--color-danger); 
+}
+
+/* Modificadores extras para botones pequeños en tablas */
+.btn-sm { 
+  padding: 6px 14px; 
+  font-size: 13px; 
+}
+
+/* Asegura que el modal oculto use tu clase nativa */
+.modal-overlay.hidden { 
+  display: none !important; 
 }

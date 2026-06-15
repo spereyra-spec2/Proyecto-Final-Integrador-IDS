@@ -1,54 +1,111 @@
-/**
- * profesor.js — Lógica compartida de las vistas de PROFESOR
- * Requiere: api.js, utils.js
- */
+// GESTIÓN DEL DISEÑO, MENÚ LATERAL Y USUARIO (LOCALSTORAGE)
 
-import api from './api.js';
-import { toast, initSidebar } from './utils.js';
 
-// Marcar nav-item activo según la URL
-export function highlightNav() {
-  const path = window.location.pathname;
-  document.querySelectorAll('.nav-item').forEach(a => {
-    a.classList.toggle('active', a.getAttribute('href') === path);
-  });
-}
+document.addEventListener('DOMContentLoaded', () => {
+    const hamburgerBtn = document.querySelector('.hamburger');
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.querySelector('.sidebar-overlay');
 
-// Renderizar lista de cursos del profesor en el sidebar o dashboard
-export async function loadMyCourses(email) {
-  const all = await api.list('Course');
-  return all.results.filter(c => c.profesor_email === email);
-}
+    if (hamburgerBtn && sidebar && overlay) {
+        hamburgerBtn.addEventListener('click', () => {
+            sidebar.classList.add('active');
+            overlay.classList.add('active');
+        });
 
-// Helper: cargar alumnos de un curso
-export async function loadStudents(cursoId) {
-  const res = await api.filter('Student', { curso_id: cursoId });
-  return res.results;
-}
+        overlay.addEventListener('click', () => {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+        });
+    }
 
-// Helper: cargar equipos de un curso
-export async function loadTeams(cursoId) {
-  const res = await api.filter('Team', { curso_id: cursoId });
-  return res.results;
-}
+    const userNameElement = document.getElementById('user-name');
+    const userAvatarElement = document.getElementById('user-avatar');
 
-// Helper: cargar evaluaciones de un curso
-export async function loadEvaluations(cursoId) {
-  const res = await api.filter('Evaluation', { curso_id: cursoId });
-  return res.results;
-}
+    if (userNameElement && userAvatarElement) {
+        const storedName = localStorage.getItem('profesor_name') || 'Profesor';
+        userNameElement.textContent = storedName;
+        userAvatarElement.textContent = storedName.charAt(0).toUpperCase();
+    }
+});
 
-// Helper: cargar notas de un curso + evaluacion
-export async function loadGrades(cursoId, evalId = null) {
-  const filter = evalId
-    ? { curso_id: cursoId, evaluacion_id: evalId }
-    : { curso_id: cursoId };
-  const res = await api.filter('Grade', filter);
-  return res.results;
-}
+// CONTROLES DE VENTANAS MODALES GLOBALES
 
-// Inicializar
-export function initProfesor() {
-  initSidebar();
-  highlightNav();
-}
+
+window.openModal = function(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+};
+
+window.closeModal = function(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.add('hidden');
+        document.body.style.overflow = '';
+        
+        // Si cerramos el modal de estudiantes, rehabilitamos el campo padrón
+        const padronInput = document.getElementById('s-padron');
+        if (padronInput) {
+            padronInput.disabled = false;
+        }
+    }
+};
+
+
+// GESTIÓN DE CURSOS (Para profesor-cursos.html)
+
+
+window.abrirModalActualizar = function(idCurso, nombre, codigo, cuatrimestre, descripcion) {
+    const formulario = document.getElementById('form-actualizar-modal');
+    if (formulario) {
+        
+        formulario.action = "/api/profesor/cursos/actualizar/" + idCurso;
+        
+       
+        document.getElementById('u-nombre').value = nombre;
+        document.getElementById('u-codigo').value = codigo;
+        document.getElementById('u-cuatri').value = cuatrimestre;
+        document.getElementById('u-desc').value = descripcion;
+        
+        window.openModal('modal-update');
+    }
+};
+
+
+// GESTIÓN DE ALUMNOS (Para profesor-alumnos.html)
+
+
+window.configurarModalAlta = function(idCurso) {
+    const formulario = document.getElementById('form-alumno-modal');
+    if (formulario) {
+        formulario.action = "/api/profesor/cursos/" + idCurso + "/alumnos/inscribir";
+        formulario.reset();
+        
+        document.getElementById('s-padron').disabled = false;
+        document.getElementById('s-estado-group').style.display = 'none';
+        document.getElementById('modal-student-title').innerText = "Nuevo alumno";
+        
+        window.openModal('modal-student');
+    }
+};
+
+window.configurarModalEditar = function(padron, nombres, mail, Estado, idCurso) {
+    const formulario = document.getElementById('form-alumno-modal');
+    if (formulario) {
+        formulario.action = "/api/profesor/cursos/" + idCurso + "/alumnos/actualizar/" + padron;
+        
+        document.getElementById('s-nombre').value = nombres;
+        document.getElementById('s-padron').value = padron;
+        document.getElementById('s-padron').disabled = true; 
+        document.getElementById('s-email').value = mail;
+        document.getElementById('s-estado').disabled = true
+        // Deshabilitamos el select de estado para evitar cambios accidentales
+        
+        document.getElementById('s-estado-group').disabled = true;
+        document.getElementById('modal-student-title').innerText = "✏️ Editar Alumno";
+        
+        window.openModal('modal-student');
+    }
+};

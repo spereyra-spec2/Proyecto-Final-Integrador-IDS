@@ -14,16 +14,33 @@
 
 <div class="login-right">
   <div class="login-card">
-    <h2>Ingresá al panel</h2>
+    <h2>Recuperá tu contraseña</h2>
 
-    <div class="form-group">
-      <label class="form-label">Padrón</label>
-      <input class="form-input" id="padron" type="number" placeholder="Ingresá tu número de padrón institucional" />
+    <form action="{{url_for('auth.contrasena_olvidada')}}" method="POST">
+      <div class="form-group">
+        <label for="padron" class="form-label">Padrón</label>
+        <input class="form-input" id="padron" type="number" name="padron" placeholder="Ingresá tu número de padrón institucional" />
+      </div>
+
+      <button class="btn btn-primary btn-lg" id="btn-login" type="submit">
+        Recuperar contraseña →
+      </button>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-container">
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+      {% endif %}
+    {% endwith %}
+    </form>
+
+    <div id="contrasena-divider">
+      <a class="alogin" href="{{url_for('auth.login')}}">Volver al inicio de sesión</a>
     </div>
 
-    <button class="btn btn-primary btn-lg" id="btn-login">
-      Ingresar al panel →
-    </button>
 
   </div>
 </div>

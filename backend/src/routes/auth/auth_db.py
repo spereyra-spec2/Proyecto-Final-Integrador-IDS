@@ -17,11 +17,11 @@ def login_user(padron, contrasena):
         return None, errors.server_error(e)
 
     if not usuario_logueado:
-        return None, errors.no_registrado(padron)
+        return None, errors.contrasena_incorrecta()
     
     contrasena_correcta = comparar_contrasena(contrasena, usuario_logueado["contrasena_hash"])
 
-    if not contrasena_correcta:
+    if not usuario_logueado or not contrasena_correcta:
         return None, errors.contrasena_incorrecta()
 
     return usuario_logueado, None

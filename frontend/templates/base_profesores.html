@@ -22,15 +22,19 @@
   <nav class="sidebar-nav">
     <div class="nav-section-label">General</div>
     <a class="nav-item" href="profesor-dashboard.html"><span class="nav-icon">📊</span> Dashboard</a>
-    <a class="nav-item" href="profesor-cursos.html"><span class="nav-icon">📚</span> Mis Cursos</a>
+    <a class="nav-item" href="{{ url_for('profesor.vista_cursos') }}"><span class="nav-icon">📚</span> Mis Cursos</a>
     <div class="nav-section-label">Curso actual</div>
     <a class="nav-item" id="nav-alumnos" href="#"><span class="nav-icon">👥</span> Alumnos</a>
+    <a class="nav-item" id="nav-notas" href="{{ url_for('notas.ver_nota') }}"><span class="nav-icon">📋</span> Notas</a>
     <a class="nav-item" id="nav-equipos" href="#"><span class="nav-icon">🤝</span> Equipos</a>
-    <a class="nav-item" id="nav-evals" href="#"><span class="nav-icon">📝</span> Evaluaciones</a>
+    <a class="nav-item" id="nav-evals" href="{{ url_for('profesor.evaluaciones', curso_id=session.get('curso_actual')) }}"><span class="nav-icon">📝</span> Evaluaciones</a>
     <a class="nav-item" href="#"><span class="nav-icon">✅</span> Asistencia</a>
   </nav>
+
   <div class="sidebar-footer">
-    <a class="nav-item" href="login.html"><span class="nav-icon">🚪</span> Cerrar sesión</a>
+    <form action="{{ url_for('auth.cerrar_sesion') }}" method="POST" class="nav__form">
+        <button type="submit" id="btn_logout">🚪 Cerrar sesión</button>
+    </form>
   </div>
 </aside>
 
@@ -44,12 +48,13 @@
     <div class="page-header">
       <div>
         <h1 class="page-title">{% block menu_titulo %}{% endblock %}</h1>
+        <p class="page-subtitle" id="course-sub">Cargando...</p>
       </div>
-        <button class="btn btn-primary" id="btn-generate-qr">{% block menu_accion_btn %}{% endblock %}</button>
+        {% block menu_accion_btn %}{% endblock %}
     </div>
 
     {% block content %}{% endblock %}
 </div>
 
 </body>
-    
+</html>
