@@ -30,7 +30,7 @@ app.register_blueprint(ev_notas_bp, url_prefix="/api/notas")
 app.register_blueprint(alumnos_bp, url_prefix='/api/cursos/<int:idCurso>/alumnos')
 app.register_blueprint(cursos_bp, url_prefix='/api/cursos')
 app.register_blueprint(equipos_bp, url_prefix='/api/cursos')
-app.register_blueprint(evaluaciones_bp, url_prefix='/api/evaluaciones')
+app.register_blueprint(evaluaciones_bp, url_prefix='/api/cursos/<int:curso_id>/evaluaciones')
 
 mail.init_app(app)
 
