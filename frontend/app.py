@@ -16,6 +16,7 @@ from src.routes.auth import auth_bp
 from src.routes.profesor import profesor_bp
 from src.routes.alumno import alumno_bp
 from src.routes.ev_notas import notas_bp
+from src.routes.asistencias import asistencias_bp
 
 app = Flask(
     __name__,
