@@ -375,7 +375,7 @@ def ver_nota(curso_id):
     if not usuario: return redirect(url_for('auth.login'))
 
 
-    id_ev = request.args.get('id_ev')
+    id_ev = request.args.get('id_ev', type=int)
     tipo = request.args.get('tipo')
     id_g = request.args.get('id_g')
 
@@ -416,7 +416,7 @@ def procesar_guardado(curso_id):
 
     curso = {"idCurso": curso_id} if curso_id else None
 
-    id_evaluacion = request.args.get('id_evaluaciones')
+    id_evaluacion = request.form.get('id_evaluacion', type=int)
     id_g = request.form.get('id_g')
     nota = request.form.get('nota')
     tipo = request.form.get('tipo')
@@ -427,9 +427,11 @@ def procesar_guardado(curso_id):
 
         if resultado["codigo"] in [200, 201]:
             # Determino un nuevo valor para 'estado'.
-            return redirect(url_for('profesor.procesar_guardado',curso_id=curso_id, id_evaluacion=id_evaluacion, estado='ok'))
+            return redirect(url_for('profesor.procesar_guardado',curso_id=curso_id, estado='ok'))
         else:
             return render_template('manejo_de_error.html', error_msg=resultado['error']), resultado["codigo"]
+
+    id_evaluacion = request.args.get('id_evaluaciones')
 
     estado = request.args.get('estado')
     return render_template('cargar_nota.html', estado=estado, curso=curso, curso_id=curso_id, id_evaluacion=id_evaluacion)
@@ -452,8 +454,6 @@ def procesar_actualizacion(curso_id):
 
         if resultado["codigo"] == 200:
             return redirect(f"/profesor/cursos/{curso_id}/evaluaciones/notas/ver?&id_ev={id_ev}&id_g={id_g}&tipo={tipo}")
-        else:
-            return render_template('manejo_de_error.html', error_msg=resultado['error']), resultado["codigo"]
     
     query_params = {
         'curso_id': curso_id, 

@@ -25,8 +25,8 @@
 
     <div class="card" style="margin-bottom:24px">
         <form action="/profesor/cursos/{{ curso_id }}/evaluaciones/notas/ver" method="GET" class="card-body" style="display:flex;gap:12px;flex-wrap:wrap;padding:16px 20px">
-            <input type="number" name="curso_id" class="form-input" placeholder="ID Curso" style="flex:1;min-width:100px" value="{{ curso_id }}" required />
-            <input type="number" name="id_ev" class="form-input" placeholder="ID Evaluación" style="flex:1;min-width:130px" value="{{ id_evaluaciones }}" required />
+            <input type="number" name="curso_id" class="form-input" placeholder="ID Curso" style="flex:1;min-width:100px; background:#f3f4f6; color:#6b7280;" value="{{ curso_id }}" readonly />
+            <input type="number" name="id_ev" class="form-input" placeholder="ID Evaluación" style="flex:1;min-width:130px; background:#f3f4f6; color:#6b7280;" value="{{ id_evaluaciones }}" readonly />
              <div>
                 <label style="font-weight:600; font-size:14px; color:#374151; display:block; margin-bottom:6px;">Tipo de nota:</label>
                 <select name="tipo" class="form-input" required>
