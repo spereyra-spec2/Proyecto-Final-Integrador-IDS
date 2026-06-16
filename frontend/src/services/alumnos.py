@@ -55,23 +55,6 @@ def baja_logica_alumno(token, id_curso, padron):
     except Exception as e:
         return {'ok': False, 'error_response': {'errors': [{'description': f'Error: {e}'}]}}
     
-#---------------------------------------------------------------------------------------------------------
-
-def obtener_ficha_alumno(token, id_curso, padron):
-    try:
-        headers = {"Authorization": f"Bearer {token}"}
-        response = requests.get(
-            f'{API_BASE_URL}/cursos/{id_curso}/alumnos/{padron}',
-            headers=headers,
-            timeout=10
-        )
-        if response.status_code == 200:
-            return {'ok': True, 'alumno': response.json().get('alumno', {})}
-        return {'ok': False, 'error_response': respuesta_error(response)}
-    except requests.exceptions.ConnectionError:
-        return {'ok': False, 'error_response': error_conexion()}
-    except Exception as e:
-        return {'ok': False, 'error_response': {'errors': [{'description': f'Error: {e}'}]}}
 
 #---------------------------------------------------------------------------------------------------------
 
@@ -141,10 +124,7 @@ def importar_csv(token, id_curso, archivo_file):
 #---------------------------------------------------------------------------------------------------------
 
 def obtener_alumno_por_padron(token, id_curso, padron):
-    """
-    GET /api/cursos/<idCurso>/alumnos/<padron>
-    Consulta la API del backend para traer los datos técnicos de un alumno específico.
-    """
+
     try:
         headers = {"Authorization": f"Bearer {token}"}
         response = requests.get(

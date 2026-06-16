@@ -3,7 +3,7 @@ import io
 import csv
 import jwt  
 from src.db.db import get_connection
-from flask import request, Blueprint
+from flask import request, Blueprint, jsonify
 from mysql.connector import IntegrityError
 from src.utils.errors import (
     not_found, conflict, server_error, bad_request, ok_response, well_response, acceso_denegado1, )
@@ -297,53 +297,56 @@ def get_alumnos(idCurso):
 def get_alumno_por_padron(idCurso, padron):
     tiene_acceso = funciones.evaluar_acceso_seguro(request.headers, ["Docente"])
     if not tiene_acceso:
-        return acceso_denegado1("No tiene permisos o token inválido")
+        return acceso_denegado1("No tiene permisos para ver los alumnos o token inválido")
 
     conn = None
     cursor = None
     try:
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
-        
+
         query_usuario = """
-            SELECT u.padron, u.nombres, u.mail, chu.Estado 
+            SELECT u.padron, u.nombres, u.mail, chu.Estado
             FROM Usuarios u
             INNER JOIN Curso_has_Usuarios chu ON u.padron = chu.Usuarios_padron
-            WHERE chu.Curso_idCurso = %s AND u.padron = %s AND u.rol = 'Alumno'
+            WHERE chu.Curso_idCurso = %s AND u.padron = %s
         """
         cursor.execute(query_usuario, (idCurso, padron))
         alumno = cursor.fetchone()
-        
+
         if not alumno:
-            return not_found(f"Alumno con padrón {padron} no encontrado en el curso {idCurso}")
-            
+            return not_found({"error": f"Alumno con padrón {padron} no encontrado"})
 
         query_asistencias = """
-            SELECT idAsistencia, asistio, fecha, justificado 
-            FROM Asistencias 
+            SELECT idAsistencia, asistio, fecha, justificado
+            FROM Asistencias
             WHERE Curso_idCurso = %s AND Usuarios_padron = %s
         """
         cursor.execute(query_asistencias, (idCurso, padron))
-        alumno["asistencias"] = cursor.fetchall()
+        asistencias = cursor.fetchall()
         
-        # 3. Notas asignadas en las evaluaciones del curso
+        for asis in asistencias:
+            if asis.get('fecha'):
+                asis['fecha'] = asis['fecha'].strftime('%Y-%m-%d')
+                
+        alumno["asistencias"] = asistencias
+
         query_notas = """
-            SELECT n.idNotas, n.puntaje, e.descripcion AS evaluacion, e.tipo 
+            SELECT n.idNotas, n.puntaje, e.descripcion AS evaluacion, e.tipo
             FROM Notas n
             INNER JOIN Evaluaciones e ON n.Evaluaciones_idEvaluacion = e.idEvaluacion
             WHERE e.Curso_idCurso = %s AND n.Usuarios_padron = %s
         """
         cursor.execute(query_notas, (idCurso, padron))
         alumno["notas"] = cursor.fetchall()
-        
-        return {"alumno": alumno}, 200
-        
+
+        return jsonify({"alumno": alumno}), 200
+
     except Exception as e:
         return server_error(str(e))
     finally:
         if cursor: cursor.close()
         if conn: conn.close()
-
 #--------------------------------------------------------------------------------------------------------
 # PUT /api/cursos/<idCurso>/alumnos/<padron>
 # Modifica datos personales o actualiza el flag de continuidad del alumno en ese curso.
