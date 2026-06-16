@@ -204,24 +204,26 @@ def baja_logica_alumno(id_curso, padron):
             
     return redirect(url_for('profesor.vista_alumnos', id_curso=id_curso))
 #---------------------------------------------------------------------------------------------------------
-
 @profesor_bp.route('/cursos/<int:id_curso>/alumnos/ficha/<int:padron>', methods=['GET'])
 def vista_ficha_alumno(id_curso, padron):
+
     usuario = utils.verificar_docente_autenticado()
-    if not usuario: return redirect(url_for('auth.login'))
-    
-    # Utiliza la ruta GET /api/cursos/<idCurso>/alumnos/<padron> para extraer la ficha, notas y asistencias
-    resultado = api_alumnos.obtener_ficha_alumno(usuario['token'], id_curso, padron)
-    
+    if not usuario: 
+        return redirect(url_for('auth.login'))
+
+    resultado = api_alumnos.obtener_alumno_por_padron(usuario['token'], id_curso, padron)
+
     if resultado.get('ok'):
         alumno_data = resultado.get('alumno', {})
         curso_mock = {"idCurso": id_curso}
-        # Debes tener una plantilla 'profesor-alumno-ficha.html' o similar para desplegar este objeto extendido
+
         return render_template('profesor-alumno-ficha.html', curso=curso_mock, alumno=alumno_data)
-        
+
     for mensaje in utils.extraer_mensaje_error(resultado.get('error_response')):
         flash(mensaje, 'error')
+        
     return redirect(url_for('profesor.vista_alumnos', id_curso=id_curso))
+
 #---------------------------------------------------------------------------------------------------------
 
 @profesor_bp.route('/cursos/<int:id_curso>/alumnos', methods=['GET'])
