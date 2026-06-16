@@ -22,11 +22,12 @@
         <form action="{{ url_for('asistencia.registrar_asistencia') }}" method="post">
           <input type="hidden" name="token" value="{{ token }}" />
           <input type="number" class="form-input" name="padron" placeholder="Tu padrón" style="margin-bottom:12px" required />
+          <input type="text" class="form-input" name="curso" placeholder="codigo de tu curso" style="margin-bottom:12px" required />
           <button type="submit" class="btn btn-accent">Registrar presente</button>
         </form>
 
         {% if mensaje %}
-          <div class="alert alert-{{ 'success' if exito else 'danger' }}" style="margin-top:12px">
+          <div class="alert alert-{{ 'success' if exito else 'error' }}" style="margin-top:12px">
             {{ mensaje }}
           </div>
         {% endif %}

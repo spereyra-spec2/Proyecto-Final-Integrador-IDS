@@ -31,14 +31,14 @@ def cargar_datos_prueba():
       
         print("Insertando cursos...")
         query_cursos = """
-            INSERT INTO Curso (idCurso, nombre, descripcion, created_at)
-            VALUES (%s, %s, %s, %s)
-            ON DUPLICATE KEY UPDATE nombre=VALUES(nombre);
+            INSERT INTO Curso (idCurso, nombre, codigo, descripcion, created_at)
+            VALUES (%s, %s, %s, %s, %s)
+            ON DUPLICATE KEY UPDATE nombre=VALUES(nombre), codigo = VALUES(codigo);
         """
         cursos_data = [
-            (1, "Ingeniería de Software I", "Curso de desarrollo y arquitectura de software", datetime.now()),
-            (2, "Base de Datos", "Diseño y optimización de bases de datos relacionales", datetime.now()),
-            (3, "Programación Orientada a Objetos", "Fundamentos de POO y patrones de diseño", datetime.now())
+            (1, "Ingeniería de Software I", "AB123", "Curso de desarrollo y arquitectura de software", datetime.now()),
+            (2, "Base de Datos", "CD123", "Diseño y optimización de bases de datos relacionales", datetime.now()),
+            (3, "Programación Orientada a Objetos", "AB456", "Fundamentos de POO y patrones de diseño", datetime.now())
         ]
         cursor.executemany(query_cursos, cursos_data)
 

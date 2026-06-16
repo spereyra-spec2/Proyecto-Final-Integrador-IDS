@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, request, send_file
 from mysql.connector import Error
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 from src.db.db import obtener_alumno_por_padron, get_asistencia_padron, get_asistencia
-from src.utils.asistencia_utils import existe_padron, verificar_token, alumno_asistio, registrar_asistencia, hacer_y_guardar_qr, validar_padron
+from src.utils.asistencia_utils import existe_padron, verificar_token, alumno_asistio, registrar_asistencia, hacer_y_guardar_qr, validar_padron, obtener_curso_por_codigo
 from src.utils.errors import forbidden, error_response, bad_request, not_found, server_error, conflict
 import config
 from datetime import date,datetime
@@ -72,12 +72,15 @@ def confirmar_asistencia():
         return bad_request("El cuerpo debe ser JSON")
 
     padron = data.get("padron")
+    codigo_curso = data.get("curso")
     token = data.get("token")
 
     if not padron:
         return bad_request("El padron es requerido")
     elif not token:
         return bad_request("No se incluyo el token")
+    elif not codigo_curso:
+        return bad_request("No se incluyo en curso")
     
     try:
         serializer.loads(token, salt="asistencia-qr", max_age=config.QR_EXPIRATION_SECONDS)
@@ -86,17 +89,23 @@ def confirmar_asistencia():
     except BadSignature:
         return error_response(403, "token invalido", "error", "el token enviado no es el valido")
 
+    curso = obtener_curso_por_codigo(codigo_curso)
+    if not curso:
+        return not_found("curso no existe")
+    curso_id = curso["idCurso"]
+
     alumno = obtener_alumno_por_padron(padron)
     if not alumno:
         return not_found("no existe alumno con ese padron en la base de datos")
     elif alumno_asistio(alumno["padron"]):
         return conflict("ya has registrado tu asistencia hoy")
-    elif not registrar_asistencia(alumno["padron"]):
+    elif not registrar_asistencia(alumno["padron"], curso_id):
         return server_error("no se pudo registrar la asistencia")
 
     return {
         "mensaje": f"Asistencia registrada correctamente para {alumno['nombres']}",
         "alumno": alumno["nombres"],
+        "curso": curso_id,
         "padron": alumno["padron"],
         "fecha": date.today().isoformat()
     }, 200

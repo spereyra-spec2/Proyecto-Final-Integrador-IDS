@@ -1,4 +1,13 @@
-{% extends "base_notas.html" %}
+{% extends 'base_profesores.html' %}
+
+{% block title %}Notas — AcademiQ{% endblock %}
+
+{% block topbar_titulo %}Notas{% endblock %}
+{% block menu_titulo %}📝 Notas{% endblock %}
+{% block menu_parrafo %}Visualiza las notas de la comisión{% endblock %}
+
+<!-- Control del menú lateral dinámico -->
+{% block active_notas %}active{% endblock %}
 
 {% block content %}
 <div class="public-container">
@@ -6,23 +15,22 @@
     <div class="card">
         <div class="card-header"><span class="card-title">Cargar Nueva Nota</span></div>
         <div class="card-body">
+            <form action="/profesor/cursos/{{ curso_id }}/evaluaciones/notas/cargar" method="POST" style="display:flex; flex-direction:column; gap:16px;">
             
-            {% if estado == 'ok' %}
-            <div style="background:#e8f5e9; color:#2e7d32; padding:12px; border-radius:6px; margin-bottom:20px; font-weight:600;">
-                ✅ La nota se ha guardado correctamente.
-            </div>
-            {% endif %}
+                {% if estado == 'ok' %}
+                <div style="background:#e8f5e9; color:#2e7d32; padding:12px; border-radius:6px; margin-bottom:20px; font-weight:600;">
+                    ✅ La nota se ha guardado correctamente.
+                </div>
+                {% endif %}
 
-            <form action="/notas/cargar" method="POST" style="display:flex; flex-direction:column; gap:16px;">
-                
                 <div>
                     <label style="font-weight:600; font-size:14px; color:#374151; display:block; margin-bottom:6px;">ID del Curso:</label>
-                    <input type="number" name="curso_id" class="form-input" style="width:100%" required>
+                    <input type="number" name="curso_id" class="form-input" value="{{ curso_id }}" style="width:100%; background:#f3f4f6; color:#6b7280;" readonly>
                 </div>
 
                 <div>
                     <label style="font-weight:600; font-size:14px; color:#374151; display:block; margin-bottom:6px;">ID de la Evaluación:</label>
-                    <input type="number" name="id_evaluacion" class="form-input" style="width:100%" required>
+                    <input type="number" name="id_evaluacion" class="form-input" value="{{ id_evaluacion }}" style="width:100%; background:#f3f4f6; color:#6b7280;" readonly>
                 </div>
 
                 <div>

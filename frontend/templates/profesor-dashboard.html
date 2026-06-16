@@ -17,6 +17,57 @@
 {% endblock %}
 
 {% block content %}
+    <!-- CONTENEDOR NUEVO: Ubica el botón justo al lado de la descripción en el círculo verde -->
+    <div style="display: flex; justify-content: flex-end; margin-bottom: 20px; margin-top: -10px;">
+      <div class="custom-dropdown">
+        <button type="button" class="btn btn-outline dropdown-toggle-btn">
+          <span>📄 Exportar Alumnos PDF</span>
+          <span class="dropdown-arrow-icon">▼</span>
+        </button>
+        <ul class="dropdown-menu-custom" style="min-width: 240px;">
+          {% if cursos %}
+            {% for curso in cursos %}
+              <li>
+                <a class="dropdown-item-custom btn-abrir-modal-curso" 
+                   href="#" 
+                   data-id="{{ curso.idCurso }}" 
+                   data-nombre="{{ curso.nombre }}">
+                  📚 {{ curso.nombre }}
+                </a>
+              </li>
+            {% endfor %}
+          {% else %}
+            <li><span class="dropdown-item-custom" style="color: var(--color-text-muted);">No hay cursos activos</span></li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+
+    <!-- Botón desplegable, reporte de rendimiento -->
+    <div style="display: flex; justify-content: flex-end; margin-bottom: 20px; margin-top: -10px;">
+      <div class="custom-dropdown" id="dropdown-reporte">
+        <button type="button" class="btn btn-outline dropdown-toggle-btn">
+          <span>📊 Reporte de Rendimiento PDF</span>
+          <span class="dropdown-arrow-icon">▼</span>
+        </button>
+        <ul class="dropdown-menu-custom" style="min-width: 240px;">
+          {% if cursos %}
+            {% for curso in cursos %}
+              <li>
+                <a class="dropdown-item-custom descargar-reporte-directo" 
+                   href="#" 
+                   data-id="{{ curso.idCurso }}">
+                  📚 {{ curso.nombre }}
+                </a>
+              </li>
+            {% endfor %}
+          {% else %}
+            <li><span class="dropdown-item-custom" style="color: var(--color-text-muted);">No hay cursos activos</span></li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+
     <!-- Stats -->
     <div class="grid-4" style="margin-bottom:28px">
       <div class="stat-card">
@@ -76,10 +127,12 @@
                     <td>{{ curso.cuatrimestre or '—' }}</td>
                     <td><span class="badge badge-success">Activo</span></td>
                     <td>
-                      <a href="{{ url_for('profesor.vista_alumnos', id_curso=curso.idCurso) }}" class="btn btn-sm btn-outline">Alumnos</a>
-                      <a href="#" class="btn btn-outline btn-sm">Equipos</a>
-                      <a href="{{ url_for('profesor.evaluaciones', curso_id=curso.idCurso) }}" class="btn btn-sm btn-outline">Evaluaciones</a>
-                      <a href="{{url_for('asistencia.asistencia_profe')}}" class="btn btn-outline btn-sm">Asistencia</a>
+                      <div class="actions-wrapper">
+                        <a href="{{ url_for('profesor.vista_alumnos', id_curso=curso.idCurso) }}" class="btn btn-sm btn-outline">Alumnos</a>
+                        <a href="#" class="btn btn-outline btn-sm">Equipos</a>
+                        <a href="{{ url_for('profesor.evaluaciones', curso_id=curso.idCurso) }}" class="btn btn-sm btn-outline">Evaluaciones</a>
+                        <a href="{{ url_for('asistencia.asistencia_profe') }}" class="btn btn-outline btn-sm">Asistencia</a>
+                      </div>
                     </td>
                   </tr>
                 {% endfor %}
@@ -90,6 +143,43 @@
               {% endif %}
             </tbody>
           </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal interactivo -->
+    <div id="modal-exportar-pdf" class="modal-overlay hidden">
+      <div class="modal">
+        <div class="modal-header">
+          <h3 class="modal-title">📄 Exportar Alumnos a PDF</h3>
+          <button type="button" class="modal-close" id="btn-cerrar-modal-pdf">×</button>
+        </div>
+        <div class="modal-body">
+          <p style="font-size: 13px; color: var(--color-text-muted); margin-bottom: 20px;">
+            Seleccioná las preferencias de ordenamiento y filtrado para generar el documento de la comisión elegida:
+          </p>
+          
+          <input type="hidden" id="modal-curso-id" value="">
+
+          <div class="form-group">
+            <label class="form-label" for="select-ordenar">Ordenar lista por</label>
+            <select class="form-select" id="select-ordenar">
+              <option value="apellido">Apellido y Nombre (Alfabético)</option>
+              <option value="padron">Número de Padrón (Ascendente)</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 24px;">
+            <label class="form-label" for="select-filtrar">Filtro de alumnos</label>
+            <select class="form-select" id="select-filtrar">
+              <option value="todos">Todos los alumnos inscriptos</option>
+              <option value="activos">Solo alumnos activos en el curso</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" id="btn-cancelar-modal-pdf">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="btn-confirmar-descarga-pdf">Guardar</button>
         </div>
       </div>
     </div>

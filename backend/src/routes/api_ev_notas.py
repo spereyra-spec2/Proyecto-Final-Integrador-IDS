@@ -29,10 +29,10 @@ def obtener_nota():
             return jsonify(bad_request("El id del curso debe ser un número entero positivo.")), 400
 
         if validar_curso(curso_id) == None:
-            return jsonify(not_found(f"No se encontró el curso con id {curso_id}.")), 404
+            return not_found(f"No se encontró el curso con id {curso_id}.")
             
         if validar_evaluacion(id_evaluacion) == None:
-            return jsonify(not_found(f"No se encontró la evaluación con id {id_evaluacion}.")), 404
+            return not_found(f"No se encontró la evaluación con id {id_evaluacion}.")
         
         nota = None
         
@@ -42,7 +42,7 @@ def obtener_nota():
                 return jsonify(bad_request("El id del equipo debe ser un numero entero positivo.")), 400
             
             if validar_equipo(id_equipo) == None:
-                return jsonify(not_found(f"No se encontró el equipo con id {id_equipo}.")), 404
+                return not_found(f"No se encontró el equipo con id {id_equipo}.")
 
             query_g = """
                 SELECT n.puntaje, e.tipo
@@ -59,7 +59,7 @@ def obtener_nota():
                 return jsonify(bad_request("El padrón debe ser un número entero positivo.")), 400
 
             if validar_id(padron) == None:
-                return jsonify(not_found(f"No se encontró al alumno con padrón {padron}.")), 404
+                return not_found(f"No se encontró al alumno con padrón {padron}.")
 
             query = """
                 SELECT n.puntaje, e.tipo
@@ -73,7 +73,7 @@ def obtener_nota():
             nota = cursor.fetchone()
 
         if nota is None:
-            return jsonify(not_found(f"No se encontró la nota solicitada.")), 404
+            return not_found(f"No se encontró la nota solicitada.")
         return jsonify(nota), 200
 
     except mysql.connector.Error as e:
@@ -108,10 +108,10 @@ def guardar_nota():
             return jsonify(bad_request("El id del curso debe ser un número entero positivo.")), 400
 
         if validar_curso(curso_id) == None:
-            return jsonify(not_found(f"No se encontró el curso con id {curso_id}.")), 404
+            return not_found(f"No se encontró el curso con id {curso_id}.")
             
         if validar_evaluacion(id_ev) == None:
-            return jsonify(not_found(f"No se encontró la evaluación con id {id_ev}.")), 404
+            return not_found(f"No se encontró la evaluación con id {id_ev}.")
         
         if not valido_numero(nota):
             return jsonify(bad_request("La nota debe ser un número entero positivo.")), 400
@@ -129,30 +129,53 @@ def guardar_nota():
                 return jsonify(bad_request("El id del equipo debe ser un número entero positivo.")), 400
             
             if validar_equipo(grupal) == None:
-                return jsonify(not_found(f"No se encontró el equipo con id {grupal}.")), 404
+                return not_found(f"No se encontró el equipo con id {grupal}.")
+            
+            query_aux = "SELECT puntaje FROM Notas WHERE Equipos_idEquipos = %s"
 
-            query_g = """
-                INSERT INTO Notas (puntaje, Evaluaciones_idEvaluacion, Equipos_idEquipos)
-                VALUES (%s, %s, %s)
-            """
-            cursor.execute(query_g, (nota, id_ev, grupal))
-            conn.commit()
-            return jsonify({"message": "Nota grupal agregada!"}), 201
+            cursor.execute(query_aux, grupal)
+
+            shield = cursor.fetchone()
+            if not shield:
+
+                query_g = """
+                    INSERT INTO Notas (puntaje, Evaluaciones_idEvaluacion, Equipos_idEquipos)
+                    VALUES (%s, %s, %s)
+                """
+                cursor.execute(query_g, (nota, id_ev, grupal))
+                conn.commit()
+                return jsonify({"message": "Nota grupal agregada!"}), 201
+            else:
+                return jsonify({"message": "La nota ya ha sido cargada"}), 200
+
         else:
 
             if validar_id(padron) == None:
-                return jsonify(not_found(f"No se encontró al alumno con padrón {padron}.")), 404
+                return not_found(f"No se encontró al alumno con padrón {padron}.")
             
             if not valido_numero(padron):
                 return jsonify(bad_request("El padrón debe ser un número entero positivo.")), 400
 
-            query_i = """
+            query_aux = "SELECT puntaje FROM Notas WHERE Usuarios_padron = %s"
+
+            cursor.execute(query_aux, padron)
+
+            shield = cursor.fetchone()
+            if not shield:
+
+                query_i = """
                 INSERT INTO Notas (puntaje, Evaluaciones_idEvaluacion, Usuarios_padron)
                 VALUES (%s, %s, %s)
-            """
-            cursor.execute(query_i, (nota, id_ev, padron))
-            conn.commit()
-            return jsonify({"message": "Nota individual agregada!"}), 201
+                """
+            
+                cursor.execute(query_i, (nota, id_ev, padron))
+                conn.commit()
+                return jsonify({"message": "Nota de alumno agregada!"}), 201
+        
+            else:
+                return jsonify({"message": "La nota ya ha sido cargada"}), 200
+            
+            
         
     except mysql.connector.Error as e:
         return jsonify(server_error("Error al obtener información de la base de datos: " + str(e))), 500
@@ -188,10 +211,10 @@ def actualizar_nota():
             return jsonify(bad_request("El id del curso debe ser un número entero positivo.")), 400
 
         if validar_curso(curso_id) == None:
-            return jsonify(not_found(f"No se encontró el curso con id {curso_id}.")), 404
+            return not_found(f"No se encontró el curso con id {curso_id}.")
 
         if validar_evaluacion(id_ev) == None:
-            return jsonify(not_found(f"No se encontró la evaluación con id {id_ev}.")), 404
+            return not_found(f"No se encontró la evaluación con id {id_ev}.")
 
         if nota < 0:
             return jsonify(bad_request("El puntaje debe ser un número entero positivo.")), 400
@@ -208,7 +231,7 @@ def actualizar_nota():
                 return jsonify(bad_request("El id del equipo debe ser un número entero positivo.")), 400
             
             if validar_equipo(id_equipo) is None:
-                return jsonify(not_found(f"No se encontró el equipo con id {id_equipo}.")), 404
+                return not_found(f"No se encontró el equipo con id {id_equipo}.")
 
             query_g = "UPDATE Notas SET puntaje = %s WHERE Equipos_idEquipos = %s AND Evaluaciones_idEvaluacion = %s"
             cursor.execute(query_g, (nota, id_equipo, id_ev))
@@ -221,7 +244,7 @@ def actualizar_nota():
                 return jsonify(bad_request("El padrón debe ser un número entero positivo.")), 400
 
             if validar_id(padron) is None:
-                return jsonify(not_found(f"No se encontró al alumno con padrón {padron}.")), 404
+                return not_found(f"No se encontró al alumno con padrón {padron}.")
 
             query_i = "UPDATE Notas SET puntaje = %s WHERE Usuarios_padron = %s AND Evaluaciones_idEvaluacion = %s"
             cursor.execute(query_i, (nota, padron, id_ev))
@@ -260,16 +283,21 @@ def get_cursos_publicos():
 
 @ev_notas_bp.route('/evaluaciones', methods=['GET'])
 def get_tipos_evaluacion_publicos():
+    curso_id = request.args.get('curso_id', type=int)
+
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
 
     try:
-        
-        query = "SELECT idEvaluacion, descripcion FROM Evaluaciones"
-        cursor.execute(query)
-        evs = cursor.fetchall()
-        
-        return jsonify({"evaluaciones": evs}), 200
+        if curso_id:
+            query = "SELECT idEvaluacion, descripcion FROM Evaluaciones WHERE Curso_idCurso = %s"
+            cursor.execute(query, (curso_id,))
+        else:
+            query = "SELECT idEvaluacion, descripcion FROM Evaluaciones"
+            cursor.execute(query)
+            
+        evaluacioes = cursor.fetchall()
+        return jsonify({"evaluaciones": evaluacioes}), 200
         
     except Exception as e:
         return server_error(str(e))

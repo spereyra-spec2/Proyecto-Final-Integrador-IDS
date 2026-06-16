@@ -91,7 +91,7 @@ window.configurarModalAlta = function(idCurso) {
 window.configurarModalEditar = function(padron, nombres, mail, Estado, idCurso) {
     const formulario = document.getElementById('form-alumno-modal');
     if (formulario) {
-        // CORRECCIÓN: Quitado el prefijo "/api" para que viaje al controlador de Flask
+
         formulario.action = "/profesor/cursos/" + idCurso + "/alumnos/actualizar/" + padron;
         
         document.getElementById('s-nombre').value = nombres;
@@ -109,3 +109,91 @@ window.configurarModalEditar = function(padron, nombres, mail, Estado, idCurso) 
         window.openModal('modal-student');
     }
 };
+
+document.addEventListener('DOMContentLoaded', function() {
+  const modalPdf = document.getElementById('modal-exportar-pdf');
+  const inputCursoId = document.getElementById('modal-curso-id');
+  const modalTitle = modalPdf ? modalPdf.querySelector('.modal-title') : null;
+
+  document.addEventListener('click', function(e) {
+    const isDropdownButton = e.target.closest('.dropdown-toggle-btn');
+    
+    if (isDropdownButton) {
+      e.preventDefault();
+      const currentMenu = isDropdownButton.nextElementSibling;
+      currentMenu.classList.toggle('show');
+
+      document.querySelectorAll('.dropdown-menu-custom').forEach(menu => {
+        if (menu !== currentMenu) menu.classList.remove('show');
+      });
+    } else if (!e.target.closest('.custom-dropdown')) {
+      document.querySelectorAll('.dropdown-menu-custom').forEach(menu => {
+        menu.classList.remove('show');
+      });
+    }
+  });
+
+  document.addEventListener('click', function(e) {
+    const itemCurso = e.target.closest('.btn-abrir-modal-curso');
+    if (itemCurso) {
+      e.preventDefault();
+      const idCurso = itemCurso.getAttribute('data-id');
+      const nombreCurso = itemCurso.getAttribute('data-nombre');
+
+      if (inputCursoId) inputCursoId.value = idCurso;
+      if (modalTitle) modalTitle.innerHTML = `📄 PDF — ${nombreCurso}`;
+      if (modalPdf) modalPdf.classList.remove('hidden');
+      
+      document.querySelectorAll('.dropdown-menu-custom').forEach(menu => {
+        menu.classList.remove('show');
+      });
+    }
+  });
+
+  function ocultarModalPdf() {
+    if (modalPdf) modalPdf.classList.add('hidden');
+  }
+
+  const btnCerrar = document.getElementById('btn-cerrar-modal-pdf');
+  const btnCancelar = document.getElementById('btn-cancelar-modal-pdf');
+  
+  if (btnCerrar) btnCerrar.addEventListener('click', ocultarModalPdf);
+  if (btnCancelar) btnCancelar.addEventListener('click', ocultarModalPdf);
+  
+  if (modalPdf) {
+    modalPdf.addEventListener('click', function(e) {
+      if (e.target === modalPdf) ocultarModalPdf();
+    });
+  }
+
+  const btnDescargar = document.getElementById('btn-confirmar-descarga-pdf');
+  if (btnDescargar) {
+    btnDescargar.addEventListener('click', function() {
+      const idCurso = inputCursoId.value;
+      const ordenarPor = document.getElementById('select-ordenar').value;
+      const filtrarActivos = document.getElementById('select-filtrar').value;
+
+      if (!idCurso) return;
+
+      window.location.href = `/profesor/curso/${idCurso}/exportar_alumnos_pdf?ordenar_por=${ordenarPor}&filtrar_activos=${filtrarActivos}`;
+      ocultarModalPdf();
+    });
+  }
+});
+
+document.addEventListener('click', function(e) {
+    const item_reporte = e.target.closest('.descargar-reporte-directo');
+    if (item_reporte) {
+        e.preventDefault();
+        const id_curso = item_reporte.getAttribute('data-id');
+        
+        if (id_curso) {
+        const urlFinal = `http://127.0.0.1:5000/api/cursos/${id_curso}/reporte-estadisticas`;
+        window.location.href = urlFinal;
+        }
+        
+        document.querySelectorAll('.dropdown-menu-custom').forEach(menu => {
+            menu.classList.remove('show');
+        });
+    }
+});

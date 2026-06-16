@@ -336,6 +336,7 @@ def delete_equipo(curso_id, usuarios_padron):
     finally:
         cursor.close()
         conn.close()
+
 def get_asistencia():
     con = get_connection()
     cursor = con.cursor(dictionary=True)
@@ -355,3 +356,4 @@ def get_asistencia_padron(padron):
     cursor.close()
     con.close()
     return asistencia
+

@@ -1,5 +1,6 @@
 {% extends 'base_profesores.html' %}
-
+{% block extra_css %}
+{% endblock %}
 {% block title %}Evaluaciones — AcademiQ{% endblock %}
 
 {% block topbar_titulo %}Evaluaciones{% endblock %}
@@ -10,7 +11,7 @@ Materia: {{ curso.nombre }}
 <br>
 Codigo: {{ curso.codigo }} 
 <br>  
-Cuatrimestre: {{ curso.cuatrimestre }}{%endblock %}
+Cuatrimestre: {{ curso.cuatrimestre }}{%endblock%}
 
 <!-- Control del menú lateral dinámico -->
 {% block active_evaluaciones %}active{% endblock %}
@@ -21,27 +22,26 @@ Cuatrimestre: {{ curso.cuatrimestre }}{%endblock %}
 {% endblock %}
 
 {% block content %}
-<!-- Contenedor principal de evaluaciones con el diseño de tus cursos -->
+<!-- Contenedor principal de evaluaciones -->
 <div id="evals-list">
   {% if evaluaciones and evaluaciones|length > 0 %}
     <div class="grid-3" id="evals-grid">
       {% for eval in evaluaciones %}
         <div class="card">
-          <div class="card-header" style="display:flex; align-items:center; justify-content:space-between">
-            <span class="card-title" style="font-weight: 700; color: var(--color-primary);">{{ eval.tipo }}</span>
+          <div class="card-header">
+            <span class="card-title">{{ eval.tipo }}</span>
             <span class="badge badge-success">Activo</span>
           </div>
           <div class="card-body">
-            <p style="color:#6b7280; font-size:13px; margin-bottom:12px">
+            <p class="card-fecha">
               📅 {{ eval.fecha if eval.fecha else 'Sin fecha' }}
             </p>
             
             {% if eval.descripcion %}
-              <p style="font-size:14px; margin-bottom:16px; color:#374151">{{ eval.descripcion }}</p>
+              <p class="card-descripcion">{{ eval.descripcion }}</p>
             {% endif %}
 
-            <div style="display: flex; justify-content: flex-end; gap: 6px; border-top: 1px solid #f0f0f0; padding-top: 12px; margin-top: 14px;">
-              <!-- Botón Editar con tus estilos globales -->
+            <div class="card-actions">
               <button class="btn btn-sm btn-outline edit-button" 
                       data-id="{{ eval.idEvaluacion }}"
                       data-tipo="{{ eval.tipo | e }}"
@@ -50,21 +50,25 @@ Cuatrimestre: {{ curso.cuatrimestre }}{%endblock %}
                 ✏️ Modificar
               </button>
               
-              <!-- Botón Ver Notas con tus estilos globales -->
-              <button class="btn btn-sm btn-outline" onclick="verNotas('{{ eval.idEvaluacion }}')">
-                📝 Ver notas
-              </button>
+              <a href="{{ url_for('profesor.ver_nota', curso_id=eval.Curso_idCurso, id_ev=eval.idEvaluacion) }}" class="btn btn-sm btn-outline">
+                📝 Ver nota
+              </a>
+              {% if 'Trabajo Práctico' in eval.tipo or 'TP' in eval.tipo %}
+              <a class="btn btn-sm btn-outline">
+                 🤝 Ver equipos
+              </a>
+              {% endif %}
+
             </div>
           </div>
         </div>
       {% endfor %}
     </div>
   {% else %}
-    <!-- Estado vacío idéntico al de tus otros listados -->
-    <div style="grid-column:1/-1; text-align:center; padding:50px; color:#9ca3af; background: white; border-radius: 8px; border: 1px solid #e5e7eb;">
-      <div style="font-size:40px; margin-bottom:12px">📝</div>
-      <strong>No hay evaluaciones</strong><br>
-      <span style="font-size:14px">Creá tu primera evaluación con el botón de arriba.</span>
+    <div class="empty-state">
+      <div class="empty-state-icon">📝</div>
+      <strong>No hay evaluaciones</strong>
+      <span>Creá tu primera evaluación con el botón de arriba.</span>
     </div>
   {% endif %}
 </div>

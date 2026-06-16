@@ -23,17 +23,16 @@ CREATE TABLE IF NOT EXISTS Usuarios (
 CREATE TABLE IF NOT EXISTS Curso_has_Usuarios (
     Curso_idCurso INT NOT NULL,
     Usuarios_padron INT NOT NULL,
+    Estado TINYINT,
     FOREIGN KEY (Curso_idCurso) REFERENCES Curso(idCurso) ON DELETE CASCADE,
     FOREIGN KEY (Usuarios_padron) REFERENCES Usuarios(padron) ON DELETE CASCADE
 );
-
 
 CREATE TABLE IF NOT EXISTS Asistencias (
     idAsistencia INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
     asistio TINYINT DEFAULT 0,
     fecha DATETIME NOT NULL,
     justificado TINYINT DEFAULT 0,
-    hash_qr VARCHAR(512),
     Usuarios_padron INT NOT NULL,
     Curso_idCurso INT NOT NULL,
     FOREIGN KEY (Usuarios_padron) REFERENCES Usuarios(padron) ON DELETE CASCADE,
@@ -112,3 +111,4 @@ CREATE TABLE IF NOT EXISTS Logs (
     Usuarios_padron INT NOT NULL,
     FOREIGN KEY (Usuarios_padron) REFERENCES Usuarios(padron) ON DELETE CASCADE
 );
+

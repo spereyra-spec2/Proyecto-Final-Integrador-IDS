@@ -15,11 +15,11 @@ def alumno_asistio(padron):
         cursor.close()
         conn.close()
 
-def registrar_asistencia(padron):
+def registrar_asistencia(padron, curso):
     conn = get_connection()
     cursor = conn.cursor()
     try:
-        cursor.execute("INSERT INTO Asistencias (asistio, fecha, justificado, Usuarios_padron) VALUES (1, NOW(), 0, %s)", (padron,))
+        cursor.execute("INSERT INTO Asistencias (asistio, fecha, justificado, Usuarios_padron, Curso_idCurso) VALUES (1, NOW(), 0, %s, %s)", (padron, curso))
         conn.commit()
         return cursor.rowcount > 0
     finally:
@@ -62,3 +62,13 @@ def verificar_token(headers, roles_permitidos):
         return False
     except jwt.PyJWTError: 
         return False
+
+def obtener_curso_por_codigo(codigo):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    curso = cursor.execute("SELECT idCurso FROM Curso WHERE codigo = %s", (codigo,))
+    curso = cursor.fetchone()
+    cursor.close()
+    conn.close()
+
+    return curso;

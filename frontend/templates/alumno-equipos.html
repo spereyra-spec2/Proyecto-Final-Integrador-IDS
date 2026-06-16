@@ -1,266 +1,151 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mi Grupo — AcademiQ</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}" />
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}" />
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}" />
-</head>
-<body>
+{% extends 'base_general.html' %}
 
-<div class="public-shell">
-  <header class="public-topbar">
-    <div class="public-topbar-logo"><span>🎓</span> AcademiQ</div>
-    <nav class="public-topbar-nav">
-      <a href="alumno-inicio.html">Inicio</a>
-      <a href="alumno-notas.html">Mis Notas</a>
-      <a href="alumno-equipos.html" class="active">Mi Grupo</a>
-      <a href="alumno-asistencia.html">Asistencia</a>
-    </nav>
-  </header>
+{% block title %}Mi Grupo — AcademiQ{% endblock %}
+{% block active_grupo %}active{% endblock %}
 
-  <div class="public-container">
-    <div class="card" style="margin-bottom:24px">
-      <div class="card-body" style="display:flex;gap:12px;flex-wrap:wrap;padding:16px 20px">
-        <input class="form-input" id="padron-input" placeholder="Tu padrón" style="flex:1;min-width:130px" />
-        <select class="form-select" id="curso-select" style="flex:2;min-width:200px">
+{% block extra_css %}
+<style>
+  .team-card {background:#d4edda;color:#155724;padding:12px;border-radius:6px;margin-bottom:12px;}
+  .team-meta {font-size:12px;color:#155724;margin-top:4px;}
+  .team-code {font-size:13px;color:#155724;margin-top:6px;}
+  .team-members {margin:6px 0 0 18px;padding:0;color:#0b3d1a;}
+  .team-members li {margin-bottom:8px;}
+  .team-empty {color:#9ca3af;margin-top:6px;}
+
+  .action-card {background:#f8faf0;border:1px solid #e6f2d8;padding:12px;border-radius:8px;}
+
+  .search-row {display:flex;gap:12px;flex-wrap:wrap;}
+  .search-row input,
+  .search-row select {flex:1;min-width:180px;}
+
+  .member-dates {font-size:12px;color:#6b7280;margin-left:6px;}
+  .left-member {color:#9ca3af;font-size:12px;margin-left:6px;}
+
+  .form-inline {display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+  .form-inline input {flex:1;min-width:150px;}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="public-container">
+  <div class="card" style="margin-bottom:24px">
+    <div class="card-header"><span class="card-title">🤝 Mi Grupo</span></div>
+    <div class="card-body">
+      <div class="search-row">
+        <input class="form-input" id="padron-input" placeholder="Tu padrón" value="{{ padron or '' }}">
+        <select class="form-select" id="curso-select">
           <option value="">Seleccioná curso</option>
           {% for curso in cursos %}
-          <option value="{{ curso.idCurso if curso.idCurso is defined else curso.id }}" {% if curso_id == (curso.idCurso if curso.idCurso is defined else curso.id) %}selected{% endif %}>{{ curso.nombre }}</option>
+            <option value="{{ curso.idCurso if curso.idCurso is defined else curso.id }}"
+              {% if curso_id == (curso.idCurso if curso.idCurso is defined else curso.id) %}selected{% endif %}>
+              {{ curso.nombre }}
+            </option>
           {% endfor %}
         </select>
-        <button class="btn btn-primary" onclick="buscar()">🔍 Consultar</button>
+
+        <button class="btn btn-primary" onclick="buscar()">Consultar</button>
       </div>
     </div>
-    <!-- Debug banner (temporary) -->
-    <div id="debug-banner" style="display:none; background:#ffe6e6; color:#8a1f1f; padding:8px 12px; margin:12px auto; max-width:900px; border-radius:6px;">
-      <strong>JS Error:</strong> <span id="debug-text"></span>
-    </div>
+  </div>
 
-    <div id="result" style="display: {{ 'block' if busqueda_realizada else 'none' }}">
-      <div class="card" style="margin-bottom:20px">
-        <div class="card-header" style="display:flex;align-items:center;justify-content:space-between">
-          <span class="card-title">🤝 Mis equipos</span>
-          <div id="team-actions" style="display:flex;gap:8px"></div>
-        </div>
-        <div class="card-body" id="team-detail">
-          {% if equipos_del_alumno and equipos_del_alumno|length > 0 %}
-            <div style="display:flex;flex-direction:column;gap:12px;">
-              {% for equipo in equipos_del_alumno %}
-                <div style="background-color: #d4edda; color: #155724; padding: 12px; border-radius:6px;">
-                  <h4 style="margin:0 0 6px 0">Equipo: <strong>{{ equipo.nombre }}</strong></h4>
-                  <div style="font-size:12px;color:#155724;margin-top:4px">Cupo: {{ equipo.active_count }} / {% if equipo.cupo %}{{ equipo.cupo }}{% else %}∞{% endif %}</div>
-                  {% if equipo.access_code %}
-                    <div style="font-size:13px;color:#155724;margin-top:6px">Código de acceso: <strong>{{ equipo.access_code }}</strong></div>
-                  {% endif %}
-                  <div style="font-size:14px;color:#155724">
-                    <strong>Integrantes:</strong>
-                    <ul style="margin:6px 0 0 18px;padding:0;color:#0b3d1a">
-                      {% for m in equipo.integrantes %}
-                        <li>
-                          <div style="display:flex;align-items:center;gap:8px">
-                            <span>{{ m.nombre or m.padron or m }} ({{ m.padron or m }})</span>
-                            {% if m.activo is defined and m.activo == 0 %}
-                              <span style="color:#9ca3af;font-size:12px;margin-left:6px">(salió)</span>
-                            {% endif %}
-                            {% if (padron and (m.padron|int) == (padron|int)) %}
-                              {% if m.activo is defined and m.activo == 1 %}
-                                <button class="btn btn-outline btn-sm" style="margin-left:8px" onclick="openLeaveModal({{ padron }}, {{ curso_id }})">Abandonar</button>
-                              {% endif %}
-                            {% endif %}
-                          </div>
-                          <div style="font-size:12px;color:#6b7280;margin-left:6px">
-                            {% if m.activo_desde %}
-                              Ingresó: {{ m.activo_desde }}
-                            {% endif %}
-                            {% if m.activo_hasta %}
-                              &nbsp;•&nbsp;Salió: {{ m.activo_hasta }}
-                            {% endif %}
-                          </div>
-                        </li>
-                      {% endfor %}
-                    </ul>
-                  </div>
+  {% if busqueda_realizada %}
+
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-header"><span class="card-title">Mis equipos</span></div>
+
+      <div class="card-body">
+
+        <h3 style="margin-bottom:10px">🟢 Equipos activos</h3>
+
+        {% if equipos_del_alumno %}
+          {% for equipo in equipos_del_alumno %}
+
+            <div class="team-card">
+              <h4 style="margin:0 0 6px 0">Equipo: <strong>{{ equipo.nombre }}</strong></h4>
+              <div class="team-meta"> Cupo: {{ equipo.active_count }} / {{ equipo.cupo if equipo.cupo else '∞' }} </div>
+              
+              {% if equipo.access_code %}
+                <div class="team-code">
+                  Código de acceso: <strong>{{ equipo.access_code }}</strong>
                 </div>
-              {% endfor %}
+              {% endif %}
+
+              <ul class="team-members">
+                {% for m in equipo.integrantes %}
+                  <li>
+                    <div style="display:flex;align-items:center;gap:8px">
+                      <span>{{ m.nombre or m.padron or m }} ({{ m.padron or m }})</span>
+
+                      {% if m.activo is defined and m.activo == 0 %}
+                        <span class="left-member">(salió)</span>
+                      {% endif %}
+
+                      {% if padron and (m.padron|int) == (padron|int) %}
+                        {% if m.activo is defined and m.activo == 1 %}
+                          <button class="btn btn-outline btn-sm" onclick="openLeaveModal('{{ padron }}','{{ curso_id }}','{{ equipo.idEquipos }}')">Abandonar</button>
+                        {% endif %}
+                      {% endif %}
+                    </div>
+
+                    <div class="member-dates">
+                      {% if m.activo_desde %}Ingresó: {{ m.activo_desde }}{% endif %}
+                      {% if m.activo_hasta %} • Salió: {{ m.activo_hasta }}{% endif %}
+                    </div>
+                  </li>
+                {% endfor %}
+              </ul>
             </div>
-          {% else %}
-            <div style="display:flex;gap:18px;align-items:flex-start">
-              <div>
-                <p style="color:#9ca3af;margin-top:6px">No estás en ningún equipo.</p>
-              </div>
-              <div style="background:#f8faf0;border:1px solid #e6f2d8;padding:12px;border-radius:8px">
-                <form method="POST" action="/crear-equipo">
-                  <input type="hidden" name="curso_id" value="{{ curso_id }}" />
-                  <input type="hidden" name="padron_creador" value="{{ padron }}" />
-                  <div style="margin-bottom:8px">
-                    <label class="form-label">Nombre del equipo</label>
-                    <input class="form-input" name="nombre_equipo" placeholder="Ej: Grupo Los Simuladores" required />
-                  </div>
-                  <div style="margin-bottom:8px">
-                    <label class="form-label">Código de acceso</label>
-                    <input class="form-input" name="access_code" placeholder="Ej: A3B2C1" />
-                  </div>
-                  <div style="margin-bottom:8px">
-                    <label class="form-label">Cupo máximo (opcional)</label>
-                    <input class="form-input" name="cupo" placeholder="Ej: 5" />
-                  </div>
-                  <div style="text-align:right">
-                    <button class="btn btn-primary" type="submit">Crear equipo</button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          {% endif %}
-        </div>
+          {% endfor %}
+        {% else %}
+
+          <div class="action-card"> <p class="team-empty">No estás en ningún equipo.</p> </div>
+          
+        {% endif %}
+
       </div>
-      
-      <div class="card" style="margin-top:12px;padding:12px">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div>
-            <strong>Crear un nuevo equipo</strong>
-            <div style="color:#6b7280;font-size:13px"></div>
+    </div>
+
+
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-header"><span class="card-title">Crear equipo</span></div>
+
+      <div class="card-body">
+        <form method="POST" action="{{ url_for('equipos.crear_nuevo_equipo') }}">
+          <input type="hidden" name="curso_id" value="{{ curso_id }}">
+          <input type="hidden" name="padron_creador" value="{{ padron }}">
+          <input type="hidden" name="padrones[]" value="{{ padron }}">
+          <div class="form-inline">
+            <input class="form-input" name="nombre_equipo" placeholder="Nombre del equipo" required>
+            <input class="form-input" name="access_code" placeholder="Código de acceso">
+            <input class="form-input" name="cupo" placeholder="Cupo">
+            <button class="btn btn-primary" type="submit">Crear equipo</button>
           </div>
-          <form method="POST" action="/crear-equipo" style="display:flex;gap:8px;align-items:center">
-            <input type="hidden" name="curso_id" value="{{ curso_id }}" />
-            <input type="hidden" name="padron_creador" value="{{ padron }}" />
-            <input class="form-input" name="nombre_equipo" placeholder="Nombre del equipo" style="min-width:220px" required />
-            <input class="form-input" name="access_code" placeholder="Código de acceso" style="min-width:120px" />
-            <input class="form-input" name="cupo" placeholder="Cupo (default: 4)" style="min-width:80px" />
-            <button class="btn btn-primary" type="submit">Crear</button>
-          </form>
-        </div>
+        </form>
       </div>
-    
-          <div class="card" style="margin-top:12px;padding:12px">
-            <div style="display:flex;justify-content:space-between;align-items:center">
-              <div>
-                <strong>Unirse a un equipo</strong>
-                <div style="color:#6b7280;font-size:13px">Ingresá el nombre del equipo y el código de acceso para unirte a equipos.</div>
-              </div>
-              <form method="POST" action="/alumno-join-by-code" style="display:flex;gap:8px;align-items:center">
-                <input type="hidden" name="curso_id" value="{{ curso_id }}" />
-                <input type="hidden" name="padron" value="{{ padron }}" />
-                <input class="form-input" name="equipo_nombre" placeholder="Nombre del equipo" style="min-width:220px" />
-                <input class="form-input" name="access_code" placeholder="Código de acceso" style="min-width:160px" />
-                <button class="btn btn-primary" type="submit">Unirse</button>
-              </form>
-            </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-title">Unirse a un equipo</span></div>
+
+      <div class="card-body">
+        <form method="POST" action="{{ url_for('equipos.unirse_equipo') }}">
+
+          <input type="hidden" name="curso_id" value="{{ curso_id }}">
+          <input type="hidden" name="padron" value="{{ padron }}">
+
+          <div class="form-inline">
+            <input class="form-input" name="equipo_nombre" placeholder="Nombre del equipo">
+            <input class="form-input" name="access_code" placeholder="Código de acceso">
+            <button class="btn btn-primary" type="submit">Unirse</button>
           </div>
-      
-<div class="modal-overlay hidden" id="modal-join">
-  <div class="modal">
-    <div class="modal-header">
-      <span class="modal-title">Unirse a un equipo</span>
-      <button class="modal-close" onclick="document.getElementById('modal-join').classList.add('hidden')">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="form-group">
-        <label class="form-label">Nombre del equipo</label>
-        <input class="form-input" id="join-name" placeholder="Ej: Grupo Alpha" />
-      </div>
-      <div class="form-group">
-        <label class="form-label">Código de acceso</label>
-        <input class="form-input" id="join-code" placeholder="Ej: A3B2C1" style="text-transform:uppercase;font-family:monospace;font-size:18px;letter-spacing:3px" />
+
+        </form>
       </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-outline" onclick="document.getElementById('modal-join').classList.add('hidden')">Cancelar</button>
-      <button class="btn btn-primary" id="btn-join">Unirse</button>
-    </div>
-  </div>
+
+  {% endif %}
+
 </div>
-
-<div class="modal-overlay hidden" id="modal-create">
-  <div class="modal">
-    <div class="modal-header">
-      <span class="modal-title">Crear equipo</span>
-      <button class="modal-close" onclick="document.getElementById('modal-create').classList.add('hidden')">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="form-group">
-        <label class="form-label">Nombre del equipo</label>
-        <input class="form-input" id="create-name" placeholder="Ej: Los Recursivos" />
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-outline" onclick="document.getElementById('modal-create').classList.add('hidden')">Cancelar</button>
-      <button class="btn btn-primary" id="btn-create">Crear</button>
-    </div>
-  </div>
-</div>
-
-
-<script>
-  function buscar() {
-    try {
-      const pad = document.getElementById('padron-input').value || '';
-      const curso = document.getElementById('curso-select').value || '';
-      if (!pad || !curso) { alert('Ingresá tu padrón y seleccioná un curso'); return; }
-      window.location.href = `/alumno-equipos.html?padron=${encodeURIComponent(pad)}&curso_id=${encodeURIComponent(curso)}`;
-    } catch (err) {
-      reportError(err);
-      throw err;
-    }
-  }
-
-  (function(){
-    const padron = '{{ padron or "" }}';
-    const cursoId = '{{ curso_id or "" }}';
-    if (padron) document.getElementById('padron-input').value = padron;
-    if (cursoId) document.getElementById('curso-select').value = cursoId;
-  })();
-</script>
-
-<script>
-  function reportError(e) {
-    try {
-      console.error('Captured error', e);
-      const banner = document.getElementById('debug-banner');
-      const txt = document.getElementById('debug-text');
-      banner.style.display = 'block';
-      txt.textContent = (e && e.message) ? e.message : String(e);
-    } catch (ignore) { console.error(ignore); }
-  }
-
-  window.addEventListener('error', function(ev){
-    reportError(ev.error || ev.message || 'Unknown error');
-  });
-
-  window.addEventListener('unhandledrejection', function(ev){
-    reportError(ev.reason || 'Unhandled promise rejection');
-  });
-</script>
-<script>
-  (function(){
-    const btn = document.getElementById('btn-join');
-    if (!btn) return;
-    btn.addEventListener('click', function(){
-      try {
-        const access = (document.getElementById('join-code') || {}).value || '';
-        const teamName = (document.getElementById('join-name') || {}).value || '';
-        const pad = (document.getElementById('padron-input') || {}).value || '{{ padron or "" }}';
-        const curso = (document.getElementById('curso-select') || {}).value || '{{ curso_id or "" }}';
-        if (!access) { alert('Ingresá el código de acceso'); return; }
-        if (!pad || !curso) { alert('Faltan padrón o curso seleccionados'); return; }
-
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '/alumno-join-by-code';
-
-        const fCurso = document.createElement('input'); fCurso.type='hidden'; fCurso.name='curso_id'; fCurso.value = curso; form.appendChild(fCurso);
-        const fPad = document.createElement('input'); fPad.type='hidden'; fPad.name='padron'; fPad.value = pad; form.appendChild(fPad);
-        const fCode = document.createElement('input'); fCode.type='hidden'; fCode.name='access_code'; fCode.value = access; form.appendChild(fCode);
-        const fName = document.createElement('input'); fName.type='hidden'; fName.name='equipo_nombre'; fName.value = teamName; form.appendChild(fName);
-
-        document.body.appendChild(form);
-        form.submit();
-      } catch (err) { reportError(err); throw err; }
-    });
-  })();
-</script>
 
 <div class="modal-overlay hidden" id="modal-leave-confirm">
   <div class="modal">
@@ -268,13 +153,17 @@
       <span class="modal-title">Confirmar abandono</span>
       <button class="modal-close" onclick="closeLeaveModal()">✕</button>
     </div>
+
     <div class="modal-body">
-      <p>¿Estás seguro que querés abandonar este equipo? Esta acción marcará tu salida.</p>
+      <p>¿Estás seguro que querés abandonar este equipo?</p>
     </div>
+
     <div class="modal-footer">
-      <form id="leave-form" method="post" action="/alumno-leave">
-        <input type="hidden" name="curso_id" id="leave-curso-id" value="" />
-        <input type="hidden" name="padron" id="leave-padron" value="" />
+      <form method="post" action="{{ url_for('equipos.alumno_leave') }}">
+        <input type="hidden" name="curso_id" id="leave-curso-id">
+        <input type="hidden" name="padron" id="leave-padron">
+        <input type="hidden" name="equipo_id" id="leave-equipo-id">
+
         <button type="button" class="btn btn-outline" onclick="closeLeaveModal()">Cancelar</button>
         <button type="submit" class="btn btn-danger">Abandonar</button>
       </form>
@@ -282,15 +171,26 @@
   </div>
 </div>
 
+{% endblock %}
+
+{% block extra_js %}
 <script>
-  function openLeaveModal(padron, cursoId){
-    document.getElementById('leave-padron').value = padron;
-    document.getElementById('leave-curso-id').value = cursoId;
-    document.getElementById('modal-leave-confirm').classList.remove('hidden');
-  }
-  function closeLeaveModal(){
-    document.getElementById('modal-leave-confirm').classList.add('hidden');
-  }
+function buscar(){
+const p=document.getElementById('padron-input').value;
+const c=document.getElementById('curso-select').value;
+if(!p||!c){alert('Falta dato');return;}
+window.location.href="{{ url_for('equipos.alumno_equipos') }}?padron="+encodeURIComponent(p)+"&curso_id="+encodeURIComponent(c);
+}
+
+function openLeaveModal(p,c,e){
+document.getElementById('leave-padron').value=p;
+document.getElementById('leave-curso-id').value=c;
+document.getElementById('leave-equipo-id').value=e;
+document.getElementById('modal-leave-confirm').classList.remove('hidden');
+}
+
+function closeLeaveModal(){
+document.getElementById('modal-leave-confirm').classList.add('hidden');
+}
 </script>
-</body>
-</html>
+{% endblock %}
