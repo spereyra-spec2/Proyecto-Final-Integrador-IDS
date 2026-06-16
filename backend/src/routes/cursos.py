@@ -120,11 +120,11 @@ def reporte_alumnos_pdf(idCurso):
     )
 
 #--------------------------------------------------------------------------------------------------------
-# GET /api/cursos/{idCurso}/reporte-estadisticias
+# GET /api/cursos/{id_curso}/reporte-estadisticas
 # Genera y exporta un documento PDF con el porcentaje de aprobados de un curso
 #--------------------------------------------------------------------------------------------------------
-@cursos_bp.route('/<int:idCurso>/reporte-estadisticas', methods=['GET'])
-def reporte_rendimiento_general_pdf(idCurso):
+@cursos_bp.route('/<int:id_curso>/reporte-estadisticas', methods=['GET'])
+def reporte_rendimiento_general_pdf(id_curso):
     
     tiene_acceso = funciones.evaluar_acceso_seguro(request.headers, ["Docente"])
     if not tiene_acceso:
@@ -154,10 +154,10 @@ def reporte_rendimiento_general_pdf(idCurso):
     try:
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
-        cursor.execute(query, (idCurso, idCurso))
+        cursor.execute(query, (id_curso, id_curso))
         alumnos_promedios = cursor.fetchall()
         
-        funciones.registrar_auditoria(cursor, padron_operador, f"Exportó PDF del índice de aprobación del curso {idCurso}")
+        funciones.registrar_auditoria(cursor, padron_operador, f"Exportó PDF del índice de aprobación del curso {id_curso}")
         conn.commit()
     except Exception as e:
         return errors.server_error(str(e))
@@ -185,7 +185,7 @@ def reporte_rendimiento_general_pdf(idCurso):
     styles = getSampleStyleSheet()
     
     story.append(Paragraph("<b>ACADEMIQ - REPORTE DE RENDIMIENTO CONSOLIDADO</b>", styles['Heading1']))
-    story.append(Paragraph(f"Curso ID: {idCurso} | Vista de Calificaciones Finales Estimadas", styles['Normal']))
+    story.append(Paragraph(f"Curso ID: {id_curso} | Vista de Calificaciones Finales Estimadas", styles['Normal']))
     story.append(Spacer(1, 15))
     
     story.append(Paragraph(f"<b>Alumnos Evaluados:</b> {total_alumnos}", styles['Normal']))
@@ -231,7 +231,7 @@ def reporte_rendimiento_general_pdf(idCurso):
         buffer, 
         mimetype='application/pdf', 
         as_attachment=True, 
-        download_name=f'rendimiento_general_curso_{idCurso}.pdf'
+        download_name=f'rendimiento_general_curso_{id_curso}.pdf'
     )
 
 #--------------------------------------------------------------------------------------------------------

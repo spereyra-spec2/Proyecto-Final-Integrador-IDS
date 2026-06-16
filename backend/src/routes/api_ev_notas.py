@@ -130,14 +130,24 @@ def guardar_nota():
             
             if validar_equipo(grupal) == None:
                 return not_found(f"No se encontró el equipo con id {grupal}.")
+            
+            query_aux = "SELECT puntaje FROM Notas WHERE Equipos_idEquipos = %s"
 
-            query_g = """
-                INSERT INTO Notas (puntaje, Evaluaciones_idEvaluacion, Equipos_idEquipos)
-                VALUES (%s, %s, %s)
-            """
-            cursor.execute(query_g, (nota, id_ev, grupal))
-            conn.commit()
-            return jsonify({"message": "Nota grupal agregada!"}), 201
+            cursor.execute(query_aux, grupal)
+
+            shield = cursor.fetchone()
+            if not shield:
+
+                query_g = """
+                    INSERT INTO Notas (puntaje, Evaluaciones_idEvaluacion, Equipos_idEquipos)
+                    VALUES (%s, %s, %s)
+                """
+                cursor.execute(query_g, (nota, id_ev, grupal))
+                conn.commit()
+                return jsonify({"message": "Nota grupal agregada!"}), 201
+            else:
+                return jsonify({"message": "La nota ya ha sido cargada"}), 200
+
         else:
 
             if validar_id(padron) == None:
@@ -146,13 +156,26 @@ def guardar_nota():
             if not valido_numero(padron):
                 return jsonify(bad_request("El padrón debe ser un número entero positivo.")), 400
 
-            query_i = """
+            query_aux = "SELECT puntaje FROM Notas WHERE Usuarios_padron = %s"
+
+            cursor.execute(query_aux, padron)
+
+            shield = cursor.fetchone()
+            if not shield:
+
+                query_i = """
                 INSERT INTO Notas (puntaje, Evaluaciones_idEvaluacion, Usuarios_padron)
                 VALUES (%s, %s, %s)
-            """
-            cursor.execute(query_i, (nota, id_ev, padron))
-            conn.commit()
-            return jsonify({"message": "Nota individual agregada!"}), 201
+                """
+            
+                cursor.execute(query_i, (nota, id_ev, padron))
+                conn.commit()
+                return jsonify({"message": "Nota de alumno agregada!"}), 201
+        
+            else:
+                return jsonify({"message": "La nota ya ha sido cargada"}), 200
+            
+            
         
     except mysql.connector.Error as e:
         return jsonify(server_error("Error al obtener información de la base de datos: " + str(e))), 500
