@@ -7,6 +7,8 @@ import src.utils.funciones as funciones
 
 cursos_bp = Blueprint('cursos', __name__)
 
+
+
 #--------------------------------------------------------------------------------------------------------
 # GET /api/cursos
 # Lista todos los cursos asignados al profesor logueado
@@ -215,6 +217,7 @@ def patch_curso(idCurso):
     finally:
         if cursor: cursor.close()
         if conn: conn.close()
+
 
 
 @cursos_bp.route('/<int:idCurso>/evaluaciones', methods=['POST'])
