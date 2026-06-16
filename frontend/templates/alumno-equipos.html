@@ -54,8 +54,12 @@
       <div class="card-header"><span class="card-title">Mis equipos</span></div>
 
       <div class="card-body">
+
+        <h3 style="margin-bottom:10px">🟢 Equipos activos</h3>
+
         {% if equipos_del_alumno %}
           {% for equipo in equipos_del_alumno %}
+
             <div class="team-card">
               <h4 style="margin:0 0 6px 0">Equipo: <strong>{{ equipo.nombre }}</strong></h4>
               <div class="team-meta"> Cupo: {{ equipo.active_count }} / {{ equipo.cupo if equipo.cupo else '∞' }} </div>
@@ -100,6 +104,7 @@
 
       </div>
     </div>
+
 
     <div class="card" style="margin-bottom:20px">
       <div class="card-header"><span class="card-title">Crear equipo</span></div>

@@ -22,11 +22,13 @@ def alumno_equipos():
     equipos_del_alumno = []
     busqueda_realizada = False
 
-    try:
-        curso_id = utils.validar_curso_id(curso_id)
-        padron = utils.validar_padron(padron)
-    except ValueError as error:
-        return str(error), 400
+    if padron and curso_id:
+        try:
+            curso_id = utils.validar_curso_id(curso_id)
+            padron = utils.validar_padron(padron)
+            busqueda_realizada = True
+        except ValueError as error:
+            return str(error), 400
 
     if padron and curso_id:
         busqueda_realizada = True
@@ -43,10 +45,7 @@ def alumno_equipos():
 
     return render_template('alumno-equipos.html', cursos = cursos, padron = padron, curso_id = curso_id, 
                            equipos_del_alumno = equipos_del_alumno, busqueda_realizada = busqueda_realizada)
-                           
 
-
-    
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 @equipos_bp.route('/grupo_baja', methods=['POST'])
@@ -131,16 +130,11 @@ def unirse_equipo():
 
     equipo_id = equipo_encontrado["idEquipos"]
 
-    body = {
-        "alumno_padron": padron,
-        "activo": 1,
-        "equipo_id": equipo_id
-    }
+    body = {"alumno_padron": padron,
+            "activo": 1,
+            "equipo_id": equipo_id}
 
+        
     actualizar_equipo(curso_id, padron, body)
 
-    return redirect(url_for(
-        'equipos.alumno_equipos',
-        padron=padron,
-        curso_id=curso_id
-    ))
+    return redirect(url_for('equipos.alumno_equipos', padron=padron, curso_id=curso_id))
