@@ -71,3 +71,4 @@ def validar_equipo_id(equipo_id):
         return eid
     except Exception:
         raise ValueError('El equipo_id debe ser un número entero válido.')
+

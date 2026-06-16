@@ -33,11 +33,12 @@ def formulario_asistencia():
 def registrar_asistencia():
     padron = request.form.get('padron')
     token = request.form.get('token')
+    curso = request.form.get('curso')
 
 
     respuesta = requests.post(
         f"{BACK_URL}/api/asistencia/confirmar-asistencia",
-        json={"padron":padron, "token": token}
+        json={"padron":padron, "token": token, "curso": curso}
     )
 
     datos = respuesta.json()

@@ -33,7 +33,6 @@ CREATE TABLE IF NOT EXISTS Asistencias (
     asistio TINYINT DEFAULT 0,
     fecha DATETIME NOT NULL,
     justificado TINYINT DEFAULT 0,
-    hash_qr VARCHAR(512),
     Usuarios_padron INT NOT NULL,
     Curso_idCurso INT NOT NULL,
     FOREIGN KEY (Usuarios_padron) REFERENCES Usuarios(padron) ON DELETE CASCADE,

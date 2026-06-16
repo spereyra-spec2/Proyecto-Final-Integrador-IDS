@@ -356,3 +356,4 @@ def get_asistencia_padron(padron):
     cursor.close()
     con.close()
     return asistencia
+
