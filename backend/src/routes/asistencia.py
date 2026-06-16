@@ -7,6 +7,7 @@ from src.utils.errors import forbidden, error_response, bad_request, not_found, 
 import config
 from datetime import date,datetime
 import os
+import src.utils.seguridad as seguridad
 
 serializer = URLSafeTimedSerializer(config.SECRET_KEY)
 
@@ -16,8 +17,8 @@ asistencia_bp = Blueprint("asistencia",__name__)
 def asistencia():
 
     try:
-        #if not(verificar_token(request.headers, roles_permitidos=["Docente"])):
-          #     return forbidden()     
+        if not seguridad.verificar_token(request.headers, ["Docente"]):
+            return forbidden()   
         asistencia = get_asistencia()
         if len(asistencia) == 0:
             return "",204
@@ -31,9 +32,8 @@ def asistencia():
 def asistencia_id(padron):
 
     try:
-        #if not(verificar_token(request.headers, roles_permitidos=["Docente"])):
-         #      return forbidden()
-
+        if not seguridad.verificar_token(request.headers, ["Docente"]):
+            return forbidden()
         if not(validar_padron(padron)):
             return bad_request("Padron invalido")
         asistencia = get_asistencia_padron(padron)
