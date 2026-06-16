@@ -275,7 +275,6 @@ def get_alumnos(idCurso):
         params = [idCurso]
         
         if estado_filtro is not None:
-            query += " AND chu.Estado = %s"
             params.append(int(estado_filtro))
             
         cursor.execute(query, params)

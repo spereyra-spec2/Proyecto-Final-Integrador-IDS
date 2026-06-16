@@ -7,6 +7,7 @@ from src.routes.equipos import equipos_bp
 from src.routes.alumnos import alumnos_bp
 from src.routes.cursos import cursos_bp
 from src.routes.asistencia import asistencia_bp
+from src.routes.evaluaciones import evaluaciones_bp
 from src.db.init_db import init_db
 
 from mail import mail
@@ -32,6 +33,7 @@ app.register_blueprint(alumnos_bp, url_prefix='/api/cursos/<int:idCurso>/alumnos
 app.register_blueprint(cursos_bp, url_prefix='/api/cursos')
 app.register_blueprint(equipos_bp, url_prefix='/api/cursos')
 app.register_blueprint(asistencia_bp, url_prefix='/api/asistencia')
+app.register_blueprint(evaluaciones_bp, url_prefix='/api/cursos/<int:idCurso>/evaluaciones')
 
 mail.init_app(app)
 
