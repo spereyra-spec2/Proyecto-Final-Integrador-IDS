@@ -1,6 +1,6 @@
 {% extends 'base_profesores.html' %}
 {% block extra_css %}
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/evaluaciones.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}" />
 {% endblock %}
 {% block title %}Evaluaciones — AcademiQ{% endblock %}
 
@@ -54,6 +54,12 @@ Cuatrimestre: {{ curso.cuatrimestre }}{%endblock%}
               <a href="{{ url_for('profesor.ver_nota', curso_id=eval.Curso_idCurso, id_ev=eval.idEvaluacion) }}" class="btn btn-sm btn-outline">
                 📝 Ver nota
               </a>
+              {% if 'Trabajo Práctico' in eval.tipo or 'TP' in eval.tipo %}
+              <a class="btn btn-sm btn-outline">
+                 🤝 Ver equipos
+              </a>
+              {% endif %}
+
             </div>
           </div>
         </div>
