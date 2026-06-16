@@ -132,10 +132,7 @@ def reporte_rendimiento_general_pdf(idCurso):
         
     padron_operador = funciones.obtener_padron_desde_headers(request.headers)
 
-    orden = request.args.get('orden', 'apellido')
-    filtro = request.args.get('filtro', 'todos')
-
-    # En base a todas lsa evaluaciones que tuvo un alumno, obtengo el promedio de esas.
+    # Traigo el promedio obtenido de todas las evaluaciones solamente si el alumno esta activo
     query = """
         SELECT 
             u.padron, 
@@ -145,18 +142,10 @@ def reporte_rendimiento_general_pdf(idCurso):
         INNER JOIN Curso_has_Usuarios chu ON u.padron = chu.Usuarios_padron
         INNER JOIN Notas n ON u.padron = n.Usuarios_padron
         INNER JOIN Evaluaciones e ON n.Evaluaciones_idEvaluacion = e.idEvaluacion
-        WHERE chu.Curso_idCurso = %s AND e.Curso_idCurso = %s
+        WHERE chu.Curso_idCurso = %s AND e.Curso_idCurso = %s AND chu.Estado = 1
+        GROUP BY u.padron, u.nombres
+        ORDER BY u.nombres ASC
     """
-    
-    if filtro == 'activos':
-        query += " AND chu.Estado = 1"
-        
-    query += " GROUP BY u.padron, u.nombres"
-    
-    query += " ORDER BY u.nombres ASC"
-    if orden == 'padron':
-        query += " ORDER BY u.padron ASC"
-
     
     alumnos_promedios = []
     conn = None
@@ -168,7 +157,7 @@ def reporte_rendimiento_general_pdf(idCurso):
         cursor.execute(query, (idCurso, idCurso))
         alumnos_promedios = cursor.fetchall()
         
-        funciones.registrar_auditoria(cursor, padron_operador, f"Exportó PDF del índice de aprobación del curso {idCurso} (Filtro: {filtro}, Orden: {orden})")
+        funciones.registrar_auditoria(cursor, padron_operador, f"Exportó PDF del índice de aprobación del curso {idCurso}")
         conn.commit()
     except Exception as e:
         return errors.server_error(str(e))
@@ -179,35 +168,30 @@ def reporte_rendimiento_general_pdf(idCurso):
     total_alumnos = len(alumnos_promedios)
     aprobados = 0
     
-    # Asumo que para aprobar se deberá de tener un promedio >= 4
+    # Asumo que para aprobar se deberá tener un promedio >= 4
     for alu in alumnos_promedios:
         if float(alu['promedio_final']) >= 4.0:
             aprobados += 1
             
     desaprobados = total_alumnos - aprobados
-    porcentaje_aprobacion = 0
+    porcentaje_de_aprobados = 0
     
     if total_alumnos > 0:
-        porcentaje_aprobacion = round((aprobados / total_alumnos) * 100)
+        porcentaje_de_aprobados = round((aprobados / total_alumnos) * 100)
 
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=40, leftMargin=40, topMargin=40, bottomMargin=40)
     story = []
     styles = getSampleStyleSheet()
     
-    texto_filtro = "Solo Alumnos Activos" if filtro == 'activos' else "Todos los inscriptos (Incluye abandonos)"
-    texto_orden = "Alfabético" if orden == 'apellido' else "Por Número de Padrón"
-
     story.append(Paragraph("<b>ACADEMIQ - REPORTE DE RENDIMIENTO CONSOLIDADO</b>", styles['Heading1']))
     story.append(Paragraph(f"Curso ID: {idCurso} | Vista de Calificaciones Finales Estimadas", styles['Normal']))
-    story.append(Spacer(1, 10))
-    story.append(Paragraph(f"<b>Criterios aplicados:</b> {texto_filtro} | Orden: {texto_orden}", styles['Normal']))
     story.append(Spacer(1, 15))
     
     story.append(Paragraph(f"<b>Alumnos Evaluados:</b> {total_alumnos}", styles['Normal']))
     story.append(Paragraph(f"<b>Alumnos que Promocionan/Aprueban (Nota >= 4.0):</b> {aprobados}", styles['Normal']))
     story.append(Paragraph(f"<b>Alumnos con Cursada Desaprobada (Nota < 4.0):</b> {desaprobados}", styles['Normal']))
-    story.append(Paragraph(f"<b>Porcentaje General de Aprobación de la Comisión:</b> {porcentaje_aprobacion}%", styles['Normal']))
+    story.append(Paragraph(f"<b>Porcentaje General de Aprobación de la Comisión:</b> {porcentaje_de_aprobados}%", styles['Normal']))
     story.append(Spacer(1, 20))
     
     if total_alumnos > 0:
@@ -238,7 +222,7 @@ def reporte_rendimiento_general_pdf(idCurso):
         ]))
         story.append(tabla_pdf)
     else:
-        story.append(Paragraph("<i>No se encontraron registros de notas para generar el listado con los filtros seleccionados.</i>", styles['Normal']))
+        story.append(Paragraph("<i>No se encontraron registros de notas para generar el listado.</i>", styles['Normal']))
 
     doc.build(story)
     buffer.seek(0)
