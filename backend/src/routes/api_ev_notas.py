@@ -14,8 +14,8 @@ def obtener_nota():
 
     padron = request.args.get('padron', type=int)
     id_equipo = request.args.get('id_equipo', type=int)
-    curso_id = request.args.get('curso_id')
-    id_evaluacion = request.args.get('id_ev')
+    curso_id = request.args.get('curso_id', type=int)
+    id_evaluacion = request.args.get('id_ev', type=int)
 
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
@@ -131,11 +131,11 @@ def guardar_nota():
             if validar_equipo(grupal) == None:
                 return not_found(f"No se encontró el equipo con id {grupal}.")
             
-            query_aux = "SELECT puntaje FROM Notas WHERE Equipos_idEquipos = %s"
+            query_aux = "SELECT puntaje FROM Notas WHERE Equipos_idEquipos = %s AND Evaluaciones_idEvaluacion = %s"
 
-            cursor.execute(query_aux, grupal)
-
+            cursor.execute(query_aux, (grupal, id_ev))
             shield = cursor.fetchone()
+            #Si no tiene nota, la cargaremos
             if not shield:
 
                 query_g = """
@@ -156,11 +156,11 @@ def guardar_nota():
             if not valido_numero(padron):
                 return jsonify(bad_request("El padrón debe ser un número entero positivo.")), 400
 
-            query_aux = "SELECT puntaje FROM Notas WHERE Usuarios_padron = %s"
+            query_aux = "SELECT puntaje FROM Notas WHERE Usuarios_padron = %s AND Evaluaciones_idEvaluacion = %s"
 
-            cursor.execute(query_aux, padron)
-
+            cursor.execute(query_aux, (padron, id_ev))
             shield = cursor.fetchone()
+            #Si no tiene nota, la cargaremos
             if not shield:
 
                 query_i = """
