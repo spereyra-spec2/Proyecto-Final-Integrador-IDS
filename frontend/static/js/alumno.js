@@ -5,7 +5,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const sel = document.getElementById('curso-select');
     const inputPadron = document.getElementById('padron-input');
 
-    // Recuperar datos guardados si existen
     const savedCurso = localStorage.getItem('alumno_curso');
     if (savedCurso && sel) {
         sel.value = savedCurso;

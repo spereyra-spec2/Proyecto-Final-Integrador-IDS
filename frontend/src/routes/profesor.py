@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, render_template, request, redirect, flash, session, url_for
+from flask import Blueprint, jsonify, render_template, request, redirect, flash, session, url_for, Response
 from src.utils import utils as utils
 from src.services import cursos as api_cursos
 from src.services import alumnos as api_alumnos
@@ -26,11 +26,40 @@ def dashboard():
         flash("Por favor, iniciá sesión para acceder al panel.", "error")
         return redirect(url_for('auth.login'))
         
-    # GET /api/cursos para rellenar las métricas y tablas del dashboard
     resultado = api_cursos.obtener_cursos(usuario['token'])
     cursos_lista = resultado.get('cursos', []) if resultado.get('ok') else []
     
     return render_template('profesor-dashboard.html', cursos=cursos_lista)
+
+#-------------------------------------------------------------------------------------------------------
+@profesor_bp.route('/curso/<int:id_curso>/exportar_alumnos_pdf', methods=['GET'])
+def exportar_alumnos_pdf(id_curso):
+    usuario = utils.verificar_docente_autenticado()
+    if not usuario:
+        flash("Por favor, iniciá sesión para acceder a esta función.", "error")
+        return redirect(url_for('auth.login'))
+        
+    ordenar_por = request.args.get('ordenar_por', 'apellido')
+    filtrar_activos = request.args.get('filtrar_activos', 'todos')
+    
+    response_api = api_alumnos.descargar_reporte_alumnos_pdf(
+        token=usuario['token'],
+        id_curso=id_curso,
+        ordenar_por=ordenar_por,
+        filtrar_activos=filtrar_activos
+    )
+    
+    if not response_api or response_api.status_code != 200:
+        flash("No se pudo generar el reporte de alumnos en formato PDF.", "error")
+        return redirect(url_for('profesor.dashboard'))
+        
+    return Response(
+        response_api.content,
+        headers={
+            'Content-Type': 'application/pdf',
+            'Content-Disposition': f'attachment; filename=alumnos_curso_{id_curso}.pdf'
+        }
+    )
 #---------------------------------------------------------------------------------------------------------
 
 # MODULO DE GESTIÓN DE CURSOS (COMISIONES)
