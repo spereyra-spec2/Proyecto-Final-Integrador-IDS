@@ -16,6 +16,7 @@ from src.routes.auth import auth_bp
 from src.routes.profesor import profesor_bp
 from src.routes.alumno import alumno_bp
 from src.routes.asistencias import asistencias_bp
+from src.routes.equipos import equipos_bp
 
 app = Flask(
     __name__,
@@ -34,6 +35,7 @@ app.register_blueprint(auth_bp, url_prefix="/auth") #sigo ejemplo del repo de c√
 app.register_blueprint(profesor_bp, url_prefix="/profesor")
 app.register_blueprint(alumno_bp, url_prefix="/alumno")
 app.register_blueprint(asistencias_bp, url_prefix='/asistencia')
+app.register_blueprint(equipos_bp, url_prefix='/equipos')
 
 
 

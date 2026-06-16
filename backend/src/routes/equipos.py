@@ -162,92 +162,133 @@ def actualizar_equipo(curso_id, usuario_padron):
         return bad_request(str(e))
 
     data = request.get_json(silent=True)
-    if not data:
-        return bad_request("El body debe ser JSON")
 
-    if not isinstance(data, dict):
-        return bad_request("El body JSON debe ser un objeto.")
+    if not data or not isinstance(data, dict):
+        return bad_request("El body debe ser un JSON válido")
 
-    alumno_padron = data.get("alumno_padron", data.get("padron"))
+    alumno_padron = data.get("alumno_padron")
     activo = data.get("activo")
+    equipo_id = data.get("equipo_id")
     evaluacion_id = data.get("evaluacion_id", data.get("tp_id"))
 
-    if alumno_padron is None and activo is not None:
-        return bad_request("El body debe incluir 'alumno_padron' para cambiar el estado de un alumno.")
-
-    if alumno_padron is not None and (not isinstance(alumno_padron, int) or alumno_padron <= 0):
-        return bad_request("El padrón del alumno debe ser un número entero positivo.")
-
-    if activo is not None and activo not in (0, 1):
-        return bad_request("El campo 'activo' debe ser 0 o 1.")
-
-    if alumno_padron is not None and activo is None:
-        return bad_request("El body debe incluir 'activo' para cambiar el estado de un alumno.")
-
-    if evaluacion_id is not None and (not isinstance(evaluacion_id, int) or evaluacion_id <= 0):
-        return bad_request("El ID de la evaluación/TP debe ser un número entero positivo.")
+    if equipo_id is None or not isinstance(equipo_id, int) or equipo_id <= 0:
+        return bad_request("Debe enviarse un equipo_id válido")
 
     if alumno_padron is None and evaluacion_id is None:
-        return bad_request("El body debe incluir un alumno para agregar/remover o una evaluación/TP.")
+        return bad_request("Debe enviarse alumno o evaluación")
+
+    if alumno_padron is not None and (not isinstance(alumno_padron, int) or alumno_padron <= 0):
+        return bad_request("Padrón inválido")
+
+    if activo is not None and activo not in (0, 1):
+        return bad_request("Activo debe ser 0 o 1")
 
     try:
-        if alumno_padron is not None and activo == 1:
-            conn_chk = get_connection()
-            cur_chk = conn_chk.cursor(dictionary=True)
-            cur_chk.execute(
-                """
-                SELECT
-                    equipo.idEquipos AS id
-                FROM Equipos AS equipo
-                INNER JOIN Usuarios_has_Equipos AS user_has_equipo
-                    ON user_has_equipo.Equipos_idEquipos = equipo.idEquipos
-                WHERE equipo.Curso_idCurso = %s
-                  AND user_has_equipo.Usuarios_padron = %s
-                  AND COALESCE(user_has_equipo.activo, 1) = 1
-                LIMIT 1
-                """,
-                (curso_id, usuario_padron),
-            )
-            equipo_row = cur_chk.fetchone()
-            cur_chk.close(); conn_chk.close()
-            if equipo_row is None:
-                return not_found("No existe un equipo activo para ese curso y padrón.")
-
-            equipo_id = equipo_row.get('id')
-
-            conn_c = get_connection()
-            cur_c = conn_c.cursor(dictionary=True)
-            cur_c.execute("""
-                SELECT e.cupo AS cupo, SUM(COALESCE(uhe.activo,0)) AS active_count
-                FROM Equipos e
-                LEFT JOIN Usuarios_has_Equipos uhe ON e.idEquipos = uhe.Equipos_idEquipos
-                WHERE e.idEquipos = %s
-                GROUP BY e.idEquipos
-            """, (equipo_id,))
-            seat_info = cur_c.fetchone()
-            cur_c.close(); conn_c.close()
-            if seat_info:
-                cupo_val = seat_info.get('cupo')
-                active_count = int(seat_info.get('active_count') or 0)
-                if cupo_val is not None and active_count >= int(cupo_val):
-                    return conflict('El equipo ya alcanzó su cupo máximo')
-
-        equipo = patch_equipo(
-            curso_id,
-            usuario_padron,
-            {
-                "alumno_padron": alumno_padron,
-                "activo": activo,
-                "evaluacion_id": evaluacion_id,
-            },
+        conn = get_connection()
+        cur = conn.cursor(dictionary=True)
+        cur.execute(
+            """
+            SELECT idEquipos
+            FROM Equipos
+            WHERE idEquipos = %s AND Curso_idCurso = %s
+            """,
+            (equipo_id, curso_id),
         )
-        if equipo is None:
-            return not_found("No existe un equipo activo para ese curso y padrón.")
+
+        if cur.fetchone() is None:
+            cur.close()
+            conn.close()
+            return not_found("Equipo inválido para este curso")
+
+        if alumno_padron is not None:
+
+            if activo == 0:
+                cur.execute(
+                    """
+                    UPDATE Usuarios_has_Equipos
+                    SET activo = 0,
+                        activo_hasta = NOW()
+                    WHERE Usuarios_padron = %s
+                      AND Equipos_idEquipos = %s
+                      AND activo = 1
+                    """,
+                    (alumno_padron, equipo_id),
+                )
+
+            elif activo == 1:
+                cur.execute(
+                    """
+                    UPDATE Usuarios_has_Equipos
+                    SET activo = 0,
+                        activo_hasta = NOW()
+                    WHERE Usuarios_padron = %s
+                      AND activo = 1
+                      AND Equipos_idEquipos <> %s
+                    """,
+                    (alumno_padron, equipo_id),
+                )
+
+                cur.execute(
+                    """
+                    UPDATE Usuarios_has_Equipos
+                    SET activo = 1,
+                        activo_desde = COALESCE(activo_desde, NOW()),
+                        activo_hasta = NULL
+                    WHERE Usuarios_padron = %s
+                      AND Equipos_idEquipos = %s
+                    """,
+                    (alumno_padron, equipo_id),
+                )
+
+                if cur.rowcount == 0:
+                    cur.execute(
+                        """
+                        INSERT INTO Usuarios_has_Equipos
+                        (Usuarios_padron, Equipos_idEquipos, activo, activo_desde)
+                        VALUES (%s, %s, 1, NOW())
+                        """,
+                        (alumno_padron, equipo_id),
+                    )
+
+        if evaluacion_id is not None:
+            cur.execute(
+                """
+                UPDATE Equipos_has_Evaluaciones
+                SET Evaluaciones_idEvaluacion = %s
+                WHERE Equipos_idEquipos = %s
+                """,
+                (evaluacion_id, equipo_id),
+            )
+
+            if cur.rowcount == 0:
+                cur.execute(
+                    """
+                    INSERT INTO Equipos_has_Evaluaciones
+                    (Equipos_idEquipos, Evaluaciones_idEvaluacion)
+                    VALUES (%s, %s)
+                    """,
+                    (equipo_id, evaluacion_id),
+                )
+
+        conn.commit()
+        cur.execute(
+            """
+            SELECT idEquipos, nombre, created_at, Curso_idCurso AS curso_id
+            FROM Equipos
+            WHERE idEquipos = %s
+            """,
+            (equipo_id,),
+        )
+
+        equipo = cur.fetchone()
+
+        cur.close()
+        conn.close()
+
         return jsonify(equipo), 200
-    except ValueError as error:
-        return bad_request(str(error))
-    except Exception as error:
-        return server_error(error)
+
+    except Exception as e:
+        return server_error(str(e))
 
 
 @equipos_bp.route("/<int:curso_id>/equipos/<int:usuario_padron>", methods=["DELETE"])
