@@ -2,6 +2,17 @@ import requests
 from src.utils.constants import API_BASE_URL
 from .auth import respuesta_error, error_conexion
 
+def descargar_reporte_alumnos_pdf(token, id_curso, ordenar_por, filtrar_activos):
+    url = f"{API_BASE_URL}/cursos/{id_curso}/reporte-alumnos"
+    headers = {"Authorization": f"Bearer {token}"}
+    params = {
+        "ordenar_por": ordenar_por,
+        "filtrar_activos": filtrar_activos
+    }
+    try:
+        return requests.get(url, headers=headers, params=params, stream=True)
+    except requests.exceptions.RequestException:
+        return None
 #---------------------------------------------------------------------------------------------------------
 
 def actualizar_alumno(token, id_curso, padron, nombres, mail, estado):

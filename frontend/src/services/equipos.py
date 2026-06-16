@@ -1,6 +1,21 @@
 import requests
+from src.utils.constants import BACKEND_URL_EQUIPOS as BACKEND_URL
 
-BACKEND_URL = "http://localhost:3006/api/cursos"
+def encontrar_equipos_del_alumno_activo(equipos, padron):
+    res = []
+    for equipo in equipos:
+        integrantes = equipo.get('integrantes') or []
+        for integrante in integrantes:
+            pad = integrante.get('padron') if isinstance(integrante, dict) else integrante
+            activo = integrante.get('activo') if isinstance(integrante, dict) else 1
+            try:
+                if int(pad) == int(padron) and int(activo) == 1:
+                    res.append(equipo)
+                    break
+            except Exception:
+                continue
+
+    return res
 
 def listar_equipos(curso_id):
     response = requests.get(f"{BACKEND_URL}/{curso_id}/equipos")
@@ -16,6 +31,9 @@ def crear_equipo(curso_id, body):
 
     if "nombre" not in body or "padrones" not in body:
         raise ValueError("Faltan campos obligatorios ('nombre' o 'padrones')")
+
+    if not isinstance(body["padrones"], list):
+        raise ValueError("'padrones' debe ser una lista")
 
     response = requests.post(f"{BACKEND_URL}/{curso_id}/equipos", json=body)
     if response.status_code == 201:
@@ -62,15 +80,21 @@ def eliminar_equipo(curso_id, usuarios_padron):
     if response.status_code == 200:
         return True
     return False
-'''
-def actualizar_equipo(curso_id, usuarios_padron, body):
-    if body is None:
-        raise ValueError("Debe enviarse un JSON")
 
-    equipo = db_patch_equipo(curso_id,usuarios_padron,body)
-    return equipo
+def filtrar_equipos_por_nombre_y_codigo(equipos, nombre, access_code):
+    nombre = (nombre or "").strip().lower()
+    access_code = (access_code or "").strip()
 
+    for eq in equipos:
+        eq_nombre = (eq.get("nombre") or "").strip().lower()
+        eq_code = (eq.get("access_code") or "").strip()
 
-def eliminar_equipo(curso_id, usuarios_padron):
-    return db_delete_equipo(curso_id, usuarios_padron)
-'''
+        if eq_nombre == nombre:
+            # si tiene código, lo valida
+            if eq_code not in ("", None):
+                if eq_code != access_code:
+                    return None
+            return eq
+
+    return None
+#---------------------------------------------------------------------------------------------
