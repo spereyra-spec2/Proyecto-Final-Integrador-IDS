@@ -43,6 +43,31 @@
       </div>
     </div>
 
+    <!-- Botón desplegable, reporte de rendimiento -->
+    <div style="display: flex; justify-content: flex-end; margin-bottom: 20px; margin-top: -10px;">
+      <div class="custom-dropdown" id="dropdown-reporte">
+        <button type="button" class="btn btn-outline dropdown-toggle-btn">
+          <span>📊 Reporte de Rendimiento PDF</span>
+          <span class="dropdown-arrow-icon">▼</span>
+        </button>
+        <ul class="dropdown-menu-custom" style="min-width: 240px;">
+          {% if cursos %}
+            {% for curso in cursos %}
+              <li>
+                <a class="dropdown-item-custom descargar-reporte-directo" 
+                   href="#" 
+                   data-id="{{ curso.idCurso }}">
+                  📚 {{ curso.nombre }}
+                </a>
+              </li>
+            {% endfor %}
+          {% else %}
+            <li><span class="dropdown-item-custom" style="color: var(--color-text-muted);">No hay cursos activos</span></li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+
     <!-- Stats -->
     <div class="grid-4" style="margin-bottom:28px">
       <div class="stat-card">

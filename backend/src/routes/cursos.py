@@ -119,6 +119,120 @@ def reporte_alumnos_pdf(idCurso):
         download_name=f'reporte_alumnos_curso_{idCurso}.pdf'
     )
 
+#--------------------------------------------------------------------------------------------------------
+# GET /api/cursos/{idCurso}/reporte-estadisticias
+# Genera y exporta un documento PDF con el porcentaje de aprobados de un curso
+#--------------------------------------------------------------------------------------------------------
+@cursos_bp.route('/<int:idCurso>/reporte-estadisticas', methods=['GET'])
+def reporte_rendimiento_general_pdf(idCurso):
+    
+    tiene_acceso = funciones.evaluar_acceso_seguro(request.headers, ["Docente"])
+    if not tiene_acceso:
+        return errors.acceso_denegado1("No tiene permisos o token inválido")
+        
+    padron_operador = funciones.obtener_padron_desde_headers(request.headers)
+
+    # Traigo el promedio obtenido de todas las evaluaciones solamente si el alumno esta activo
+    query = """
+        SELECT 
+            u.padron, 
+            u.nombres, 
+            AVG(n.puntaje) AS promedio_final
+        FROM Usuarios u
+        INNER JOIN Curso_has_Usuarios chu ON u.padron = chu.Usuarios_padron
+        INNER JOIN Notas n ON u.padron = n.Usuarios_padron
+        INNER JOIN Evaluaciones e ON n.Evaluaciones_idEvaluacion = e.idEvaluacion
+        WHERE chu.Curso_idCurso = %s AND e.Curso_idCurso = %s AND chu.Estado = 1
+        GROUP BY u.padron, u.nombres
+        ORDER BY u.nombres ASC
+    """
+    
+    alumnos_promedios = []
+    conn = None
+    cursor = None
+    
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute(query, (idCurso, idCurso))
+        alumnos_promedios = cursor.fetchall()
+        
+        funciones.registrar_auditoria(cursor, padron_operador, f"Exportó PDF del índice de aprobación del curso {idCurso}")
+        conn.commit()
+    except Exception as e:
+        return errors.server_error(str(e))
+    finally:
+        if cursor: cursor.close()
+        if conn: conn.close()
+
+    total_alumnos = len(alumnos_promedios)
+    aprobados = 0
+    
+    # Asumo que para aprobar se deberá tener un promedio >= 4
+    for alu in alumnos_promedios:
+        if float(alu['promedio_final']) >= 4.0:
+            aprobados += 1
+            
+    desaprobados = total_alumnos - aprobados
+    porcentaje_de_aprobados = 0
+    
+    if total_alumnos > 0:
+        porcentaje_de_aprobados = round((aprobados / total_alumnos) * 100)
+
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=40, leftMargin=40, topMargin=40, bottomMargin=40)
+    story = []
+    styles = getSampleStyleSheet()
+    
+    story.append(Paragraph("<b>ACADEMIQ - REPORTE DE RENDIMIENTO CONSOLIDADO</b>", styles['Heading1']))
+    story.append(Paragraph(f"Curso ID: {idCurso} | Vista de Calificaciones Finales Estimadas", styles['Normal']))
+    story.append(Spacer(1, 15))
+    
+    story.append(Paragraph(f"<b>Alumnos Evaluados:</b> {total_alumnos}", styles['Normal']))
+    story.append(Paragraph(f"<b>Alumnos que Promocionan/Aprueban (Nota >= 4.0):</b> {aprobados}", styles['Normal']))
+    story.append(Paragraph(f"<b>Alumnos con Cursada Desaprobada (Nota < 4.0):</b> {desaprobados}", styles['Normal']))
+    story.append(Paragraph(f"<b>Porcentaje General de Aprobación de la Comisión:</b> {porcentaje_de_aprobados}%", styles['Normal']))
+    story.append(Spacer(1, 20))
+    
+    if total_alumnos > 0:
+        tabla_datos = [["Padrón", "Nombre y Apellido", "Promedio Individual", "Condición Cursada"]]
+        
+        for fila in alumnos_promedios:
+            promedio_num = round(float(fila['promedio_final']), 2)
+            estado_texto = "Aprobado" if promedio_num >= 4.0 else "Desaprobado"
+            tabla_datos.append([
+                str(fila['padron']),
+                fila['nombres'],
+                str(promedio_num),
+                estado_texto
+            ])
+            
+        tabla_pdf = Table(tabla_datos, colWidths=[80, 240, 100, 100])
+        tabla_pdf.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#2d5986")), 
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+            ('TOPPADDING', (0, 0), (-1, 0), 8),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor("#e5e7eb")),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor("#f9fafb")]),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ]))
+        story.append(tabla_pdf)
+    else:
+        story.append(Paragraph("<i>No se encontraron registros de notas para generar el listado.</i>", styles['Normal']))
+
+    doc.build(story)
+    buffer.seek(0)
+    
+    return send_file(
+        buffer, 
+        mimetype='application/pdf', 
+        as_attachment=True, 
+        download_name=f'rendimiento_general_curso_{idCurso}.pdf'
+    )
 
 #--------------------------------------------------------------------------------------------------------
 # GET /api/cursos
