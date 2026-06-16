@@ -1,5 +1,6 @@
 import requests
 from src.utils.constants import BACKEND_URL_EQUIPOS as BACKEND_URL
+from backend.src.db.db import get_connection
 
 def encontrar_equipos_del_alumno_activo(equipos, padron):
     """
@@ -108,9 +109,17 @@ def eliminar_equipo(curso_id, usuarios_padron):
     Elimina un equipo del curso. Devuelve True si el equipo fue eliminado, False en caso contrario.
     """
     response = requests.delete(f"{BACKEND_URL}/{curso_id}/equipos/{usuarios_padron}")
-    if response.status_code == 200:
+
+    if response.status_code in (200, 204):
         return True
-    return False
+
+    try:
+        err = response.json().get('errors', [{}])[0]
+        msg = err.get('description') or err.get('message') or response.text
+    except Exception:
+        msg = response.text
+
+    raise ValueError(msg)
 
 #---------------------------------------------------------------------------------------------
 
