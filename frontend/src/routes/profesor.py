@@ -429,8 +429,6 @@ def ver_nota(curso_id):
         return redirect(url_for('auth.login'))
 
 
-    token = usuario.get('token')
-
     id_ev = request.args.get('id_ev', type=int)
     tipo = request.args.get('tipo')
     id_g = request.args.get('id_g')
@@ -447,7 +445,7 @@ def ver_nota(curso_id):
                                curso=curso)
 
 
-    resultado = api_notas.consultar_nota(curso_id, id_ev, id_g, tipo, token)
+    resultado = api_notas.consultar_nota(curso_id, id_ev, id_g, tipo)
 
     if resultado["codigo"] == 200:
         return render_template('ver_nota.html', 
@@ -695,3 +693,31 @@ def agregar_equipo(curso_id):
         flash(str(error), "error")
 
     return redirect(url_for('profesor.ver_equipos', curso_id=curso_id))
+#---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+@profesor_bp.route('/curso/<int:id_curso>/exportar_equipos_pdf', methods=['GET'])
+def exportar_equipos_pdf(id_curso):
+    usuario = utils.verificar_docente_autenticado()
+    if not usuario:
+        flash("Por favor, iniciá sesión para acceder a esta función.", "error")
+        return redirect(url_for('auth.login'))
+        
+    sin_equipo = request.args.get('sin_equipo', 'excluir')
+    
+    response_api = api_equipos.descargar_reporte_equipos_pdf(
+        token=usuario['token'],
+        id_curso=id_curso,
+        sin_equipo=sin_equipo
+    )
+    
+    if not response_api or response_api.status_code != 200:
+        flash("No se pudo generar el reporte de equipos en formato PDF.", "error")
+        return redirect(url_for('profesor.ver_equipos', curso_id=id_curso))
+        
+    return Response(
+        response_api.content,
+        headers={
+            'Content-Type': 'application/pdf',
+            'Content-Disposition': f'attachment; filename=equipos_curso_{id_curso}.pdf'
+        }
+    )

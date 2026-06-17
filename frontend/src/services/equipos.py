@@ -145,3 +145,12 @@ def filtrar_equipos_por_nombre_y_codigo(equipos, nombre, access_code):
 
     return None
 #---------------------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------
+def descargar_reporte_equipos_pdf(token, id_curso, sin_equipo='excluir'):
+    url = f"{BACKEND_URL}/{id_curso}/reporte-equipos"
+    headers = {"Authorization": f"Bearer {token}"}
+    params = {"sin_equipo": sin_equipo}
+    try:
+        return requests.get(url, headers=headers, params=params, stream=True)
+    except requests.exceptions.RequestException:
+        return None

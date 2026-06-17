@@ -16,12 +16,10 @@ def extraer_error(respuesta, msg_defecto):
 
 #----------------------------------------------------------------------------------------------------
 
-def consultar_nota(curso_id, id_ev, id_g, tipo, token):
+def consultar_nota(curso_id, id_ev, id_g, tipo):
 
     "Consume la API dando como resultado una nota o none en caso de ser false."
     
-    headers = {"Authorization": f"Bearer {token}"}
-
     API = f"{API_BASE_URL}/notas/ver"
     
     query_params = {
@@ -34,7 +32,7 @@ def consultar_nota(curso_id, id_ev, id_g, tipo, token):
         query_params['id_equipo'] = int(id_g)
 
     try:
-        respuesta = requests.get(API, headers=headers ,params=query_params, timeout=10)
+        respuesta = requests.get(API, params=query_params, timeout=10)
         if respuesta.status_code == 200:
             return {"datos": respuesta.json(), "error": None, "codigo": 200}
         else:
@@ -67,7 +65,7 @@ def cargar_nota(curso_id, id_ev, id_g, nota, tipo, token):
         payload['id_equipo'] = int(id_g)
     
     try:
-        respuesta = requests.post(API, headers,json=payload, timeout=10)
+        respuesta = requests.post(API, headers=headers, json=payload, timeout=10)
         if respuesta.status_code in [200, 201]:
             return {"error": None, "codigo": respuesta.status_code}
         else:

@@ -13,11 +13,7 @@ ev_notas_bp=Blueprint('api/notas', __name__)
 
 @ev_notas_bp.route('/ver', methods=['GET'])
 def obtener_nota():
-    tiene_acceso = funciones.evaluar_acceso_seguro(request.headers, ["Docente"])
-
-    if not tiene_acceso:
-        return errors.acceso_denegado1("No tiene permisos o token inválido")
-
+    
     padron = request.args.get('padron', type=int)
     id_equipo = request.args.get('id_equipo', type=int)
     curso_id = request.args.get('curso_id', type=int)
@@ -101,9 +97,6 @@ def guardar_nota():
 
     padron_operador = funciones.obtener_padron_desde_headers(request.headers)
 
-    if not tiene_acceso:
-        return errors.acceso_denegado1("No tiene permisos o token inválido")
-    
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
 

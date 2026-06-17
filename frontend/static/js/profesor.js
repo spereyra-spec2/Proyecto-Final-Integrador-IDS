@@ -110,6 +110,7 @@ window.configurarModalEditar = function(padron, nombres, mail, Estado, idCurso) 
     }
 };
 
+
 document.addEventListener('DOMContentLoaded', function() {
   const modalPdf = document.getElementById('modal-exportar-pdf');
   const inputCursoId = document.getElementById('modal-curso-id');
@@ -210,6 +211,61 @@ document.addEventListener('click', function(e) {
         
         document.querySelectorAll('.dropdown-menu-custom').forEach(menu => {
             menu.classList.remove('show');
+        });
+    }
+});
+
+document.addEventListener('click', function(e) {
+    const itemCursoEquipos = e.target.closest('.btn-abrir-modal-equipos');
+    if (itemCursoEquipos) {
+        e.preventDefault();
+        const idCurso = itemCursoEquipos.getAttribute('data-id');
+        const nombreCurso = itemCursoEquipos.getAttribute('data-nombre');
+
+        const modalEquiposPdf = document.getElementById('modal-exportar-equipos-pdf');
+        const inputEquiposCursoId = document.getElementById('modal-equipos-curso-id');
+        const modalEquiposTitle = modalEquiposPdf ? modalEquiposPdf.querySelector('.modal-title') : null;
+
+        if (inputEquiposCursoId) inputEquiposCursoId.value = idCurso;
+        if (modalEquiposTitle) modalEquiposTitle.innerHTML = `🤝 PDF Equipos — ${nombreCurso}`;
+        if (modalEquiposPdf) modalEquiposPdf.classList.remove('hidden');
+        
+        document.querySelectorAll('.dropdown-menu-custom').forEach(menu => {
+            menu.classList.remove('show');
+        });
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const modalEquiposPdf = document.getElementById('modal-exportar-equipos-pdf');
+    
+    function ocultarModalEquiposPdf() {
+        if (modalEquiposPdf) modalEquiposPdf.classList.add('hidden');
+    }
+    
+    const btnCerrarEquipos = document.getElementById('btn-cerrar-modal-equipos-pdf');
+    const btnCancelarEquipos = document.getElementById('btn-cancelar-modal-equipos-pdf');
+    
+    if (btnCerrarEquipos) btnCerrarEquipos.addEventListener('click', ocultarModalEquiposPdf);
+    if (btnCancelarEquipos) btnCancelarEquipos.addEventListener('click', ocultarModalEquiposPdf);
+    
+    if (modalEquiposPdf) {
+        modalEquiposPdf.addEventListener('click', function(e) {
+            if (e.target === modalEquiposPdf) ocultarModalEquiposPdf();
+        });
+    }
+
+    const btnDescargarEquipos = document.getElementById('btn-confirmar-descarga-equipos-pdf');
+    if (btnDescargarEquipos) {
+        btnDescargarEquipos.addEventListener('click', function() {
+            const inputEquiposCursoId = document.getElementById('modal-equipos-curso-id');
+            const idCurso = inputEquiposCursoId ? inputEquiposCursoId.value : null;
+            const sinEquipo = document.getElementById('select-incluir-sin-equipo').value;
+
+            if (!idCurso) return;
+
+            window.location.href = `/profesor/curso/${idCurso}/exportar_equipos_pdf?sin_equipo=${sinEquipo}`;
+            ocultarModalEquiposPdf();
         });
     }
 });
