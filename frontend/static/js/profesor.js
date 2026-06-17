@@ -188,6 +188,22 @@ document.addEventListener('click', function(e) {
         const id_curso = item_reporte.getAttribute('data-id');
         
         if (id_curso) {
+            window.location.href = `/api/cursos/${id_curso}/reporte-estadisticas`;
+        }
+        
+        document.querySelectorAll('.dropdown-menu-custom').forEach(menu => {
+            menu.classList.remove('show');
+        });
+    }
+});
+
+document.addEventListener('click', function(e) {
+    const item_reporte = e.target.closest('.descargar-reporte-directo');
+    if (item_reporte) {
+        e.preventDefault();
+        const id_curso = item_reporte.getAttribute('data-id');
+        
+        if (id_curso) {
         const urlFinal = `http://127.0.0.1:5000/api/cursos/${id_curso}/reporte-estadisticas`;
         window.location.href = urlFinal;
         }

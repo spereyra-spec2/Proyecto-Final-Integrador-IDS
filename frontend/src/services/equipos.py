@@ -123,6 +123,8 @@ def eliminar_equipo(curso_id, usuarios_padron):
 
 #---------------------------------------------------------------------------------------------
 
+#---------------------------------------------------------------------------------------------
+
 def filtrar_equipos_por_nombre_y_codigo(equipos, nombre, access_code):
     """
     Filtra una lista de equipos por nombre y código de acceso. 

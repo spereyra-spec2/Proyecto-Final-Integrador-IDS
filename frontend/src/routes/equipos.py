@@ -133,6 +133,7 @@ def unirse_equipo():
             "activo": 1,
             "equipo_id": equipo_id}
 
+        
     actualizar_equipo(curso_id, padron, body)
 
     return redirect(url_for('equipos.alumno_equipos', padron=padron, curso_id=curso_id))
