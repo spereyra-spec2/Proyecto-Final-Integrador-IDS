@@ -31,6 +31,8 @@ A diferencia de soluciones monolíticas básicas, este desarrollo aborda de form
 No hay lógica compartida en memoria entre capas; el Frontend es estrictamente un cliente HTTP de la API Backend.
 
 ## Estructura del proyecto
+
+```text
 Proyecto-AcademiQ/
 ├── backend/                            # Capa de lógica de negocio y servicios API (Puerto 5000)
 │   ├── app.py                          # Entry point de la API REST
@@ -78,17 +80,18 @@ Proyecto-AcademiQ/
 │   │   │   ├── equipos.py              # Vistas de conformación grupal por alumnos
 │   │   │   └── profesor.py             # Dashboard del docente, ABMs y reportes PDF
 │   │   └── services/                   # Clientes HTTP encargados de delegar hacia la API
-│   │       ├── alumnos.py              # Consumo de rutas de alumnos y CSV multipart
-│   │       ├── auth.py                 # Negociación de sesiones y validación de tokens
-│   │       ├── cursos.py               # Cliente HTTP para gestión de comisiones
-│   │       ├── equipos.py              # Gestión de grupos de trabajo
-│   │       ├── evaluaciones.py         # Cliente HTTP para instrumentos de evaluación
-│   │       └── ev_notas_service.py     # Servicios de interacción de calificaciones
+│   │   │   ├── alumnos.py              # Consumo de rutas de alumnos y CSV multipart
+│   │   │   ├── auth.py                 # Negociación de sesiones y validación de tokens
+│   │   │   ├── cursos.py               # Cliente HTTP para gestión de comisiones
+│   │   │   ├── equipos.py              # Gestión de grupos de trabajo
+│   │   │   ├── evaluaciones.py         # Cliente HTTP para instrumentos de evaluación
+│   │   │   └── ev_notas_service.py     # Servicios de interacción de calificaciones
 │   ├── static/                         # Recursos estáticos del frontend
 │   │   ├── css/                        # Estilos CSS segmentados de forma modular
 │   │   └── js/                         # Lógica dinámica del cliente (Validaciones frontend)
 │   └── templates/                      # Archivos de la vista renderizados mediante Jinja2
-└── requirements.txt
+└── requirements.txt                    # Listado único de dependencias del ecosistema
+```
 
 ## Requisitos previos
 Python 3.12+
