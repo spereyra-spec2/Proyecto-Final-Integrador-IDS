@@ -50,8 +50,6 @@ def dashboard():
         if equipos_res:
             total_equipos += len(equipos_res)
 
-        print(eval_res)
-        
         if eval_res.get("ok"):
             total_evaluaciones += len(eval_res.get("evaluaciones", []))
     
