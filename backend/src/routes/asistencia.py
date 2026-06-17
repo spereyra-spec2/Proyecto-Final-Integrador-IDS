@@ -5,7 +5,8 @@ from src.db.db import obtener_alumno_por_padron, get_asistencia_padron, get_asis
 from src.utils.asistencia_utils import existe_padron, verificar_token, alumno_asistio, registrar_asistencia, hacer_y_guardar_qr, validar_padron, obtener_curso_por_codigo
 from src.utils.errors import forbidden, error_response, bad_request, not_found, server_error, conflict
 import config
-from datetime import date,datetime
+from datetime import date
+import src.utils.seguridad as seguridad
 
 serializer = URLSafeTimedSerializer(config.SECRET_KEY)
 
@@ -30,9 +31,8 @@ def asistencia(idCurso):
 def asistencia_id(padron, idCurso):
 
     try:
-        #if not(verificar_token(request.headers, roles_permitidos=["Docente"])):
-         #      return forbidden()
-
+#        if not seguridad.verificar_token(request.headers, ["Docente"]):
+#            return forbidden()
         if not(validar_padron(padron)):
             return bad_request("Padron invalido")
         asistencia = get_asistencia_padron(padron, idCurso)

@@ -1,5 +1,7 @@
 from flask import Blueprint, request, jsonify
 import mysql.connector
+from src.utils import funciones
+import src.utils.errors as errors
 from src.db.db import get_connection
     
 from src.db.ev_notas_db import validar_id, validar_curso, validar_evaluacion, validar_equipo
@@ -11,11 +13,15 @@ ev_notas_bp=Blueprint('api/notas', __name__)
 
 @ev_notas_bp.route('/ver', methods=['GET'])
 def obtener_nota():
+    tiene_acceso = funciones.evaluar_acceso_seguro(request.headers, ["Docente"])
+
+    if not tiene_acceso:
+        return errors.acceso_denegado1("No tiene permisos o token inválido")
 
     padron = request.args.get('padron', type=int)
     id_equipo = request.args.get('id_equipo', type=int)
-    curso_id = request.args.get('curso_id')
-    id_evaluacion = request.args.get('id_ev')
+    curso_id = request.args.get('curso_id', type=int)
+    id_evaluacion = request.args.get('id_ev', type=int)
 
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
@@ -88,7 +94,16 @@ def obtener_nota():
 
 @ev_notas_bp.route('/cargar', methods=['POST'])
 def guardar_nota():
+    tiene_acceso = funciones.evaluar_acceso_seguro(request.headers, ["Docente"])
 
+    if not tiene_acceso:
+        return errors.acceso_denegado1("No tiene permisos o token inválido")
+
+    padron_operador = funciones.obtener_padron_desde_headers(request.headers)
+
+    if not tiene_acceso:
+        return errors.acceso_denegado1("No tiene permisos o token inválido")
+    
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
 
@@ -130,14 +145,27 @@ def guardar_nota():
             
             if validar_equipo(grupal) == None:
                 return not_found(f"No se encontró el equipo con id {grupal}.")
+            
+            query_aux = "SELECT puntaje FROM Notas WHERE Equipos_idEquipos = %s AND Evaluaciones_idEvaluacion = %s"
 
-            query_g = """
-                INSERT INTO Notas (puntaje, Evaluaciones_idEvaluacion, Equipos_idEquipos)
-                VALUES (%s, %s, %s)
-            """
-            cursor.execute(query_g, (nota, id_ev, grupal))
-            conn.commit()
-            return jsonify({"message": "Nota grupal agregada!"}), 201
+            cursor.execute(query_aux, (grupal, id_ev))
+            shield = cursor.fetchone()
+            #Si no tiene nota, la cargaremos
+            if not shield:
+
+                query_g = """
+                    INSERT INTO Notas (puntaje, Evaluaciones_idEvaluacion, Equipos_idEquipos)
+                    VALUES (%s, %s, %s)
+                """
+                cursor.execute(query_g, (nota, id_ev, grupal))
+
+                funciones.registrar_auditoria(cursor, padron_operador, f"Cargó una nota al grupo con id: {grupal}")
+
+                conn.commit()
+                return jsonify({"message": "Nota grupal agregada!"}), 201
+            else:
+                return jsonify({"message": "La nota ya ha sido cargada"}), 200
+
         else:
 
             if validar_id(padron) == None:
@@ -146,13 +174,29 @@ def guardar_nota():
             if not valido_numero(padron):
                 return jsonify(bad_request("El padrón debe ser un número entero positivo.")), 400
 
-            query_i = """
+            query_aux = "SELECT puntaje FROM Notas WHERE Usuarios_padron = %s AND Evaluaciones_idEvaluacion = %s"
+
+            cursor.execute(query_aux, (padron, id_ev))
+            shield = cursor.fetchone()
+            #Si no tiene nota, la cargaremos
+            if not shield:
+
+                query_i = """
                 INSERT INTO Notas (puntaje, Evaluaciones_idEvaluacion, Usuarios_padron)
                 VALUES (%s, %s, %s)
-            """
-            cursor.execute(query_i, (nota, id_ev, padron))
-            conn.commit()
-            return jsonify({"message": "Nota individual agregada!"}), 201
+                """
+            
+                cursor.execute(query_i, (nota, id_ev, padron))
+
+                funciones.registrar_auditoria(cursor, padron_operador, f"Cargó una nota al alumno con padrón: {padron}")
+
+                conn.commit()
+                return jsonify({"message": "Nota de alumno agregada!"}), 201
+        
+            else:
+                return jsonify({"message": "La nota ya ha sido cargada"}), 200
+            
+            
         
     except mysql.connector.Error as e:
         return jsonify(server_error("Error al obtener información de la base de datos: " + str(e))), 500
@@ -165,6 +209,13 @@ def guardar_nota():
 
 @ev_notas_bp.route('/editar', methods=['PATCH'])
 def actualizar_nota():
+    tiene_acceso = funciones.evaluar_acceso_seguro(request.headers, ["Docente"])
+
+    if not tiene_acceso:
+        return errors.acceso_denegado1("No tiene permisos o token inválido")
+    
+    padron_operador = funciones.obtener_padron_desde_headers(request.headers)
+    
 
     padron = request.args.get('padron', type=int)
     curso_id = request.args.get('curso_id')
@@ -212,6 +263,9 @@ def actualizar_nota():
 
             query_g = "UPDATE Notas SET puntaje = %s WHERE Equipos_idEquipos = %s AND Evaluaciones_idEvaluacion = %s"
             cursor.execute(query_g, (nota, id_equipo, id_ev))
+
+            funciones.registrar_auditoria(cursor, padron_operador, f"Editó la nota del grupo con id: {id_equipo}")
+
             conn.commit()
 
             return jsonify({"message": "Nota grupal actualizada!"}), 200
@@ -225,6 +279,9 @@ def actualizar_nota():
 
             query_i = "UPDATE Notas SET puntaje = %s WHERE Usuarios_padron = %s AND Evaluaciones_idEvaluacion = %s"
             cursor.execute(query_i, (nota, padron, id_ev))
+
+            funciones.registrar_auditoria(cursor, padron_operador, f"Editó la nota del alumno con padrón: {padron}")
+
             conn.commit()
 
             return jsonify({"message": "Nota individual actualizada!"}), 200
@@ -260,6 +317,7 @@ def get_cursos_publicos():
 
 @ev_notas_bp.route('/evaluaciones', methods=['GET'])
 def get_tipos_evaluacion_publicos():
+
     curso_id = request.args.get('curso_id', type=int)
 
     conn = get_connection()

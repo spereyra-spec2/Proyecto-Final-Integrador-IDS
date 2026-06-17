@@ -127,7 +127,6 @@ def unirse_equipo():
 
     if not equipo_encontrado:
         return jsonify({"error": "Equipo inexistente o código incorrecto"}), 404
-
     equipo_id = equipo_encontrado["idEquipos"]
 
     body = {"alumno_padron": padron,

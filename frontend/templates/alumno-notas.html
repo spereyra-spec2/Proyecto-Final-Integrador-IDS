@@ -56,20 +56,8 @@
     <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">🔍 Consultar Nota</button>
 </form>
 
-<script>
-function recargarEvaluaciones() {
-    const curso_id = document.getElementById('curso_id').value;
-    const padron = document.getElementById('padron').value;
-    
-    // Si seleccionó un curso válido, refrescamos la vista trayendo las evaluaciones de ese curso
-    if (cursoId) {
-        window.location.href = `/alumnos/ver?curso_id=${cursoId}&padron=${padron}`;
-    }
-}
-</script>
-
     {% if request.args.get('padron') %}
-      {% if nota %}
+      {% if nota_alumno %}
         <div id="result">
           <div class="card" style="margin-bottom:20px">
             <div class="card-body" style="display:flex; align-items:center; gap:20px; flex-wrap:wrap">
@@ -89,7 +77,7 @@ function recargarEvaluaciones() {
                   <strong style="font-size:15px">Puntaje registrado</strong>
                 </div>
                 
-                {% set puntaje = nota.puntaje | float %}
+                {% set puntaje = nota_alumno.puntaje | float %}
                 {% if puntaje >= 7 %}
                   <div class="nota-circle nota-aprobado">{{ puntaje }}</div>
                 {% elif puntaje >= 4 %}

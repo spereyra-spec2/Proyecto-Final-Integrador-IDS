@@ -48,14 +48,14 @@ def asistencia_profe(idCurso):
         padron = request.form.get('padron', '').strip()
 
         if not padron:
-            return redirect(url_for('asistencia.asistencia_profe', idCurso=idCurso))
+            return redirect(url_for('asistencia.asistencia_profe', idCurso=idCurso, token=token))
         
         regular_expresion = re.compile(r"^[1-9][0-9]{5}$")
         padron_bool= bool(regular_expresion.match(str(padron)))
         if not(padron_bool):
-            return redirect(url_for('asistencia.asistencia_profe', idCurso=idCurso))
+            return redirect(url_for('asistencia.asistencia_profe', idCurso=idCurso, token=token))
         
-        return redirect(url_for("asistencia.obtener_asistencia_padron", padron=padron, idCurso=idCurso))
+        return redirect(url_for("asistencia.obtener_asistencia_padron", padron=padron, idCurso=idCurso, token=token))
 
     qr_generado = False
     if request.args.get('generar'):

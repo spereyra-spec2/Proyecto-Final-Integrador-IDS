@@ -1,9 +1,11 @@
 from flask import Blueprint, jsonify, render_template, request, redirect, flash, session, url_for, Response
+from backend.src.db.db import get_connection
 from src.utils import utils as utils
 from src.services import cursos as api_cursos
 from src.services import alumnos as api_alumnos
 from src.services import evaluaciones as api_evaluaciones
 from src.services import ev_notas_service as api_notas
+from src.services import equipos as api_equipos
 
 profesor_bp = Blueprint('profesor', __name__)
 
@@ -28,8 +30,28 @@ def dashboard():
         
     resultado = api_cursos.obtener_cursos(usuario['token'])
     cursos_lista = resultado.get('cursos', []) if resultado.get('ok') else []
+
+    total_alumnos = 0
+    total_equipos = 0
+    total_evaluaciones = 0
+
+    for curso in cursos_lista:
+        id_curso = curso["idCurso"]
+
+        alumnos_res = api_alumnos.obtener_alumnos(usuario['token'], id_curso)
+        equipos_res = api_equipos.listar_equipos(id_curso)
+        eval_res = api_evaluaciones.obtener_evaluaciones(usuario['token'], id_curso)
     
-    return render_template('profesor-dashboard.html', cursos=cursos_lista)
+        if alumnos_res.get("ok"):
+            total_alumnos += len(alumnos_res.get("alumnos", []))
+
+        if equipos_res:
+            total_equipos += len(equipos_res)
+
+        if eval_res.get("ok"):
+            total_evaluaciones += len(eval_res.get("evaluaciones", []))
+    
+    return render_template('profesor-dashboard.html', cursos=cursos_lista, total_alumnos=total_alumnos, total_equipos=total_equipos, total_evaluaciones=total_evaluaciones)
 
 #-------------------------------------------------------------------------------------------------------
 @profesor_bp.route('/curso/<int:id_curso>/exportar_alumnos_pdf', methods=['GET'])
@@ -231,7 +253,7 @@ def vista_alumnos(id_curso):
     usuario = utils.verificar_docente_autenticado()
     if not usuario:
         return redirect(url_for('auth.login'))
-        
+
     padron_buscar = request.args.get('buscar', '').strip()
     estado_filtro = request.args.get('estado')
     if estado_filtro == "": 
@@ -403,14 +425,18 @@ def actualizar_evaluacion_route(curso_id, idEvaluacion):
 def ver_nota(curso_id):
 
     usuario = utils.verificar_docente_autenticado()
-    if not usuario: return redirect(url_for('auth.login'))
+    if not usuario: 
+        return redirect(url_for('auth.login'))
 
+
+    token = usuario.get('token')
 
     id_ev = request.args.get('id_ev', type=int)
     tipo = request.args.get('tipo')
     id_g = request.args.get('id_g')
 
     curso = {"idCurso": curso_id} if curso_id else None
+
     # Si se ingresa por el template de "profesor-evaluaciones" (con curso_id y id_ev)
     if not all([curso_id, id_ev, id_g, tipo]):
         return render_template('ver_nota.html', 
@@ -421,10 +447,7 @@ def ver_nota(curso_id):
                                curso=curso)
 
 
-    if not curso_id and not id_ev and not id_g and not tipo:
-        return render_template('ver_nota.html', nota=None, error=None)
-
-    resultado = api_notas.consultar_nota(curso_id, id_ev, id_g, tipo)
+    resultado = api_notas.consultar_nota(curso_id, id_ev, id_g, tipo, token)
 
     if resultado["codigo"] == 200:
         return render_template('ver_nota.html', 
@@ -443,7 +466,11 @@ def ver_nota(curso_id):
 def procesar_guardado(curso_id):
 
     usuario = utils.verificar_docente_autenticado()
-    if not usuario: return redirect(url_for('auth.login'))
+    if not usuario: 
+        return redirect(url_for('auth.login'))
+
+
+    token = usuario.get('token')
 
     curso = {"idCurso": curso_id} if curso_id else None
 
@@ -454,7 +481,7 @@ def procesar_guardado(curso_id):
 
     if request.method == 'POST':
 
-        resultado = api_notas.cargar_nota(curso_id, id_evaluacion, id_g, nota, tipo)
+        resultado = api_notas.cargar_nota(curso_id, id_evaluacion, id_g, nota, tipo, token)
 
         if resultado["codigo"] in [200, 201]:
             # Determino un nuevo valor para 'estado'.
@@ -472,7 +499,10 @@ def procesar_guardado(curso_id):
 def procesar_actualizacion(curso_id):
 
     usuario = utils.verificar_docente_autenticado()
-    if not usuario: return redirect(url_for('auth.login'))
+    if not usuario: 
+        return redirect(url_for('auth.login'))
+    
+    token = usuario.get('token')
 
     if request.method == 'POST': 
 
@@ -481,7 +511,7 @@ def procesar_actualizacion(curso_id):
         nota_nueva = request.form.get('nota')
         tipo = request.form.get('tipo')
 
-        resultado = api_notas.actualizar_nota(curso_id, id_ev, id_g, nota_nueva, tipo)
+        resultado = api_notas.actualizar_nota(curso_id, id_ev, id_g, nota_nueva, tipo, token)
 
         if resultado["codigo"] == 200:
             return redirect(f"/profesor/cursos/{curso_id}/evaluaciones/notas/ver?&id_ev={id_ev}&id_g={id_g}&tipo={tipo}")
@@ -493,3 +523,175 @@ def procesar_actualizacion(curso_id):
         'tipo': request.args.get('tipo')
     }
     return render_template('editar_nota.html', **query_params)
+
+#---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+#GESTIÓN DE EQUIPOS
+#---------------------------------------------------------------------------------------------------------------------------------------------------------------
+@profesor_bp.route('/cursos/<int:curso_id>/equipos/alumnos', methods=['GET'])
+def ver_equipos(curso_id):
+
+    usuario = utils.verificar_docente_autenticado()
+    if not usuario: 
+        return redirect(url_for('auth.login'))
+
+    try:
+        curso_id = utils.validar_curso_id(curso_id)
+    except ValueError as error:
+        return str(error), 400
+
+    equipos = api_equipos.listar_equipos(curso_id)
+    return render_template("profesor-equipos.html",curso_id=curso_id,teams=equipos)
+
+#---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+@profesor_bp.route('/cursos/<int:curso_id>/equipos/alumnos/alta', methods=['POST'])
+def agregar_miembro(curso_id):
+
+    usuario = utils.verificar_docente_autenticado()
+    if not usuario:
+        return redirect(url_for('auth.login'))
+
+    try:
+        curso_id = utils.validar_curso_id(curso_id)
+    except ValueError as error:
+        flash(str(error), "error")
+        return redirect(url_for('profesor.ver_equipos', curso_id=curso_id))
+
+    padron = request.form.get("nuevo_padron")
+    equipo_id = request.form.get("equipo_id")
+
+    try:
+        padron = utils.validar_padron(padron)
+        equipo_id = utils.validar_equipo_id(equipo_id)
+    except ValueError as error:
+        flash(str(error), "error")
+        return redirect(url_for('profesor.ver_equipos', curso_id=curso_id))
+
+    body = {"alumno_padron": int(padron),
+            "equipo_id": int(equipo_id),
+            "activo": 1}
+
+    try:
+        api_equipos.actualizar_equipo(curso_id, padron, body)
+        flash("Integrante agregado correctamente.", "success")
+    except ValueError as error:
+        flash(str(error), "error")
+
+    return redirect(url_for('profesor.ver_equipos', curso_id=curso_id))
+
+#---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+@profesor_bp.route('/cursos/<int:curso_id>/equipos/alumnos/baja', methods=['POST'])
+def eliminar_miembro(curso_id):
+
+    usuario = utils.verificar_docente_autenticado()
+    if not usuario:
+        return redirect(url_for('auth.login'))
+
+    try:
+        curso_id = utils.validar_curso_id(curso_id)
+    except ValueError as error:
+        flash(str(error), "error")
+        return redirect(url_for('profesor.ver_equipos', curso_id=curso_id))
+
+    padron = request.form.get('padron')
+    equipo_id = request.form.get("equipo_id")
+
+    try:
+        padron = utils.validar_padron(padron)
+        equipo_id = utils.validar_equipo_id(equipo_id)
+    except ValueError as error:
+        flash(str(error), "error")
+        return redirect(url_for('profesor.ver_equipos', curso_id=curso_id))
+
+    body = {"alumno_padron": int(padron),
+            "equipo_id": int(equipo_id),
+            "activo": 0}
+
+    try:
+        api_equipos.actualizar_equipo(curso_id, padron, body)
+        flash("Integrante removido correctamente.", "success")
+    except ValueError as error:
+        flash(str(error), "error")
+
+    return redirect(url_for('profesor.ver_equipos', curso_id=curso_id))
+
+#---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+@profesor_bp.route('/cursos/<int:curso_id>/equipos/alumnos/delete', methods=['POST'])
+def disolver_equipo(curso_id):
+
+    usuario = utils.verificar_docente_autenticado()
+    if not usuario:
+        return redirect(url_for('auth.login'))
+
+    try:
+        curso_id = utils.validar_curso_id(curso_id)
+    except ValueError as error:
+        flash(str(error), "error")
+        return redirect(url_for('profesor.ver_equipos', curso_id=curso_id))
+
+    padron = request.form.get('padron')
+
+    try:
+        padron = utils.validar_padron(padron)
+    except ValueError as error:
+        flash(str(error), "error")
+        return redirect(url_for('profesor.ver_equipos', curso_id=curso_id))
+
+    try:
+        api_equipos.eliminar_equipo(curso_id, padron)
+        flash("Equipo disuelto correctamente.", "success")
+    except ValueError as error:
+        flash(str(error), "error")
+
+    return redirect(url_for('profesor.ver_equipos', curso_id=curso_id))
+
+#---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+@profesor_bp.route('/cursos/<int:curso_id>/equipos/alumnos/agregar', methods=['POST'])
+def agregar_equipo(curso_id):
+
+    usuario = utils.verificar_docente_autenticado()
+    if not usuario:
+        return redirect(url_for('auth.login'))
+
+    try:
+        curso_id = utils.validar_curso_id(curso_id)
+    except ValueError as error:
+        flash(str(error), "error")
+        return redirect(url_for('profesor.ver_equipos', curso_id=curso_id))
+
+    nombre = request.form.get("nombre")
+    cupo = request.form.get("cupo")
+    padrones_raw = request.form.get("padrones")
+
+    try:
+        if not nombre:
+            raise ValueError("El nombre del equipo es obligatorio")
+
+        if not padrones_raw:
+            raise ValueError("Debe ingresar al menos un padrón")
+
+        padrones = [utils.validar_padron(p.strip()) for p in padrones_raw.split(",")if p.strip()]
+
+        if len(padrones) == 0:
+            raise ValueError("No hay padrones válidos")
+
+        body = {"nombre": nombre,
+                "padrones": padrones,
+                "cupo": int(cupo) if cupo else None}
+
+    except ValueError as error:
+        flash(str(error), "error")
+        return redirect(url_for('profesor.ver_equipos', curso_id=curso_id))
+
+    try:
+        api_equipos.crear_equipo(curso_id, body)
+        flash("Equipo creado correctamente.", "success")
+    except ValueError as error:
+        flash(str(error), "error")
+
+    return redirect(url_for('profesor.ver_equipos', curso_id=curso_id))
