@@ -12,9 +12,11 @@ profesor_bp = Blueprint('profesor', __name__)
 
 
 
+"""
 @profesor_bp.route('/asistencia', methods = ['GET'])
 def asistencia():
     return render_template('profesor-asistencia.html')
+"""
 #---------------------------------------------------------------------------------------------------------
 
 # VISTA GENERAL DOCENTE

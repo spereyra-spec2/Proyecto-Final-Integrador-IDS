@@ -155,7 +155,7 @@
                         <a href="{{ url_for('profesor.vista_alumnos', id_curso=curso.idCurso) }}" class="btn btn-sm btn-outline">Alumnos</a>
                         <a href="{{ url_for('profesor.ver_equipos', curso_id=curso.idCurso) }}" class="btn btn-outline btn-sm">Equipos</a>
                         <a href="{{ url_for('profesor.evaluaciones', curso_id=curso.idCurso) }}" class="btn btn-sm btn-outline">Evaluaciones</a>
-                        <a href="{{ url_for('asistencia.asistencia_profe') }}" class="btn btn-outline btn-sm">Asistencia</a>
+                        <a href="{{ url_for('asistencia.asistencia_profe', idCurso=curso.idCurso) }}" class="btn btn-outline btn-sm">Asistencia</a>
                       </div>
                     </td>
                   </tr>
