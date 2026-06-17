@@ -4,7 +4,8 @@ from src.utils.constants import API_BASE_URL
 #----------------------------------------------------------------------------------------------------
 
 def extraer_error(respuesta, msg_defecto):
-    """Extrae el mensaje de error de forma segura, evitando crasheos."""
+    "Extrae el mensaje de error."
+
     try:
         datos = respuesta.json()
         if "errors" in datos and len(datos["errors"]) > 0:
@@ -15,10 +16,12 @@ def extraer_error(respuesta, msg_defecto):
 
 #----------------------------------------------------------------------------------------------------
 
-def consultar_nota(curso_id, id_ev, id_g, tipo):
+def consultar_nota(curso_id, id_ev, id_g, tipo, token):
 
     "Consume la API dando como resultado una nota o none en caso de ser false."
     
+    headers = {"Authorization": f"Bearer {token}"}
+
     API = f"{API_BASE_URL}/notas/ver"
     
     query_params = {
@@ -31,7 +34,7 @@ def consultar_nota(curso_id, id_ev, id_g, tipo):
         query_params['id_equipo'] = int(id_g)
 
     try:
-        respuesta = requests.get(API, params=query_params, timeout=10)
+        respuesta = requests.get(API, headers=headers ,params=query_params, timeout=10)
         if respuesta.status_code == 200:
             return {"datos": respuesta.json(), "error": None, "codigo": 200}
         else:
@@ -44,11 +47,13 @@ def consultar_nota(curso_id, id_ev, id_g, tipo):
     
 #----------------------------------------------------------------------------------------------------
 
-def cargar_nota(curso_id, id_ev, id_g, nota, tipo):
+def cargar_nota(curso_id, id_ev, id_g, nota, tipo, token):
     
     "Envía los datos a la API para crear una nueva nota."
     
     API = f"{API_BASE_URL}/notas/cargar"
+
+    headers = {"Authorization": f"Bearer {token}"}
 
     payload = {
         "curso_id": int(curso_id), 
@@ -62,7 +67,7 @@ def cargar_nota(curso_id, id_ev, id_g, nota, tipo):
         payload['id_equipo'] = int(id_g)
     
     try:
-        respuesta = requests.post(API, json=payload, timeout=10)
+        respuesta = requests.post(API, headers,json=payload, timeout=10)
         if respuesta.status_code in [200, 201]:
             return {"error": None, "codigo": respuesta.status_code}
         else:
@@ -74,11 +79,13 @@ def cargar_nota(curso_id, id_ev, id_g, nota, tipo):
     
 #---------------------------------------------------------------------------------------------------
 
-def actualizar_nota(curso_id, id_ev, id_g, nuevo_puntaje, tipo):
+def actualizar_nota(curso_id, id_ev, id_g, nuevo_puntaje, tipo, token):
     
     "Envía los datos a la API para modificar una nota existente."
 
     API = f"{API_BASE_URL}/notas/editar"
+
+    headers = {"Authorization": f"Bearer {token}"}
 
     query_params = {
         'curso_id': curso_id,
@@ -93,7 +100,7 @@ def actualizar_nota(curso_id, id_ev, id_g, nuevo_puntaje, tipo):
     json = {'puntaje': float(nuevo_puntaje)}
     
     try:
-        respuesta = requests.patch(API, params=query_params, json=json, timeout=10)
+        respuesta = requests.patch(API, headers=headers ,params=query_params, json=json, timeout=10)
         if respuesta.status_code == 200:
             return {"error": None, "codigo": 200}
         else:
@@ -107,14 +114,11 @@ def actualizar_nota(curso_id, id_ev, id_g, nuevo_puntaje, tipo):
 #---------------------------------------------------------------------------------------------------
 
 def obtener_cursos_activos():
-    """
-    Se conecta a la API para obtener los cursos cuyo estado es 'activo'.
-     replica el filtro: api.filter('Course', { estado: 'activo' })
-    """
+    
+    "Obtiene todos los cursos creados"
 
     API = f"{API_BASE_URL}/notas/cursos"
     
-
     try:
         response = requests.get(API)
         response.raise_for_status() 
@@ -139,10 +143,9 @@ def obtener_cursos_activos():
 #---------------------------------------------------------------------------------------------------
 
 def obtener_evaluacion(curso_id):
-    """
-    Se conecta a la API para traer los tipos de evaluación mapeados en la base de datos.
-    Asegura que el retorno sea un diccionario compatible con el método .items() de Jinja2.
-    """
+    
+    "Obt"
+
     url = f"{API_BASE_URL}/notas/evaluaciones" 
     
     # Si viene un curso_id, lo agregamos como parámetro de consulta
@@ -155,7 +158,11 @@ def obtener_evaluacion(curso_id):
         response.raise_for_status()
         data = response.json()
         
-        evaluaciones_crudos = data.get("evaluaciones", []) if isinstance(data, dict) else data
+        evaluaciones_crudos = data
+        
+        if isinstance(data, dict):
+            evaluaciones_crudos = data.get("evaluaciones", [])
+
         evaluaciones_mapeados = []
 
         for e in evaluaciones_crudos:

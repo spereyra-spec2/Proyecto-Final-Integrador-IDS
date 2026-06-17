@@ -429,11 +429,14 @@ def ver_nota(curso_id):
         return redirect(url_for('auth.login'))
 
 
+    token = usuario.get('token')
+
     id_ev = request.args.get('id_ev', type=int)
     tipo = request.args.get('tipo')
     id_g = request.args.get('id_g')
 
     curso = {"idCurso": curso_id} if curso_id else None
+
     # Si se ingresa por el template de "profesor-evaluaciones" (con curso_id y id_ev)
     if not all([curso_id, id_ev, id_g, tipo]):
         return render_template('ver_nota.html', 
@@ -444,10 +447,7 @@ def ver_nota(curso_id):
                                curso=curso)
 
 
-    if not curso_id and not id_ev and not id_g and not tipo:
-        return render_template('ver_nota.html', nota=None, error=None)
-
-    resultado = api_notas.consultar_nota(curso_id, id_ev, id_g, tipo)
+    resultado = api_notas.consultar_nota(curso_id, id_ev, id_g, tipo, token)
 
     if resultado["codigo"] == 200:
         return render_template('ver_nota.html', 
@@ -469,6 +469,9 @@ def procesar_guardado(curso_id):
     if not usuario: 
         return redirect(url_for('auth.login'))
 
+
+    token = usuario.get('token')
+
     curso = {"idCurso": curso_id} if curso_id else None
 
     id_evaluacion = request.form.get('id_evaluacion', type=int)
@@ -478,7 +481,7 @@ def procesar_guardado(curso_id):
 
     if request.method == 'POST':
 
-        resultado = api_notas.cargar_nota(curso_id, id_evaluacion, id_g, nota, tipo)
+        resultado = api_notas.cargar_nota(curso_id, id_evaluacion, id_g, nota, tipo, token)
 
         if resultado["codigo"] in [200, 201]:
             # Determino un nuevo valor para 'estado'.
@@ -498,6 +501,8 @@ def procesar_actualizacion(curso_id):
     usuario = utils.verificar_docente_autenticado()
     if not usuario: 
         return redirect(url_for('auth.login'))
+    
+    token = usuario.get('token')
 
     if request.method == 'POST': 
 
@@ -506,7 +511,7 @@ def procesar_actualizacion(curso_id):
         nota_nueva = request.form.get('nota')
         tipo = request.form.get('tipo')
 
-        resultado = api_notas.actualizar_nota(curso_id, id_ev, id_g, nota_nueva, tipo)
+        resultado = api_notas.actualizar_nota(curso_id, id_ev, id_g, nota_nueva, tipo, token)
 
         if resultado["codigo"] == 200:
             return redirect(f"/profesor/cursos/{curso_id}/evaluaciones/notas/ver?&id_ev={id_ev}&id_g={id_g}&tipo={tipo}")
