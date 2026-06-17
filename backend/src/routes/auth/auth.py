@@ -66,45 +66,6 @@ def alta_usuario():
     
     insertar_log(f"Alta de usuario", data["padron"])
     return ("", 201)
-    
-'''
-Ejemplo de implementación (BORRAR LUEGO)
-@auth_bp.route("/prueba", methods = ["GET"])
-def prueba():
-    palabra = "hola"
-
-    tiene_acceso = seguridad.verificar_token(request.headers, ["Docente"])
-    
-    if tiene_acceso:
-        return jsonify({"palabra": palabra}), 200
-    else:
-        return jsonify({"error": "no autorizado"}), 401
-'''
-
-'''@auth_bp.route("/verificar_token", methods=["GET"])
-def verificar_token():
-    token = request.args.get("token")
-
-    if not token:
-        return errors.datos_incompletos()
-
-    try:
-        jwt.decode(
-            token,
-            seguridad.SECRET_KEY,
-            algorithms = ["HS256"]
-        )
-
-        return jsonify({
-            "code": "200",
-            "message": "OK",
-            "success": True,
-            "description": "Token válido"
-        }), 200
-
-    except jwt.PyJWTError:
-        return errors.acceso_denegado()'''
-
 
 @auth_bp.route("/contrasena_olvidada", methods=["POST"])
 def contrasena_olvidada():

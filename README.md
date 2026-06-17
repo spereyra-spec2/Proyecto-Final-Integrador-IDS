@@ -18,7 +18,8 @@ A diferencia de soluciones monolíticas básicas, este desarrollo aborda de form
 
            Browser
               |
-              v (Peticiones HTTP & Formularios Web)
+              v 
+    (Peticiones HTTP & Formularios Web)
   Frontend Web (Flask Server, Puerto 5001)
               |
               v (API Calls / JSON / Cabecera Authorization Bearer Token)
@@ -113,9 +114,6 @@ venv\Scripts\activate
 #Activar en Linux/macOS
 source venv/bin/activate
 
-pip install -r ../requirements.txt
-python app.py
-
 **3. Despliegue del Frontend (Web Server)**
 Abre una terminal paralela, accede a la carpeta del frontend, inicializa su respectivo entorno e inicia el servidor web:
 bash: 
@@ -127,8 +125,6 @@ venv\Scripts\activate
 #Activar en Linux/macOS
 source venv/bin/activate
 
-pip install -r ../requirements.txt
-python app.py
 
 Gestión de Alumnos: Páginas y Flujos
 
