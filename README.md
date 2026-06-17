@@ -116,6 +116,8 @@ python -m venv venv
 venv\Scripts\activate
 #Activar en Linux/macOS
 source venv/bin/activate
+en el archio	
+rellenar las variables de "password" y "SECRET_KEY" con la informacion acorde
 
 **3. Despliegue del Frontend (Web Server)**
 Abre una terminal paralela, accede a la carpeta del frontend, inicializa su respectivo entorno e inicia el servidor web:
