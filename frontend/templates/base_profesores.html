@@ -33,10 +33,6 @@
     
     <!-- Enlace dinámico a Evaluaciones -->
     <a class="nav-item {% block active_evaluaciones %}{% endblock %}" id="nav-evals" href="{{ url_for('profesor.evaluaciones', curso_id=curso['idCurso']) if curso else url_for('profesor.evaluaciones', curso_id=curso_id) if curso_id else url_for('profesor.evaluaciones', curso_id=session['curso_actual']) if session['curso_actual'] else '#' }}" {% block hide_nav_evals %}{% endblock %}> <span class="nav-icon">📝</span> Evaluaciones</a>
-
-    <a>{{ session }}</a>
-    <a>{{ curso }}</a>
-    <a>{{ curso_id }}</a>
   </nav>
 
   <div class="sidebar-footer">
