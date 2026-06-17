@@ -23,4 +23,10 @@ notas:
 	DELETE nota
 	GET notas, con posibilidad de filtrado y ordenamiento
 
+autenticación:
+	POST login
+	POST registro
+	POST enviado de mail para recuperar contraseña
+	PATCH de reseteo de contraseña
+
 

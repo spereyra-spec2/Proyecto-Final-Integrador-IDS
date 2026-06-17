@@ -3,7 +3,8 @@ import sys
 import mysql.connector
 import hashlib
 import time
-
+from src.utils import errors as errors
+import datetime
 DB_DIR = os.path.dirname(os.path.abspath(__file__))
 
 BACKEND_DIR = os.path.abspath(os.path.join(DB_DIR, '..', '..'))
@@ -355,3 +356,17 @@ def get_asistencia_padron(padron):
     cursor.close()
     con.close()
     return asistencia
+
+
+def insertar_log(mensaje, padron):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("INSERT INTO Logs (fecha, accion, Usuarios_padron) VALUES (%s, %s, %s)", (datetime.datetime.now(), mensaje, padron))
+        conn.commit()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        return errors.server_error(e)
+    
+    return None

@@ -9,7 +9,6 @@ ROOT_DIR = os.path.dirname(BASE_DIR)
 if ROOT_DIR not in sys.path:
     sys.path.insert(0, ROOT_DIR)
 
-from backend.src.db.db import get_connection 
 from flask import Flask, render_template, send_from_directory, request, redirect, url_for, flash
 from flask_cors import CORS
 from src.routes.auth import auth_bp

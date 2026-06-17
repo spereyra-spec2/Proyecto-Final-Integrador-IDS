@@ -1,5 +1,4 @@
 from flask import Blueprint, jsonify, request, render_template, redirect, url_for, flash
-from backend.src.db.db import get_connection
 from src.services.evaluaciones import actualizar_evaluacion, actualizar_evaluacion, crear_evaluacion, obtener_evaluaciones
 
 evaluaciones_bp = Blueprint('evaluaciones', __name__)
