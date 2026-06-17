@@ -33,7 +33,7 @@ def verificar_token(headers, roles_permitidos):
         try:
             payload=jwt.decode(encoded_token, SECRET_KEY, algorithms=["HS256"])
 
-            if payload['proposito'] != 'reset':
+            if payload['proposito'] == 'reset':
                 return errors.acceso_denegado()
 
             roles = payload["rol"]

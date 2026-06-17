@@ -9,7 +9,6 @@ ROOT_DIR = os.path.dirname(BASE_DIR)
 if ROOT_DIR not in sys.path:
     sys.path.insert(0, ROOT_DIR)
 
-from backend.src.db.db import get_connection 
 from flask import Flask, render_template, send_from_directory, request, redirect, url_for, flash
 from flask_cors import CORS
 from src.routes.auth import auth_bp
@@ -45,13 +44,7 @@ def index():
 
 @app.route('/alumno-inicio.html')
 def alumno_inicio():
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT idCurso AS id, nombre, codigo FROM Curso")
-    cursos = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return render_template('alumno-inicio.html', cursos=cursos)
+    return render_template('alumno-inicio.html')
 
 if __name__ == '__main__':
     app.run(port=5001, debug=True)
