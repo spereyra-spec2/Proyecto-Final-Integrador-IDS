@@ -1,5 +1,4 @@
 from flask import Blueprint, jsonify, render_template, request, redirect, flash, session, url_for, Response
-from backend.src.db.db import get_connection
 from src.utils import utils as utils
 from src.services import cursos as api_cursos
 from src.services import alumnos as api_alumnos

@@ -35,7 +35,7 @@ def listar_equipos(curso_id):
         return []
     if response.status_code == 200:
         return response.json()
-    return []
+    raise ValueError(f"Error al obtener equipos: {response.status_code} - {response.text}")
 
 #---------------------------------------------------------------------------------------------
 
