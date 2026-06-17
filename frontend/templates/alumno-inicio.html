@@ -11,16 +11,6 @@
     <h1>Portal del Alumno</h1>
     <p>Consultá tus notas, grupos y asistencia sin necesidad de registrarte</p>
 
-    <div class="search-box">
-      <input type="number" id="padron-input" placeholder="Ingresá tu padrón" required />
-      <select id="curso-select" required>
-        <option value="">Seleccioná curso</option>
-        {% for curso in cursos %}
-          <option value="{{ curso.id }}">{{ curso.nombre }} ({{ curso.codigo }})</option>
-        {% endfor %}
-      </select>
-      <button onclick="window.buscar()">Consultar →</button>
-    </div>
   </section>
 
   <!-- Features -->
