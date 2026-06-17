@@ -20,8 +20,7 @@ def get_connection():
         user=config.user,
         port=3306,
         password=config.password,
-        database=config.database,
-        auth_plugin='mysql_native_password'
+        database=config.database
     )
 
 
