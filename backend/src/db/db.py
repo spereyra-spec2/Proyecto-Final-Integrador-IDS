@@ -85,6 +85,7 @@ def get_equipos(curso_id: int) -> list:
                     e.access_code AS access_code,
                 u.padron, 
                 u.nombres AS usuario_nombre,
+                u.mail,
                 uhe.activo,
                 uhe.activo_desde,
                 uhe.activo_hasta,
@@ -117,6 +118,7 @@ def get_equipos(curso_id: int) -> list:
             equipos_dict[id_equipo]["integrantes"].append({
                 "padron": fila["padron"],
                 "nombre": fila["usuario_nombre"],
+                "mail": fila["mail"],
                 "activo": int(fila.get("activo") or 0),
                 "activo_desde": fila.get("activo_desde"),
                 "activo_hasta": fila.get("activo_hasta"),

@@ -1,9 +1,15 @@
-from flask import Flask, Blueprint, jsonify, request, url_for, Response
+from flask import Flask, Blueprint, jsonify, request, url_for, Response, send_file
 from src.db.db import get_equipos, crear_equipo, delete_equipo, patch_equipo, get_connection
-from src.utils.validaciones import validar_curso_datos, validar_entero, validar_curso_id, validar_padron
+from src.utils import validaciones as validaciones
 from typing import Any
 import mysql.connector
-from src.utils.errors import error_response, not_found, bad_request, server_error, conflict
+from src.utils import errors as errors
+import io
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib import colors
+from src.utils import funciones as funciones
 
 equipos_bp = Blueprint("equipos",__name__)
 
@@ -15,7 +21,7 @@ def obtener_equipos(curso_id: int) -> Response:
         return jsonify(equipos), 200
         
     except Exception as e:
-        return server_error(str(e))
+        return errors.server_error(str(e))
 
 
 
@@ -25,7 +31,7 @@ def registrar_equipo(curso_id: int) -> Response:
         data = request.get_json()
         
         if not data or "nombre" not in data or "padrones" not in data:
-            return bad_request("Faltan campos obligatorios: 'nombre' y 'padrones'")
+            return errors.bad_request("Faltan campos obligatorios: 'nombre' y 'padrones'")
         
             
         nombre_equipo = data["nombre"]
@@ -34,7 +40,7 @@ def registrar_equipo(curso_id: int) -> Response:
         cupo = data.get("cupo")
         
         if not isinstance(padrones, list) or len(padrones) == 0:
-            return bad_request("El campo 'padrones' debe ser una lista no vacía")
+            return errors.bad_request("El campo 'padrones' debe ser una lista no vacía")
 
         crear_equipo(curso_id, {"nombre": nombre_equipo, "access_code": access_code, "cupo": cupo}, padrones)
         
@@ -42,9 +48,9 @@ def registrar_equipo(curso_id: int) -> Response:
         return jsonify({"message": "Equipo creado y alumnos vinculados exitosamente",}), 201
         
     except mysql.connector.Error as db_err:
-        return bad_request(f"Error de base de datos (verifique los padrones): {str(db_err)}")
+        return errors.bad_request(f"Error de base de datos (verifique los padrones): {str(db_err)}")
     except Exception as e:
-        return server_error(str(e))
+        return errors.server_error(str(e))
 
 
 @equipos_bp.route('/<int:curso_id>/equipos/join', methods=['POST'])
@@ -52,13 +58,13 @@ def join_equipo_by_code(curso_id: int) -> Response:
     try:
         payload = request.get_json()
         if not payload or 'access_code' not in payload or 'padron' not in payload:
-            return bad_request("Se requiere 'access_code' y 'padron' en el body")
+            return errors.bad_request("Se requiere 'access_code' y 'padron' en el body")
         access_code = payload['access_code']
         padron = payload['padron']
 
         nombre_equipo = payload.get('nombre')
         if not nombre_equipo:
-            return bad_request("Se requiere 'nombre' del equipo junto con 'access_code' para unirse")
+            return errors.bad_request("Se requiere 'nombre' del equipo junto con 'access_code' para unirse")
 
         conn = get_connection()
         cur = conn.cursor(dictionary=True)
@@ -69,7 +75,7 @@ def join_equipo_by_code(curso_id: int) -> Response:
         equipo = cur.fetchone()
         cur.close(); conn.close()
         if equipo is None:
-            return not_found('Código de acceso inválido o equipo no encontrado')
+            return errors.not_found('Código de acceso inválido o equipo no encontrado')
 
         equipo_id = equipo['idEquipos']
 
@@ -89,7 +95,7 @@ def join_equipo_by_code(curso_id: int) -> Response:
             cupo_val = seat_info.get('cupo')
             active_count = int(seat_info.get('active_count') or 0)
             if cupo_val is not None and active_count >= int(cupo_val):
-                return conflict('El equipo ya alcanzó su cupo máximo')
+                return errors.conflict('El equipo ya alcanzó su cupo máximo')
 
     
         conn2 = get_connection()
@@ -103,12 +109,12 @@ def join_equipo_by_code(curso_id: int) -> Response:
             try:
                 equipo_after = patch_equipo(curso_id, int(reference_padron), {"alumno_padron": int(padron), "activo": 1})
                 if equipo_after is None:
-                    return not_found('No existe equipo activo para ese curso y referencia')
+                    return errors.not_found('No existe equipo activo para ese curso y referencia')
                 return jsonify(equipo_after), 200
             except ValueError as e:
-                return bad_request(str(e))
+                return errors.bad_request(str(e))
             except Exception as e:
-                return server_error(str(e))
+                return errors.server_error(str(e))
         else:
             try:
                 conn_ins = get_connection()
@@ -145,26 +151,26 @@ def join_equipo_by_code(curso_id: int) -> Response:
                         equipo_after = e
                         break
                 if equipo_after is None:
-                    return server_error('Equipo actualizado pero no se pudo recuperar el estado')
+                    return errors.server_error('Equipo actualizado pero no se pudo recuperar el estado')
                 return jsonify(equipo_after), 200
             except Exception as e:
-                return server_error(str(e))
+                return errors.server_error(str(e))
 
     except Exception as e:
-        return server_error(str(e))
+        return errors.server_error(str(e))
 
 @equipos_bp.route("/<int:curso_id>/equipos/<int:usuario_padron>", methods=["PATCH"])
 def actualizar_equipo(curso_id, usuario_padron):
     try:
-        curso_id = validar_curso_id(curso_id)
-        usuario_padron = validar_padron(usuario_padron)
+        curso_id = validaciones.validar_curso_id(curso_id)
+        usuario_padron = validaciones.validar_padron(usuario_padron)
     except ValueError as e:
-        return bad_request(str(e))
+        return errors.bad_request(str(e))
 
     data = request.get_json(silent=True)
 
     if not data or not isinstance(data, dict):
-        return bad_request("El body debe ser un JSON válido")
+        return errors.bad_request("El body debe ser un JSON válido")
 
     alumno_padron = data.get("alumno_padron")
     activo = data.get("activo")
@@ -172,16 +178,16 @@ def actualizar_equipo(curso_id, usuario_padron):
     evaluacion_id = data.get("evaluacion_id", data.get("tp_id"))
 
     if equipo_id is None or not isinstance(equipo_id, int) or equipo_id <= 0:
-        return bad_request("Debe enviarse un equipo_id válido")
+        return errors.bad_request("Debe enviarse un equipo_id válido")
 
     if alumno_padron is None and evaluacion_id is None:
-        return bad_request("Debe enviarse alumno o evaluación")
+        return errors.bad_request("Debe enviarse alumno o evaluación")
 
     if alumno_padron is not None and (not isinstance(alumno_padron, int) or alumno_padron <= 0):
-        return bad_request("Padrón inválido")
+        return errors.bad_request("Padrón inválido")
 
     if activo is not None and activo not in (0, 1):
-        return bad_request("Activo debe ser 0 o 1")
+        return errors.bad_request("Activo debe ser 0 o 1")
 
     try:
         conn = get_connection()
@@ -198,7 +204,7 @@ def actualizar_equipo(curso_id, usuario_padron):
         if cur.fetchone() is None:
             cur.close()
             conn.close()
-            return not_found("Equipo inválido para este curso")
+            return errors.not_found("Equipo inválido para este curso")
 
         if alumno_padron is not None:
 
@@ -288,22 +294,164 @@ def actualizar_equipo(curso_id, usuario_padron):
         return jsonify(equipo), 200
 
     except Exception as e:
-        return server_error(str(e))
+        return errors.server_error(str(e))
 
 
 @equipos_bp.route("/<int:curso_id>/equipos/<int:usuario_padron>", methods=["DELETE"])
 def disolver_equipo(curso_id, usuario_padron):
     try:
-        curso_id = validar_curso_id(curso_id)
-        usuario_padron = validar_padron(usuario_padron)
+        curso_id = validaciones.validar_curso_id(curso_id)
+        usuario_padron = validaciones.validar_padron(usuario_padron)
     except ValueError as e:
-        return bad_request(str(e))
+        return errors.bad_request(str(e))
     try:
         eliminado = delete_equipo(curso_id, usuario_padron)
         if not eliminado:
-            return not_found("No existe un equipo activo para ese curso y padrón.")
+            return errors.not_found("No existe un equipo activo para ese curso y padrón.")
 
         return jsonify({"message": "Equipo disuelto correctamente."}), 200
 
     except Exception as e:
-        return server_error(e)
+        return errors.server_error(e)
+
+@equipos_bp.route('/<int:idCurso>/reporte-equipos', methods=['GET'])
+def reporte_equipos_pdf(idCurso):
+    tiene_acceso = funciones.evaluar_acceso_seguro(request.headers, ["Docente"])
+    if not tiene_acceso:
+        return errors.acceso_denegado1("No tiene permisos o token inválido")
+        
+    padron_operador = funciones.obtener_padron_desde_headers(request.headers)
+
+    sin_equipo = request.args.get('sin_equipo', 'excluir')
+
+    conn = None
+    cursor = None
+
+    alumnos_sueltos = []
+
+    try:
+        equipos = get_equipos(idCurso)
+    
+        if sin_equipo == 'incluir':
+            conn = get_connection()
+            cursor = conn.cursor(dictionary=True)
+            
+            query_sueltos = """
+                SELECT u.padron, u.nombres, u.mail 
+                FROM Usuarios u
+                INNER JOIN Curso_has_Usuarios chu ON u.padron = chu.Usuarios_padron
+                WHERE chu.Curso_idCurso = %s 
+                  AND chu.Estado = 1 
+                  AND u.rol = 'Alumno'
+                  AND u.padron NOT IN (
+                      SELECT uhe.Usuarios_padron 
+                      FROM Usuarios_has_Equipos uhe
+                      INNER JOIN Equipos e ON uhe.Equipos_idEquipos = e.idEquipos
+                      WHERE e.Curso_idCurso = %s 
+                        AND uhe.activo = 1
+                  )
+            """
+            cursor.execute(query_sueltos, (idCurso, idCurso))
+            alumnos_sueltos = cursor.fetchall()
+            
+            funciones.registrar_auditoria(cursor, padron_operador, f"Exportó PDF de equipos del curso {idCurso}")
+            conn.commit()
+            
+    except Exception as e:
+        return errors.server_error(str(e))
+    finally:
+        if cursor: cursor.close()
+        if conn: conn.close()
+
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buffer, 
+        pagesize=letter,
+        rightMargin=40, 
+        leftMargin=40, 
+        topMargin=40, 
+        bottomMargin=40
+    )
+    story = []
+    styles = getSampleStyleSheet()
+    
+    story.append(Paragraph("<b>ACADEMIQ - REPORTE DE EQUIPOS</b>", styles['Heading1']))
+    story.append(Paragraph(f"Curso ID: {idCurso} | Alumnos sin grupo: {sin_equipo.upper()}", styles['Normal']))
+    story.append(Spacer(1, 20))
+    
+    estilo_tabla = TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#2d5986")), 
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 6),
+        ('TOPPADDING', (0, 0), (-1, 0), 6),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor("#e5e7eb")),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor("#f9fafb")]),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+    ])
+    
+    if equipos:
+        for eq in equipos_lista:
+            story.append(Paragraph(f"<b>🔹 Equipo: {eq['nombre']}</b> (Código: {eq['access_code'] or '—'})", styles['Heading3']))
+            story.append(Spacer(1, 5))
+            
+            tabla_datos = [["Padrón", "Nombre y Apellido", "Correo Electrónico"]]
+            
+            for miembro in eq.get('integrantes', []):
+                if int(miembro.get('activo', 0)) == 1:
+                    tabla_datos.append([
+                        str(miembro['padron']),
+                        miembro.get('nombre', '—'), 
+                        miembro.get('mail', '—')     
+                    ])
+                
+            if len(tabla_datos) == 1:
+                tabla_datos.append(["—", "Este equipo no tiene integrantes activos", "—"])
+                
+            tabla_pdf = Table(tabla_datos, colWidths=[70, 230, 230])
+            tabla_pdf.setStyle(estilo_tabla)
+            story.append(tabla_pdf)
+            story.append(Spacer(1, 15))
+    else:
+        story.append(Paragraph("No hay equipos registrados en este curso.", styles['Normal']))
+        story.append(Spacer(1, 15))
+        
+    if sin_equipo == 'incluir' and alumnos_sueltos:
+        story.append(Spacer(1, 10))
+        story.append(Paragraph("<b>⚠️ Alumnos sin Equipo Asignado</b>", styles['Heading3']))
+        story.append(Spacer(1, 5))
+        
+        tabla_sueltos_datos = [["Padrón", "Nombre y Apellido", "Correo Electrónico"]]
+        for alu in alumnos_sueltos:
+            tabla_sueltos_datos.append([
+                str(alu['padron']),
+                alu['nombres'], 
+                alu['mail']
+            ])
+            
+        tabla_sueltos_pdf = Table(tabla_sueltos_datos, colWidths=[70, 230, 230])
+        
+        estilo_sueltos = TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#b33939")), 
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 10),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor("#e5e7eb")),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor("#fff5f5")]),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ])
+        tabla_sueltos_pdf.setStyle(estilo_sueltos)
+        story.append(tabla_sueltos_pdf)
+
+    doc.build(story)
+    buffer.seek(0)
+    
+    return send_file(
+        buffer, 
+        mimetype='application/pdf', 
+        as_attachment=True, 
+        download_name=f'reporte_equipos_curso_{idCurso}.pdf'
+    )

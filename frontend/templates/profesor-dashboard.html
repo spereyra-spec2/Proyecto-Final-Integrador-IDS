@@ -68,6 +68,30 @@
       </div>
     </div>
 
+<div style="display: flex; justify-content: flex-end; margin-bottom: 20px; margin-top: -10px;">
+  <div class="custom-dropdown">
+    <button type="button" class="btn btn-outline dropdown-toggle-btn">
+      <span>🤝 Exportar Equipos PDF</span>
+      <span class="dropdown-arrow-icon">▼</span>
+    </button>
+    <ul class="dropdown-menu-custom" style="min-width: 240px;">
+      {% if cursos %}
+        {% for curso in cursos %}
+          <li>
+            <a class="dropdown-item-custom btn-abrir-modal-equipos" 
+               href="#" 
+               data-id="{{ curso.idCurso }}" 
+               data-nombre="{{ curso.nombre }}">
+              📚 {{ curso.nombre }}
+            </a>
+          </li>
+        {% endfor %}
+      {% else %}
+        <li><span class="dropdown-item-custom" style="color: var(--color-text-muted);">No hay cursos activos</span></li>
+      {% endif %}
+    </ul>
+  </div>
+</div>
     <!-- Stats -->
     <div class="grid-4" style="margin-bottom:28px">
       <div class="stat-card">
@@ -180,6 +204,34 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-outline" id="btn-cancelar-modal-pdf">Cancelar</button>
           <button type="button" class="btn btn-primary" id="btn-confirmar-descarga-pdf">Guardar</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="modal-exportar-equipos-pdf" class="modal-overlay hidden">
+      <div class="modal">
+        <div class="modal-header">
+          <h3 class="modal-title">🤝 Exportar Equipos a PDF</h3>
+          <button type="button" class="modal-close" id="btn-cerrar-modal-equipos-pdf">×</button>
+        </div>
+        <div class="modal-body">
+          <p style="font-size: 13px; color: var(--color-text-muted); margin-bottom: 20px;">
+            Seleccioná las preferencias para generar el documento de los equipos de la comisión elegida:
+          </p>
+      
+          <input type="hidden" id="modal-equipos-curso-id" value="">
+
+          <div class="form-group" style="margin-bottom: 24px;">
+            <label class="form-label" for="select-incluir-sin-equipo">Alumnos sin equipo</label>
+            <select class="form-select" id="select-incluir-sin-equipo">
+              <option value="excluir">No incluir alumnos sueltos</option>
+              <option value="incluir">Incluir al final como "Sin Equipo"</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" id="btn-cancelar-modal-equipos-pdf">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="btn-confirmar-descarga-equipos-pdf">Guardar</button>
         </div>
       </div>
     </div>
