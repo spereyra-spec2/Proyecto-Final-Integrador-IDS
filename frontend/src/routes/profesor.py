@@ -30,8 +30,28 @@ def dashboard():
         
     resultado = api_cursos.obtener_cursos(usuario['token'])
     cursos_lista = resultado.get('cursos', []) if resultado.get('ok') else []
+
+    total_alumnos = 0
+    total_equipos = 0
+    total_evaluaciones = 0
+
+    for curso in cursos_lista:
+        id_curso = curso["idCurso"]
+
+        alumnos_res = api_alumnos.obtener_alumnos(usuario['token'], id_curso)
+        equipos_res = api_equipos.listar_equipos(id_curso)
+        eval_res = api_evaluaciones.obtener_evaluaciones(usuario['token'], id_curso)
     
-    return render_template('profesor-dashboard.html', cursos=cursos_lista)
+        if alumnos_res.get("ok"):
+            total_alumnos += len(alumnos_res.get("alumnos", []))
+
+        if equipos_res:
+            total_equipos += len(equipos_res)
+
+        if eval_res.get("ok"):
+            total_evaluaciones += len(eval_res.get("evaluaciones", []))
+    
+    return render_template('profesor-dashboard.html', cursos=cursos_lista, total_alumnos=total_alumnos, total_equipos=total_equipos, total_evaluaciones=total_evaluaciones)
 
 #-------------------------------------------------------------------------------------------------------
 @profesor_bp.route('/curso/<int:id_curso>/exportar_alumnos_pdf', methods=['GET'])
