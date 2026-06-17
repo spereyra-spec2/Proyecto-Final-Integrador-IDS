@@ -113,7 +113,7 @@ def validar_curso_datos(nombre: Any, codigo: Any) -> dict[str, int | str] | None
     return None
 
 #--------------------------------------------------------------------------------------------------------------
-
+"""
 def verificar_unicidad_curso(cursor, nombre: str, codigo: str, id_curso_ignorar: int = None) -> dict[str, int | str] | None:
 
     query = "SELECT nombre, codigo FROM Curso WHERE (nombre = %s OR codigo = %s)"
@@ -133,10 +133,29 @@ def verificar_unicidad_curso(cursor, nombre: str, codigo: str, id_curso_ignorar:
             return conflict("Ya existe un curso registrado con ese mismo código.")
             
     return None
+"""
+def verificar_unicidad_curso(cursor, nombre: str, codigo: str, cuatrimestre: str, id_curso_ignorar: int = None) -> dict[str, int | str] | None:
+
+    query = "SELECT nombre, codigo FROM Curso WHERE cuatrimestre = %s AND (nombre = %s OR codigo = %s)"
+    params = [cuatrimestre, nombre, codigo]
+    
+    if id_curso_ignorar is not None:
+        query += " AND idCurso != %s"
+        params.append(id_curso_ignorar)
+        
+    cursor.execute(query, tuple(params))
+    existente = cursor.fetchone()
+    
+    if existente:
+        if existente["nombre"].lower() == nombre.lower():
+            return conflict("Ya existe un curso registrado con ese mismo nombre en este cuatrimestre.")
+        if existente["codigo"].lower() == codigo.lower():
+            return conflict("Ya existe un curso registrado con ese mismo código en este cuatrimestre.")
+            
+    return None
 
 
 def validar_curso_id(curso_id: Any) -> int:
-    """Validate and return curso_id as integer; raise ValueError on invalid input."""
     try:
         cid = int(curso_id)
         if cid <= 0:
@@ -147,7 +166,6 @@ def validar_curso_id(curso_id: Any) -> int:
 
 
 def validar_padron(padron: Any) -> int:
-    """Validate and return padron as integer; raise ValueError on invalid input."""
     try:
         p = int(padron)
         if p <= 0:
