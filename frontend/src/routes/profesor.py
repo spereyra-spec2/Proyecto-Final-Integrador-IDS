@@ -233,7 +233,7 @@ def vista_alumnos(id_curso):
     usuario = utils.verificar_docente_autenticado()
     if not usuario:
         return redirect(url_for('auth.login'))
-        
+
     padron_buscar = request.args.get('buscar', '').strip()
     estado_filtro = request.args.get('estado')
     if estado_filtro == "": 
