@@ -1,6 +1,7 @@
-from flask import Blueprint, jsonify, request, render_template, redirect, url_for
+from flask import Blueprint, jsonify, request, render_template, redirect, url_for, session
 from flask import jsonify
 from frontend.src.services.equipos import listar_equipos, crear_equipo, actualizar_equipo, encontrar_equipos_del_alumno_activo, filtrar_equipos_por_nombre_y_codigo
+from src.services import ev_notas_service as api_notas
 from src.utils import utils as utils
 
 equipos_bp = Blueprint('equipos', __name__)
@@ -8,6 +9,8 @@ equipos_bp = Blueprint('equipos', __name__)
 
 @equipos_bp.route('/grupos', methods=['GET'])
 def alumno_equipos():
+
+    cursos_db = api_notas.obtener_cursos_activos()
 
     padron = request.args.get('padron')
     curso_id = request.args.get('curso_id')
@@ -19,22 +22,18 @@ def alumno_equipos():
         try:
             curso_id = utils.validar_curso_id(curso_id)
             padron = utils.validar_padron(padron)
+
             busqueda_realizada = True
+
+            equipos = listar_equipos(curso_id)
+            equipos_del_alumno = encontrar_equipos_del_alumno_activo(
+                equipos,
+                padron)
+
         except ValueError as error:
             return str(error), 400
 
-    if padron and curso_id:
-        busqueda_realizada = True
-
-        try:
-            todos_los_equipos = listar_equipos(curso_id) or []
-            equipos_del_alumno = encontrar_equipos_del_alumno_activo(todos_los_equipos, padron)
-
-        except Exception:
-            equipos_del_alumno = []
-
-    return render_template('alumno-equipos.html', cursos = todos_los_equipos, padron = padron, curso_id = curso_id, 
-                           equipos_del_alumno = equipos_del_alumno, busqueda_realizada = busqueda_realizada)
+    return render_template('alumno-equipos.html', cursos=cursos_db, padron=padron, curso_id=curso_id, equipos_del_alumno=equipos_del_alumno, busqueda_realizada=busqueda_realizada)
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------
 

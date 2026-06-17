@@ -23,8 +23,6 @@ def encontrar_equipos_del_alumno_activo(equipos, padron):
 
 #---------------------------------------------------------------------------------------------
 
-#---------------------------------------------------------------------------------------------
-
 def listar_equipos(curso_id):
     """
     Devuelve la lista de equipos del curso. Si el curso no tiene equipos, devuelve una lista vacía. Si el curso no existe, devuelve None.
