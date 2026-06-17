@@ -42,7 +42,7 @@ def dashboard():
 
         alumnos_res = api_alumnos.obtener_alumnos(usuario['token'], id_curso)
         equipos_res = api_equipos.listar_equipos(id_curso)
-        eval_res = api_evaluaciones.obtener_evaluaciones(usuario['token'], id_curso)
+        eval_res = api_evaluaciones.obtener_evaluaciones(usuario['token'], curso_id=id_curso)
     
         if alumnos_res.get("ok"):
             total_alumnos += len(alumnos_res.get("alumnos", []))
@@ -50,6 +50,8 @@ def dashboard():
         if equipos_res:
             total_equipos += len(equipos_res)
 
+        print(eval_res)
+        
         if eval_res.get("ok"):
             total_evaluaciones += len(eval_res.get("evaluaciones", []))
     
