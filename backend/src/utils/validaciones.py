@@ -20,6 +20,19 @@ def validar_email_fiuba(email):
         
     return usuario != '' and dominio == 'fi.uba.ar'
 
+#----------------------------------------------------------------------------------------------------------
+
+def validar_padron(padron):
+    if padron is None:
+        return False
+
+    padron_str = str(padron).strip()
+
+    if not re.match(r"^\d{1,6}$", padron_str):
+        return False
+
+    return int(padron_str) > 0
+
 #--------------------------------------------------------------------------------------------------------
 
 def validar_entero(param: Any, nombre: str, valor_min: int | float = float('-inf'), valor_max: int | float = float('inf')) -> dict[str, int | str] | None:

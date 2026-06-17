@@ -21,7 +21,6 @@ DEFAULT_LIMIT: int = 50
 #--------------------------------------------------------------------------------------------------------
 @alumnos_bp.route('', methods=['POST']) 
 def add_alumno(idCurso):
-    
     tiene_acceso = funciones.evaluar_acceso_seguro(request.headers, ["Docente"])
     if not tiene_acceso:
         return acceso_denegado1("No tiene permisos para agregar alumnos o token inválido")
@@ -48,11 +47,15 @@ def add_alumno(idCurso):
 
         nombres = str(data["nombres"]).strip()
         mail = str(data["mail"]).strip()
-        padron = int(data["padron"])
         rol = "Alumno" 
 
         if not validaciones.validar_email_fiuba(mail):
             return bad_request("El formato del correo es inválido. Debe pertenecer al dominio 'fi.uba.ar'")
+
+        if not validaciones.validar_padron(data["padron"]):
+            return bad_request("El padrón debe ser un número entero positivo de hasta 6 dígitos.")
+
+        padron = int(data["padron"])
 
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
@@ -84,6 +87,7 @@ def add_alumno(idCurso):
         if cursor: cursor.close()
         if conn: conn.close()
 
+
 #--------------------------------------------------------------------------------------------------------
 # POST / api/ cursos/ {curso-id}/ alumnos/ importar 
 # Procesa el archivo CSV e inscribe masivamente a los alumnos en el curso indicado en la URL.
@@ -91,7 +95,6 @@ def add_alumno(idCurso):
 
 @alumnos_bp.route('/importar', methods=['POST'])
 def importar_alumnos(idCurso):
-    
     tiene_acceso = funciones.evaluar_acceso_seguro(request.headers, ["Docente"])
     if not tiene_acceso:
         return acceso_denegado1("No tiene permisos para agregar alumnos o token inválido")
@@ -121,7 +124,6 @@ def importar_alumnos(idCurso):
         query_existentes = "SELECT Usuarios_padron FROM Curso_has_Usuarios WHERE Curso_idCurso = %s"
         cursor.execute(query_existentes, (idCurso,))
         
-
         padrones_ya_inscriptos = set(row[0] for row in cursor.fetchall())
 
         stream = io.StringIO(file.stream.read().decode("UTF8"), newline=None)
@@ -137,10 +139,13 @@ def importar_alumnos(idCurso):
             if not all(campo in row for campo in campos_esperados):
                 return bad_request("El archivo CSV debe contener las columnas: padron, nombres, mail")
             
-            try:
-                padron_actual = int(row["padron"])
-            except ValueError:
-                return bad_request(f"El padrón '{row['padron']}' no es un número válido.")
+            if not validaciones.validar_email_fiuba(row["mail"]):
+                return bad_request(f"El correo '{row['mail']}' es inválido. Debe ser @fi.uba.ar")
+
+            if not validaciones.validar_padron(row["padron"]):
+                return bad_request(f"El padrón '{row['padron']}' no es válido. Debe ser un entero positivo de hasta 6 dígitos.")
+
+            padron_actual = int(row["padron"])
 
             if padron_actual in padrones_vistos_csv:
                 continue
@@ -148,9 +153,6 @@ def importar_alumnos(idCurso):
 
             if padron_actual in padrones_ya_inscriptos:
                 continue 
-
-            if not validaciones.validar_email_fiuba(row["mail"]):
-                return bad_request(f"El correo '{row['mail']}' es inválido. Debe ser @fi.uba.ar")
 
             alumnos_a_insertar.append((
                 padron_actual, 
@@ -192,6 +194,7 @@ def importar_alumnos(idCurso):
     finally:
         if cursor: cursor.close()
         if conn: conn.close()
+
 #--------------------------------------------------------------------------------------------------------
 # DELETE / api/ cursos/ {curso-id}/ alumnos/{padrón}
 # Baja lógica del alumno solo en ese curso.
