@@ -429,8 +429,6 @@ def ver_nota(curso_id):
         return redirect(url_for('auth.login'))
 
 
-    token = usuario.get('token')
-
     id_ev = request.args.get('id_ev', type=int)
     tipo = request.args.get('tipo')
     id_g = request.args.get('id_g')
@@ -447,7 +445,7 @@ def ver_nota(curso_id):
                                curso=curso)
 
 
-    resultado = api_notas.consultar_nota(curso_id, id_ev, id_g, tipo, token)
+    resultado = api_notas.consultar_nota(curso_id, id_ev, id_g, tipo)
 
     if resultado["codigo"] == 200:
         return render_template('ver_nota.html', 
