@@ -5,6 +5,7 @@ import src.utils.seguridad as seguridad
 import src.utils.errors as errors
 from src.utils.validaciones import es_email_valido
 import jwt
+from src.db.db import insertar_log
 
 auth_bp = Blueprint("auth",__name__)
 
@@ -24,6 +25,7 @@ def login():
         return error
 
     token = seguridad.generar_token(usuario)
+    insertar_log(f"Inicio de sesión {padron}", padron)
     return jsonify({'success': True, 'token': token, 'padron': usuario['padron'], 'rol': usuario['rol']}), 200
 
 
@@ -37,7 +39,7 @@ def alta_usuario():
     if not isinstance(data["padron"], int):
         return errors.datos_incorrectos("padron")
     
-    if data["padron"] < 99999:
+    if data["padron"] <= 99999:
         return errors.datos_incorrectos("padron")
     
     if not isinstance(data["nombres"], str) or len(data["nombres"]) == 0:
@@ -62,6 +64,7 @@ def alta_usuario():
     if resultado:
         return resultado #si llega acá es porque tiró error
     
+    insertar_log(f"Alta de usuario", data["padron"])
     return ("", 201)
     
 '''
@@ -78,7 +81,7 @@ def prueba():
         return jsonify({"error": "no autorizado"}), 401
 '''
 
-@auth_bp.route("/verificar_token", methods=["GET"])
+'''@auth_bp.route("/verificar_token", methods=["GET"])
 def verificar_token():
     token = request.args.get("token")
 
@@ -100,7 +103,7 @@ def verificar_token():
         }), 200
 
     except jwt.PyJWTError:
-        return errors.acceso_denegado()
+        return errors.acceso_denegado()'''
 
 
 @auth_bp.route("/contrasena_olvidada", methods=["POST"])
@@ -131,6 +134,8 @@ def contrasena_olvidada():
         if error_enviando:
             return error_enviando
         
+
+        insertar_log(f"Mail enviado a {data['padron']}",data["padron"])
         return jsonify({'success': True}), 200
         
 
@@ -139,7 +144,7 @@ def resetear_contrasena():
     data = request.get_json(silent=True)
     token = request.args.get("token")
 
-    if not "token" or "contrasena" not in data:
+    if not token or "contrasena" not in data:
         return errors.datos_incompletos()
 
     nueva_contrasena = data["contrasena"]
@@ -153,6 +158,9 @@ def resetear_contrasena():
 
     except jwt.PyJWTError as e:
         return errors.acceso_denegado()
+    
+    if payload.get('proposito') != 'reset':
+        return errors.acceso_denegado()
 
     padron = payload["padron"]
 
@@ -163,6 +171,7 @@ def resetear_contrasena():
     if resultado:
         return resultado
 
+    insertar_log(f"Contraseña cambiada", padron)
     return jsonify({
         "code":"200",
         "message":"OK",

@@ -1,0 +1,32 @@
+ usuarios:
+	POST usuario
+	GET usuarios, usuario por padron/nombre, con posibilidad de filtrado y ordenamiento
+	PATCH usuario
+	DELETE usuarios por condicion
+	TRUNCATE para limpiar tabla
+
+ equipos:
+ 	GET equipos, con posibilidad de filtrado y ordenamiento
+	POST equipo
+	DELETE equipo, automatico si no tiene integrantes(?)
+	PATCH equipo
+
+ evaluaciones:
+	POST evaluacion
+	PATCH evaluacion
+	DELETE evluacion
+	GET evaluaciones, con posibilidad de filtrado y ordenamiento
+
+notas: 
+	POST nota
+	PATCH nota
+	DELETE nota
+	GET notas, con posibilidad de filtrado y ordenamiento
+
+autenticación:
+	POST login
+	POST registro
+	POST enviado de mail para recuperar contraseña
+	PATCH de reseteo de contraseña
+
+

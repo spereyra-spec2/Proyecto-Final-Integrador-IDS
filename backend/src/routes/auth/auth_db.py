@@ -37,7 +37,6 @@ def alta_usuario(padron, rol, nombres, mail, contrasena):
         cursor.close()
         conn.close()
     except Exception as e:
-        print(e)
         return errors.server_error(e)
     
     return None
@@ -98,3 +97,4 @@ def obtener_mail_usuario(padron):
         return None, errors.no_registrado(padron)
     
     return resultado["mail"], None
+
