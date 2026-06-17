@@ -34,7 +34,7 @@ app.config['SECRET_KEY'] = 'clave_secreta_ids_2026'
 app.register_blueprint(auth_bp, url_prefix="/auth") #sigo ejemplo del repo de cátedra
 app.register_blueprint(profesor_bp, url_prefix="/profesor")
 app.register_blueprint(alumno_bp, url_prefix="/alumno")
-app.register_blueprint(asistencias_bp, url_prefix='/asistencia')
+app.register_blueprint(asistencias_bp, url_prefix='/')
 app.register_blueprint(equipos_bp, url_prefix='/equipos')
 
 

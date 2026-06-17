@@ -1,24 +1,23 @@
 from flask import Blueprint, jsonify, request, send_file
 from mysql.connector import Error
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
-from src.db.db import obtener_alumno_por_padron, get_asistencia_padron, get_asistencia
+from src.db.db import obtener_alumno_por_padron, get_asistencia_padron, get_asistencias_curso
 from src.utils.asistencia_utils import existe_padron, verificar_token, alumno_asistio, registrar_asistencia, hacer_y_guardar_qr, validar_padron, obtener_curso_por_codigo
 from src.utils.errors import forbidden, error_response, bad_request, not_found, server_error, conflict
 import config
 from datetime import date,datetime
-import os
 
 serializer = URLSafeTimedSerializer(config.SECRET_KEY)
 
-asistencia_bp = Blueprint("asistencia",__name__)
+asistencias_bp = Blueprint("asistencias",__name__)
 
-@asistencia_bp.route('', methods=['GET'])
-def asistencia():
+@asistencias_bp.route('', methods=['GET'])
+def asistencia(idCurso):
 
     try:
         #if not(verificar_token(request.headers, roles_permitidos=["Docente"])):
           #     return forbidden()     
-        asistencia = get_asistencia()
+        asistencia = get_asistencias_curso(idCurso)
         if len(asistencia) == 0:
             return "",204
         
@@ -27,8 +26,8 @@ def asistencia():
     except Error as e:
        server_error(e)
     
-@asistencia_bp.route('/<int:padron>', methods=['GET'])
-def asistencia_id(padron):
+@asistencias_bp.route('/<int:padron>', methods=['GET'])
+def asistencia_id(padron, idCurso):
 
     try:
         #if not(verificar_token(request.headers, roles_permitidos=["Docente"])):
@@ -36,7 +35,7 @@ def asistencia_id(padron):
 
         if not(validar_padron(padron)):
             return bad_request("Padron invalido")
-        asistencia = get_asistencia_padron(padron)
+        asistencia = get_asistencia_padron(padron, idCurso)
         if len(asistencia) == 0:
             return "",204
         
@@ -46,14 +45,13 @@ def asistencia_id(padron):
         return server_error(e)
     
 # accedido por el boton de "generar qr en /asistencia/profe
-@asistencia_bp.route("/generar-qr", methods=["GET"])
-def generar_qr():
+@asistencias_bp.route("/generar-qr", methods=["GET"])
+def generar_qr(idCurso):
     try:
-
         payload = {"tipo": "asistencia", "timestamp": date.today().isoformat()}
         token = serializer.dumps(payload, salt="asistencia-qr")
 
-        formulario_url = f"{config.FRONT_URL}/asistencia/formulario?token={token}"
+        formulario_url = f"{config.FRONT_URL}/profesor/cursos/{idCurso}/asistencias/formulario?token={token}"
 
         hacer_y_guardar_qr(formulario_url)
 
@@ -65,22 +63,19 @@ def generar_qr():
     except Exception as e:
         return server_error(str(e))
 
-@asistencia_bp.route("/confirmar-asistencia", methods=["POST"])
-def confirmar_asistencia():
+@asistencias_bp.route("/confirmar-asistencia", methods=["POST"])
+def confirmar_asistencia(idCurso):
     data = request.get_json(silent=True)
     if not data:
         return bad_request("El cuerpo debe ser JSON")
 
     padron = data.get("padron")
-    codigo_curso = data.get("curso")
     token = data.get("token")
 
     if not padron:
         return bad_request("El padron es requerido")
     elif not token:
         return bad_request("No se incluyo el token")
-    elif not codigo_curso:
-        return bad_request("No se incluyo en curso")
     
     try:
         serializer.loads(token, salt="asistencia-qr", max_age=config.QR_EXPIRATION_SECONDS)
@@ -89,27 +84,22 @@ def confirmar_asistencia():
     except BadSignature:
         return error_response(403, "token invalido", "error", "el token enviado no es el valido")
 
-    curso = obtener_curso_por_codigo(codigo_curso)
-    if not curso:
-        return not_found("curso no existe")
-    curso_id = curso["idCurso"]
-
     alumno = obtener_alumno_por_padron(padron)
     if not alumno:
         return not_found("no existe alumno con ese padron en la base de datos")
     elif alumno_asistio(alumno["padron"]):
         return conflict("ya has registrado tu asistencia hoy")
-    elif not registrar_asistencia(alumno["padron"], curso_id):
+    elif not registrar_asistencia(alumno["padron"], idCurso):
         return server_error("no se pudo registrar la asistencia")
 
     return {
         "mensaje": f"Asistencia registrada correctamente para {alumno['nombres']}",
         "alumno": alumno["nombres"],
-        "curso": curso_id,
+        "curso": idCurso,
         "padron": alumno["padron"],
         "fecha": date.today().isoformat()
     }, 200
 
-@asistencia_bp.route('/qr-imagen', methods=['GET'])
-def servir_qr():
+@asistencias_bp.route('/qr-imagen', methods=['GET'])
+def servir_qr(idCurso):
     return send_file(config.QR_PATH, mimetype='image/png')

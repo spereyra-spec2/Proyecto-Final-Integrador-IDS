@@ -13,7 +13,8 @@ def cargar_datos_prueba():
             host=config.host,
             user=config.user,
             password=config.password,
-            database="ids_db"
+            database="ids_db",
+            auth_plugin='mysql_native_password'
         )
         cursor = conn.cursor()
         print("Conectado a ids_db exitosamente.")

@@ -337,20 +337,20 @@ def delete_equipo(curso_id, usuarios_padron):
         cursor.close()
         conn.close()
 
-def get_asistencia():
+def get_asistencias_curso(idCurso):
     con = get_connection()
     cursor = con.cursor(dictionary=True)
-    query = "SELECT * FROM Asistencias"
+    query = f"SELECT * FROM Asistencias WHERE Curso_idCurso = {idCurso}"
     cursor.execute(query)
     asistencia = cursor.fetchall()
     cursor.close()
     con.close()
     return asistencia
 
-def get_asistencia_padron(padron):
+def get_asistencia_padron(padron, idCurso):
     con = get_connection()
     cursor = con.cursor(dictionary=True)
-    query = "SELECT * FROM Asistencias WHERE Usuarios_padron = %s "
+    query = f"SELECT * FROM Asistencias WHERE Usuarios_padron = %s AND Curso_idCurso = {idCurso}"
     cursor.execute(query,(padron,))
     asistencia = cursor.fetchall()
     cursor.close()

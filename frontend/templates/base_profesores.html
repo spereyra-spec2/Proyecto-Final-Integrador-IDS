@@ -35,7 +35,7 @@
     <a class="nav-item {% block active_evaluaciones %}{% endblock %}" id="nav-evals" href="{% if curso and curso.idCurso %}{{ url_for('profesor.evaluaciones', curso_id=curso.idCurso) }}{% else %}#{% endif %}" {% block hide_nav_evals %}{% endblock %}><span class="nav-icon">📝</span> Evaluaciones</a>
 
     <!-- ENLACE CORREGIDO Y DINÁMICO A ASISTENCIA -->
-    <a class="nav-item {% block active_asistencia %}{% endblock %}" id="nav-asist" href="{{ url_for('asistencia.asistencia_profe') }}" {% block hide_nav_asist %}{% endblock %}><span class="nav-icon">✅</span> Asistencia</a>
+    <a class="nav-item {% block active_asistencia %}{% endblock %}" id="nav-asist" href="{{ url_for('asistencia.asistencia_profe', idCurso=idCurso) }}" {% block hide_nav_asist %}{% endblock %}><span class="nav-icon">✅</span> Asistencia</a>
   </nav>
 
   <div class="sidebar-footer">

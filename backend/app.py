@@ -6,13 +6,11 @@ from src.routes.api_ev_notas import ev_notas_bp
 from src.routes.equipos import equipos_bp
 from src.routes.alumnos import alumnos_bp
 from src.routes.cursos import cursos_bp
-from src.routes.asistencia import asistencia_bp
+from src.routes.asistencia import asistencias_bp
 from src.routes.evaluaciones import evaluaciones_bp
 from src.db.init_db import init_db
 
 from mail import mail
-
-app = Flask(__name__)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 app = Flask(__name__)
@@ -32,7 +30,7 @@ app.register_blueprint(ev_notas_bp, url_prefix="/api/notas")
 app.register_blueprint(alumnos_bp, url_prefix='/api/cursos/<int:idCurso>/alumnos')
 app.register_blueprint(cursos_bp, url_prefix='/api/cursos')
 app.register_blueprint(equipos_bp, url_prefix='/api/cursos')
-app.register_blueprint(asistencia_bp, url_prefix='/api/asistencia')
+app.register_blueprint(asistencias_bp, url_prefix='/api/cursos/<int:idCurso>/asistencias')
 app.register_blueprint(evaluaciones_bp, url_prefix='/api/cursos/<int:idCurso>/evaluaciones')
 
 mail.init_app(app)

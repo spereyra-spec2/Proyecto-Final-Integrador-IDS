@@ -19,10 +19,9 @@
       <div class="card-header"><span class="card-title">Registrar asistencia</span></div>
       <div class="card-body">
         
-        <form action="{{ url_for('asistencia.registrar_asistencia') }}" method="post">
+        <form action="{{ url_for('asistencia.registrar_asistencia', idCurso=idCurso) }}" method="post">
           <input type="hidden" name="token" value="{{ token }}" />
           <input type="number" class="form-input" name="padron" placeholder="Tu padrón" style="margin-bottom:12px" required />
-          <input type="text" class="form-input" name="curso" placeholder="codigo de tu curso" style="margin-bottom:12px" required />
           <button type="submit" class="btn btn-accent">Registrar presente</button>
         </form>
 

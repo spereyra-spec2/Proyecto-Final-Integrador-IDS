@@ -15,6 +15,7 @@ def init_db():
         host=host,
         user=user,
         password=password,
+        auth_plugin='mysql_native_password'
     )
 
     cursor = conn.cursor()
