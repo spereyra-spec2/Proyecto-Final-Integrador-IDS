@@ -1,5 +1,4 @@
 from flask import Blueprint, jsonify, render_template, request, redirect, flash, session, url_for, Response
-from backend.src.db.db import get_connection
 from src.utils import utils as utils
 from src.services import cursos as api_cursos
 from src.services import alumnos as api_alumnos
@@ -42,7 +41,7 @@ def dashboard():
 
         alumnos_res = api_alumnos.obtener_alumnos(usuario['token'], id_curso)
         equipos_res = api_equipos.listar_equipos(id_curso)
-        eval_res = api_evaluaciones.obtener_evaluaciones(usuario['token'], id_curso)
+        eval_res = api_evaluaciones.obtener_evaluaciones(usuario['token'], curso_id=id_curso)
     
         if alumnos_res.get("ok"):
             total_alumnos += len(alumnos_res.get("alumnos", []))

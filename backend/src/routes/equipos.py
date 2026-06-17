@@ -393,7 +393,7 @@ def reporte_equipos_pdf(idCurso):
     ])
     
     if equipos:
-        for eq in equipos_lista:
+        for eq in equipos:
             story.append(Paragraph(f"<b>🔹 Equipo: {eq['nombre']}</b> (Código: {eq['access_code'] or '—'})", styles['Heading3']))
             story.append(Spacer(1, 5))
             

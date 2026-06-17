@@ -1,5 +1,4 @@
 from flask import Blueprint, jsonify, request, render_template, redirect, url_for
-from backend.src.db.db import get_connection
 from flask import jsonify
 from frontend.src.services.equipos import listar_equipos, crear_equipo, actualizar_equipo, encontrar_equipos_del_alumno_activo, filtrar_equipos_por_nombre_y_codigo
 from src.utils import utils as utils
@@ -9,12 +8,6 @@ equipos_bp = Blueprint('equipos', __name__)
 
 @equipos_bp.route('/grupos', methods=['GET'])
 def alumno_equipos():
-
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
-
-    cursor.execute("SELECT idCurso, nombre FROM Curso")
-    cursos = cursor.fetchall()
 
     padron = request.args.get('padron')
     curso_id = request.args.get('curso_id')
@@ -40,10 +33,7 @@ def alumno_equipos():
         except Exception:
             equipos_del_alumno = []
 
-    cursor.close()
-    conn.close()
-
-    return render_template('alumno-equipos.html', cursos = cursos, padron = padron, curso_id = curso_id, 
+    return render_template('alumno-equipos.html', cursos = todos_los_equipos, padron = padron, curso_id = curso_id, 
                            equipos_del_alumno = equipos_del_alumno, busqueda_realizada = busqueda_realizada)
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------
