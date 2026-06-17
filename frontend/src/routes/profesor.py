@@ -405,7 +405,8 @@ def actualizar_evaluacion_route(curso_id, idEvaluacion):
 def ver_nota(curso_id):
 
     usuario = utils.verificar_docente_autenticado()
-    if not usuario: return redirect(url_for('auth.login'))
+    if not usuario: 
+        return redirect(url_for('auth.login'))
 
 
     id_ev = request.args.get('id_ev', type=int)
@@ -445,7 +446,8 @@ def ver_nota(curso_id):
 def procesar_guardado(curso_id):
 
     usuario = utils.verificar_docente_autenticado()
-    if not usuario: return redirect(url_for('auth.login'))
+    if not usuario: 
+        return redirect(url_for('auth.login'))
 
     curso = {"idCurso": curso_id} if curso_id else None
 
@@ -474,7 +476,8 @@ def procesar_guardado(curso_id):
 def procesar_actualizacion(curso_id):
 
     usuario = utils.verificar_docente_autenticado()
-    if not usuario: return redirect(url_for('auth.login'))
+    if not usuario: 
+        return redirect(url_for('auth.login'))
 
     if request.method == 'POST': 
 
@@ -505,7 +508,8 @@ def procesar_actualizacion(curso_id):
 def ver_equipos(curso_id):
 
     usuario = utils.verificar_docente_autenticado()
-    if not usuario: return redirect(url_for('auth.login'))
+    if not usuario: 
+        return redirect(url_for('auth.login'))
 
     try:
         curso_id = utils.validar_curso_id(curso_id)

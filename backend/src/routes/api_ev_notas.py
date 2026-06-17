@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 import mysql.connector
+from src.utils import funciones
 from src.db.db import get_connection
     
 from src.db.ev_notas_db import validar_id, validar_curso, validar_evaluacion, validar_equipo
@@ -11,7 +12,7 @@ ev_notas_bp=Blueprint('api/notas', __name__)
 
 @ev_notas_bp.route('/ver', methods=['GET'])
 def obtener_nota():
-
+    tiene_acceso = funciones.evaluar_acceso_seguro(request.headers, ["Docente"])
     padron = request.args.get('padron', type=int)
     id_equipo = request.args.get('id_equipo', type=int)
     curso_id = request.args.get('curso_id', type=int)
@@ -88,6 +89,7 @@ def obtener_nota():
 
 @ev_notas_bp.route('/cargar', methods=['POST'])
 def guardar_nota():
+    tiene_acceso = funciones.evaluar_acceso_seguro(request.headers, ["Docente"])
 
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
@@ -188,7 +190,7 @@ def guardar_nota():
 
 @ev_notas_bp.route('/editar', methods=['PATCH'])
 def actualizar_nota():
-
+    tiene_acceso = funciones.evaluar_acceso_seguro(request.headers, ["Docente"])
     padron = request.args.get('padron', type=int)
     curso_id = request.args.get('curso_id')
     id_ev = request.args.get('id_ev')
@@ -263,6 +265,7 @@ def actualizar_nota():
             
 @ev_notas_bp.route('/cursos', methods=['GET'])
 def get_cursos_publicos():
+    tiene_acceso = funciones.evaluar_acceso_seguro(request.headers, ["Docente"])
 
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
@@ -283,6 +286,8 @@ def get_cursos_publicos():
 
 @ev_notas_bp.route('/evaluaciones', methods=['GET'])
 def get_tipos_evaluacion_publicos():
+    tiene_acceso = funciones.evaluar_acceso_seguro(request.headers, ["Docente"])
+
     curso_id = request.args.get('curso_id', type=int)
 
     conn = get_connection()
