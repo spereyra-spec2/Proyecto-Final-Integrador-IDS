@@ -21,21 +21,37 @@
   <nav class="sidebar-nav">
     <div class="nav-section-label">General</div>
     <a class="nav-item {% block active_dashboard %}{% endblock %}" href="{{ url_for('profesor.dashboard') }}"><span class="nav-icon">📊</span> Dashboard</a>
-    <a class="nav-item {% block active_cursos %}{% endblock %}" href="{{ url_for('profesor.vista_cursos') }}"><span class="nav-icon">📚</span> Mis Cursos</a>
+    <a class="nav-item {% block active_cursos %}{% endblock %}" href="{{ url_for('profesor.cursos.vista_cursos') }}"><span class="nav-icon">📚</span> Mis Cursos</a>
     
     <div class="nav-section-label" id="curso-nav-label" {% block hide_curso_label %}{% endblock %}>Curso actual</div>
     
-    <!-- Enlace dinámico a Alumnos -->
-    <a class="nav-item {% block active_alumnos %}{% endblock %}" id="nav-alumnos" href="{{ url_for('profesor.vista_alumnos', id_curso=session.get('curso_actual')) if session.get('curso_actual') else '#' }}" {% block hide_nav_alumnos %}{% endblock %}> <span class="nav-icon">👥</span> Alumnos</a>
+    <!-- Enlace a Alumnos -->
+    <a class="nav-item {% block active_alumnos %}{% endblock %}" id="nav-alumnos" 
+       href="{{ url_for('profesor.vista_alumnos', id_curso=session.get('curso_actual')) if session.get('curso_actual') else '#' }}" 
+       {% block hide_nav_alumnos %}{% endblock %}>
+       <span class="nav-icon">👥</span> Alumnos
+    </a>
     
-    <!-- Enlace a Equipos  -->
-    <a class="nav-item {% block active_equipos %}{% endblock %}" id="nav-equipos" href="{{ url_for('profesor.ver_equipos', curso_id=session.get('curso_actual')) if session.get('curso_actual') else '#' }}" {% block hide_nav_equipos %}{% endblock %}> <span class="nav-icon">🤝</span> Equipos </a>
+    <!-- Enlace a Equipos -->
+    <a class="nav-item {% block active_equipos %}{% endblock %}" id="nav-equipos" 
+       href="{{ url_for('profesor.ver_equipos', curso_id=session.get('curso_actual')) if session.get('curso_actual') else '#' }}" 
+       {% block hide_nav_equipos %}{% endblock %}>
+       <span class="nav-icon">🤝</span> Equipos
+    </a>
     
-    <!-- Enlace dinámico a Evaluaciones -->
-    <a class="nav-item {% block active_evaluaciones %}{% endblock %}" id="nav-evals" href="{{ url_for('profesor.evaluaciones', curso_id=session.get('curso_actual')) if session.get('curso_actual') else '#' }}" {% block hide_nav_evals %}{% endblock %}> <span class="nav-icon">📝</span> Evaluaciones</a>
+    <!-- Enlace a Evaluaciones - CORREGIDO -->
+    <a class="nav-item {% block active_evaluaciones %}{% endblock %}" id="nav-evals" 
+       href="{{ url_for('profesor.cursos.evaluaciones.evaluaciones', idCurso=session.get('curso_actual')) if session.get('curso_actual') else '#' }}" 
+       {% block hide_nav_evals %}{% endblock %}>
+       <span class="nav-icon">📝</span> Evaluaciones
+    </a>
 
-    <!-- ENLACE CORREGIDO Y DINÁMICO A ASISTENCIA -->
-    <a class="nav-item {% block active_asistencia %}{% endblock %}" id="nav-asist" href="{{ url_for('asistencia.asistencia_profe') }}" {% block hide_nav_asist %}{% endblock %}><span class="nav-icon">✅</span> Asistencia</a>
+    <!-- Enlace a Asistencia -->
+    <a class="nav-item {% block active_asistencia %}{% endblock %}" id="nav-asist" 
+       href="{{ url_for('asistencia.asistencia_profe') }}" 
+       {% block hide_nav_asist %}{% endblock %}>
+       <span class="nav-icon">✅</span> Asistencia
+    </a>
   </nav>
 
   <div class="sidebar-footer">

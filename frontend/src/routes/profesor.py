@@ -6,10 +6,14 @@ from src.services import alumnos as api_alumnos
 from src.services import evaluaciones as api_evaluaciones
 from src.services import ev_notas_service as api_notas
 from src.services import equipos as api_equipos
+from src.routes.cursos import cursos_bp
 
-profesor_bp = Blueprint('profesor', __name__)
 
 
+profesor_bp = Blueprint('profesor', __name__, url_prefix='/profesor')
+
+# Registramos los blueprints de nivel 2 dentro del nivel 1
+profesor_bp.register_blueprint(cursos_bp)
 
 
 @profesor_bp.route('/asistencia', methods = ['GET'])
@@ -64,83 +68,7 @@ def exportar_alumnos_pdf(id_curso):
     )
 #---------------------------------------------------------------------------------------------------------
 
-# MODULO DE GESTIÓN DE CURSOS (COMISIONES)
-
-#---------------------------------------------------------------------------------------------------------
-
-@profesor_bp.route('/cursos', methods=['GET'])
-def vista_cursos():
-    usuario = utils.verificar_docente_autenticado()
-    if not usuario:
-        flash("Por favor, iniciá sesión para acceder a tus cursos.", "error")
-        return redirect(url_for('auth.login'))
-        
-    # GET /api/cursos
-    resultado = api_cursos.obtener_cursos(usuario['token'])
-    cursos_lista = resultado.get('cursos', []) if resultado.get('ok') else []
-    
-    return render_template('profesor-cursos.html', cursos=cursos_lista)
-#---------------------------------------------------------------------------------------------------------
-
-@profesor_bp.route('/cursos/crear', methods=['POST'])
-def crear_curso():
-    usuario = utils.verificar_docente_autenticado()
-    if not usuario: return redirect(url_for('auth.login'))
-    
-    nombre = request.form.get('nombre', '').strip()
-    codigo = request.form.get('codigo', '').strip()
-    cuatrimestre = request.form.get('cuatrimestre', '').strip()
-    descripcion = request.form.get('descripcion', '').strip()
-    
-    # POST /api/cursos
-    resultado = api_cursos.crear_curso(usuario['token'], nombre, codigo, cuatrimestre, descripcion)
-    
-    if resultado.get('ok'):
-        flash("Curso creado exitosamente.", "success")
-    else:
-        for mensaje in utils.extraer_mensaje_error(resultado.get('error_response')):
-            flash(mensaje, 'error')
-            
-    return redirect(url_for('profesor.vista_cursos'))
-#---------------------------------------------------------------------------------------------------------
-
-@profesor_bp.route('/cursos/actualizar/<int:id_curso>', methods=['POST'])
-def actualizar_curso(id_curso):
-    usuario = utils.verificar_docente_autenticado()
-    if not usuario: return redirect(url_for('auth.login'))
-    
-    nombre = request.form.get('nombre', '').strip()
-    codigo = request.form.get('codigo', '').strip()
-    cuatrimestre = request.form.get('cuatrimestre', '').strip()
-    descripcion = request.form.get('descripcion', '').strip()
-    
-    # PATCH /api/cursos/{idCurso}
-    resultado = api_cursos.actualizar_curso(usuario['token'], id_curso, nombre, codigo, cuatrimestre, descripcion)
-    
-    if resultado.get('ok'):
-        flash("Comisión modificada correctamente.", "success")
-    else:
-        for mensaje in utils.extraer_mensaje_error(resultado.get('error_response')):
-            flash(mensaje, 'error')
-            
-    return redirect(url_for('profesor.vista_cursos'))
-#---------------------------------------------------------------------------------------------------------
-
-@profesor_bp.route('/cursos/eliminar/<int:id_curso>', methods=['POST'])
-def eliminar_curso(id_curso):
-    usuario = utils.verificar_docente_autenticado()
-    if not usuario: return redirect(url_for('auth.login'))
-    
-    # DELETE /api/cursos/{idCurso}
-    resultado = api_cursos.eliminar_curso(usuario['token'], id_curso)
-    
-    if resultado.get('ok'):
-        flash("Curso eliminado permanentemente.", "success")
-    else:
-        for mensaje in utils.extraer_mensaje_error(resultado.get('error_response')):
-            flash(mensaje, 'error')
-            
-    return redirect(url_for('profesor.vista_cursos'))
+#
 #---------------------------------------------------------------------------------------------------------
 
 # GESTIÓN DE ALUMNOS
@@ -284,119 +212,7 @@ def actualizar_alumno(id_curso, padron):
 #---------------------------------------------------------------------------------------------------------
 
 
-# GESTIÓN DE EVALUACIONES
-#---------------------------------------------------------------------------------------------------------
 
-@profesor_bp.route('/cursos/<int:curso_id>/evaluaciones', methods=['GET', 'POST'])
-def evaluaciones(curso_id):
-    usuario = utils.verificar_docente_autenticado()
-    if not usuario:
-        flash("Por favor, iniciá sesión para acceder al panel.", "error")
-        return redirect(url_for('auth.login'))
-    
-    token = usuario.get('token')
-    session['curso_actual'] = curso_id
-
-    if request.method == 'POST':
-        tipo = request.form.get('tipo', '').strip()
-        descripcion = request.form.get('descripcion', '').strip()
-        fecha = request.form.get('fecha', '').strip()
-        
-        if not tipo or not descripcion or not fecha:
-            flash("Todos los campos son obligatorios", "error")
-            return redirect(url_for('profesor.evaluaciones', curso_id=curso_id))
-        
-        resultado = api_evaluaciones.crear_evaluacion(token, tipo, descripcion, fecha, curso_id)
-        
-        if resultado.get('ok'):
-            flash(resultado.get('message', 'Evaluación creada exitosamente'), 'success')
-        else:
-            errores = resultado.get('error_response', {}).get('errors', [])
-            for e in errores:
-                flash(e.get('description', 'Error al crear evaluación'), 'error')
-        
-        return redirect(url_for('profesor.evaluaciones', curso_id=curso_id))
-    
-    # GET: obtener evaluaciones
-    resultado = api_evaluaciones.obtener_evaluaciones(token, curso_id=curso_id)
-    
-    evaluaciones_lista = []
-    if resultado.get('ok'):
-        evaluaciones_lista = resultado.get('evaluaciones', [])
-    else:
-        errores = resultado.get('error_response', {}).get('errors', [])
-        for e in errores:
-            flash(e.get('description', 'Error al obtener evaluaciones'), 'error')
-    
-    # Obtener información del curso actual
-    cursos_resultado = api_cursos.obtener_cursos(token)
-    cursos = cursos_resultado.get('cursos', []) if cursos_resultado.get('ok') else []
-    curso_actual = next((c for c in cursos if c.get('idCurso') == curso_id), {'idCurso': curso_id, 'nombre': f'Curso {curso_id}'})
-    
-    return render_template('profesor-evaluaciones.html', 
-                         evaluaciones=evaluaciones_lista,
-                         cursos=cursos,
-                         curso=curso_actual, 
-                         curso_id=curso_id)
-
-#-----------------------------------------------------------------------------------------------------
-@profesor_bp.route('/cursos/<int:curso_id>/evaluaciones/<int:id>', methods=['GET'])
-def api_get_evaluacion(curso_id, id): 
-    """API para obtener una evaluación específica (para editar)"""
-    usuario = utils.verificar_docente_autenticado()
-    if not usuario:
-        return jsonify({'error': 'No autorizado'}), 401
-    
-    token = usuario.get('token')
-    resultado = api_evaluaciones.obtener_evaluacion(token, id)
-    
-    if resultado.get('ok'):
-        evaluaciones = resultado.get('evaluaciones', [])
-        if isinstance(evaluaciones, list) and len(evaluaciones) > 0:
-            evaluacion = evaluaciones[0]
-        elif isinstance(evaluaciones, dict):
-            evaluacion = evaluaciones
-        else:
-            evaluacion = None
-        
-        if evaluacion:
-            return jsonify(evaluacion)
-    
-    return jsonify({'error': 'Evaluación no encontrada'}), 404
-
-#----------------------------------------------------------------------------------------------------
-@profesor_bp.route('/cursos/<int:curso_id>/evaluaciones/actualizar/<int:idEvaluacion>', methods=['POST'])
-def actualizar_evaluacion_route(curso_id, idEvaluacion):
-
-    usuario = utils.verificar_docente_autenticado()
-    if not usuario:
-        flash("Por favor, iniciá sesión para acceder al panel.", "error")
-        return redirect(url_for('auth.login'))
-    
-    token = usuario.get('token')
-    
-    tipo = request.form.get('tipo', '').strip()
-    descripcion = request.form.get('descripcion', '').strip()
-    fecha = request.form.get('fecha', '').strip()
-    
-    resultado = api_evaluaciones.actualizar_evaluacion(
-        token, 
-        idEvaluacion,
-        tipo=tipo if tipo else None,
-        descripcion=descripcion if descripcion else None,
-        fecha=fecha if fecha else None,
-        curso_id=int(curso_id)
-    )
-    
-    if resultado.get('ok'):
-        flash('✅ Evaluación actualizada exitosamente', 'success')
-    else:
-        errores_lista = resultado.get('error_response', {}).get('errors', [])
-        for e in errores_lista:
-            flash(f'❌ Error: {e.get("description", "Error al actualizar")}', 'error')
-    
-    return redirect(url_for('profesor.evaluaciones', curso_id=curso_id))
-#----------------------------------------------------------------------------------------------------
 
 
 # GESTIÓN DE NOTAS

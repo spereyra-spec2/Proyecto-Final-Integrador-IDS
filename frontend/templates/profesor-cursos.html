@@ -36,7 +36,7 @@
               <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
                 <a href="{{ url_for('profesor.vista_alumnos', id_curso=curso.idCurso) }}" class="btn btn-outline btn-sm">Alumnos</a>
                 <a href="{{ url_for('profesor.ver_equipos', curso_id=curso.idCurso) }}" class="btn btn-outline btn-sm">Equipos</a>
-                <a href="{{ url_for('profesor.evaluaciones', curso_id=curso.idCurso) }}" class="btn btn-outline btn-sm">Evaluaciones</a>
+                <a href="{{ url_for('profesor.cursos.evaluaciones.evaluaciones', idCurso=curso.idCurso) }}" class="btn btn-outline btn-sm">Evaluaciones</a>
                 <a href="{{url_for('asistencia.asistencia_profe')}}" class="btn btn-outline btn-sm">Asistencia</a>
               </div>
 
@@ -45,7 +45,7 @@
                         onclick="window.abrirModalActualizar('{{ curso.idCurso }}', '{{ curso.nombre }}', '{{ curso.codigo }}', '{{ curso.cuatrimestre }}', '{{ curso.descripcion }}')">
                   ✏️ Modificar
                 </button>
-                <form action="{{ url_for('profesor.eliminar_curso', id_curso=curso.idCurso) }}" method="POST" style="display:inline;">
+                <form action="{{ url_for('profesor.cursos.eliminar_curso', id_curso=curso.idCurso) }}" method="POST" style="display:inline;">
                   <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Seguro que deseas eliminar permanentemente esta comisión?');">
                     🗑️ Eliminar
                   </button>
@@ -70,7 +70,7 @@
       <span class="modal-title">Nuevo Curso</span>
       <button class="modal-close" onclick="window.closeModal('modal-create')">✕</button>
     </div>
-    <form action="{{ url_for('profesor.crear_curso') }}" method="POST">
+    <form action="{{ url_for('profesor.cursos.crear_curso') }}" method="POST">
       <div class="modal-body">
         <div class="form-group">
           <label class="form-label">Nombre del curso *</label>

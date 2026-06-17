@@ -80,7 +80,7 @@ Cuatrimestre: {{ curso.cuatrimestre }}{%endblock%}
       <span class="modal-title">✨ Nueva evaluación</span>
       <button class="modal-close" onclick="document.getElementById('modal-eval').classList.add('hidden')">✕</button>
     </div>
-    <form action="{{ url_for('profesor.evaluaciones', curso_id=curso_id) }}" method="POST">
+    <form action="{{ url_for('profesor.cursos.evaluaciones.evaluaciones', idCurso=curso_id) }}" method="POST">
       <div class="modal-body">
         <div class="form-group">
           <label class="form-label" for="tipo">📌 Tipo *</label>

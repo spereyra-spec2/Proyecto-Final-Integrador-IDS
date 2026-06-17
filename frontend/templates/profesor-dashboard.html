@@ -13,7 +13,7 @@
 {% block hide_nav_asist %}style="display:none"{% endblock %}
 
 {% block menu_acciones %}
-  <a href="{{ url_for('profesor.vista_cursos') }}" class="btn btn-primary">➕ Nuevo curso</a>
+  <a href="{{ url_for('profesor.cursos.vista_cursos') }}" class="btn btn-primary">➕ Nuevo curso</a>
 {% endblock %}
 
 {% block content %}
@@ -104,7 +104,7 @@
     <div class="card">
       <div class="card-header" style="display:flex;align-items:center;justify-content:space-between">
         <span class="card-title">Mis cursos</span>
-        <a href="{{ url_for('profesor.vista_cursos') }}" class="btn btn-outline btn-sm">Ver todos</a>
+        <a href="{{ url_for('profesor.cursos.vista_cursos') }}" class="btn btn-outline btn-sm">Ver todos</a>
       </div>
       <div class="card-body" style="padding:0">
         <div class="table-wrapper">
@@ -130,7 +130,7 @@
                       <div class="actions-wrapper">
                         <a href="{{ url_for('profesor.vista_alumnos', id_curso=curso.idCurso) }}" class="btn btn-sm btn-outline">Alumnos</a>
                         <a href="{{ url_for('profesor.ver_equipos', curso_id=curso.idCurso) }}" class="btn btn-outline btn-sm">Equipos</a>
-                        <a href="{{ url_for('profesor.evaluaciones', curso_id=curso.idCurso) }}" class="btn btn-sm btn-outline">Evaluaciones</a>
+                        <a href="{{ url_for('profesor.cursos.evaluaciones.evaluaciones', idCurso=curso.idCurso) }}" class="btn btn-sm btn-outline">Evaluaciones</a>
                         <a href="{{ url_for('asistencia.asistencia_profe') }}" class="btn btn-outline btn-sm">Asistencia</a>
                       </div>
                     </td>
