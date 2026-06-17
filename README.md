@@ -19,14 +19,17 @@ A diferencia de soluciones monolíticas básicas, este desarrollo aborda de form
            Browser
               |
               v 
-    (Peticiones HTTP & Formularios Web)
-  Frontend Web (Flask Server, Puerto 5001)
+     Peticiones HTTP & Formularios Web 
+     
+     Frontend Web (Flask Server, Puerto 5001) 
               |
-              v (API Calls / JSON / Cabecera Authorization Bearer Token)
-  Backend API  (Flask REST API, Puerto 5000)
+              v 
+    (API Calls / JSON / Cabecera Authorization Bearer Token) 
+    Backend API  (Flask REST API, Puerto 5000) 
               |
-              v (Consultas SQL con mysql-connector)
-     Base de Datos (MySQL - Esquema ids_db)
+              v 
+    (Consultas SQL con mysql-connector) 
+     Base de Datos (MySQL - Esquema ids_db) 
 
 
 No hay lógica compartida en memoria entre capas; el Frontend es estrictamente un cliente HTTP de la API Backend.
@@ -124,6 +127,14 @@ python -m venv venv
 venv\Scripts\activate
 #Activar en Linux/macOS
 source venv/bin/activate
+
+**4. Instalación de dependecias** <br>
+
+**Caso linux** <br>
+una vez instalado e iniciado en entorno virtual, instalar las dependencias con:
+	chmod +x instalacion.sh
+	./instalacion.sh
+
 
 
 Gestión de Alumnos: Páginas y Flujos
